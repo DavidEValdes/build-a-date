@@ -459,3 +459,33 @@ body {
   animation: fadeIn 0.3s ease-out;
 }
 
+/* Option Buttons */
+.option-button {
+  background-color: #f3f4f6;
+  color: #1f2937;
+  padding: 1rem;
+  border: none;
+  border-radius: 0.5rem;
+  width: 100%;
+  text-align: center;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  margin-bottom: 1rem;
+}
+
+.option-button:hover {
+  background-color: #e5e7eb;
+  transform: translateY(-2px);
+}
+
+.option-button:active {
+  background-color: #d1d5db;
+  transform: translateY(0);
+}
+
+.option-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.5);
+}
