@@ -62,14 +62,13 @@ const DateIdeasController = {
     createDateIdea: async (req, res) => {
         try {
             const { title, description, location, cost_category, duration, activity_type, image_url } = req.body
-            const creator_id = req.user.id // Assuming authentication middleware sets req.user
 
             const results = await pool.query(
                 `INSERT INTO date_ideas 
-                (creator_id, title, description, location, cost_category, duration, activity_type, image_url)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+                (title, description, location, cost_category, duration, activity_type, image_url)
+                VALUES ($1, $2, $3, $4, $5, $6, $7)
                 RETURNING *`,
-                [creator_id, title, description, location, cost_category, duration, activity_type, image_url]
+                [title, description, location, cost_category, duration, activity_type, image_url]
             )
 
             res.status(201).json(results.rows[0])
