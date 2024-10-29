@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 const questions = [
   {
     id: 'mood',
-    question: 'What mood are you in?',
+    question: 'What mood are you in today?',
     type: 'singleChoice',
     options: [
       { value: 'adventurous', label: 'Adventurous' },
@@ -34,6 +34,7 @@ const questions = [
       { value: 'noPreference', label: 'No Preference' },
     ],
   },
+  // Conditional question based on 'indoorOutdoor' answer
   {
     id: 'weatherConsideration',
     question: 'Do you want to consider the weather in your planning?',
@@ -75,6 +76,7 @@ const questions = [
       { value: 'far', label: 'A road trip away' },
     ],
   },
+  // Final question
   {
     id: 'importance',
     question: 'What is most important for your date?',
@@ -101,6 +103,7 @@ const QuestionPipeline = ({ onComplete }) => {
   );
 
   useEffect(() => {
+    // Update visibleQuestions whenever answers change
     const generateVisibleQuestions = () => {
       return questions.filter((q) => {
         if (q.condition) {
@@ -114,15 +117,15 @@ const QuestionPipeline = ({ onComplete }) => {
 
   const currentQuestion = visibleQuestions[currentStep];
 
-  const resetPipeline = () => {
-    setCurrentStep(0);
-    setAnswers({});
-  };
-
   const handleAnswer = (value) => {
-    const updatedAnswers = { ...answers, [currentQuestion.id]: value };
+    const updatedAnswers = {
+      ...answers,
+      [currentQuestion.id]: value,
+    };
+
     setAnswers(updatedAnswers);
 
+    // Calculate new visibleQuestions based on updated answers
     const newVisibleQuestions = questions.filter((q) => {
       if (q.condition) {
         return q.condition(updatedAnswers);
@@ -130,6 +133,7 @@ const QuestionPipeline = ({ onComplete }) => {
       return true;
     });
 
+    // Move to the next question or complete
     if (currentStep < newVisibleQuestions.length - 1) {
       setCurrentStep((prevStep) => prevStep + 1);
     } else {
@@ -137,46 +141,54 @@ const QuestionPipeline = ({ onComplete }) => {
     }
   };
 
+  const handleTryAgain = () => {
+    setCurrentStep(0);
+    setAnswers({});
+  };
+
+  // Check if currentQuestion is defined
+  if (!currentQuestion) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div className="question-pipeline">
-      {currentQuestion ? (
-        <>
-          <div className="progress-section">
-            <div className="progress-bar">
-              <div
-                className="progress-fill"
-                style={{
-                  width: `${((currentStep + 1) / visibleQuestions.length) * 100}%`,
-                }}
-              ></div>
-            </div>
-            <p className="question-counter">
-              Question {currentStep + 1} of {visibleQuestions.length}
-            </p>
-          </div>
-
-          <h3>{currentQuestion.question}</h3>
-
-          <div className="options-list">
-            {currentQuestion.options.map((option) => (
-              <button
-                key={option.value}
-                className="option-button"
-                onClick={() => handleAnswer(option.value)}
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
-        </>
-      ) : (
-        <div>
-          <h3>Thank you for completing the questionnaire!</h3>
-          <button className="primary-button" onClick={resetPipeline}>
-            Try Again
-          </button>
+      <div className="progress-section">
+        <div className="progress-bar">
+          <div
+            className="progress-fill"
+            style={{
+              width: `${((currentStep + 1) / visibleQuestions.length) * 100}%`,
+            }}
+          ></div>
         </div>
-      )}
+        <p className="question-counter">
+          Question {currentStep + 1} of {visibleQuestions.length}
+        </p>
+      </div>
+
+      <h3>{currentQuestion.question}</h3>
+
+      <div className="options-list">
+        {currentQuestion.options.map((option) => (
+          <button
+            key={option.value}
+            className="option-button"
+            onClick={() => handleAnswer(option.value)}
+          >
+            {option.label}
+          </button>
+        ))}
+      </div>
+
+      <div className="try-again-section">
+        <button 
+          onClick={handleTryAgain}
+          className="secondary-button mt-6"
+        >
+          Start Over
+        </button>
+      </div>
     </div>
   );
 };

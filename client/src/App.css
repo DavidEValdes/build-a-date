@@ -489,3 +489,151 @@ body {
   outline: none;
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.5);
 }
+
+
+/* Enhanced Suggestion Screen */
+.suggestion-screen {
+  text-align: center;
+  max-width: 32rem;
+  margin: 0 auto;
+  padding: 2rem;
+  background-color: white;
+  border-radius: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  animation: slideUp 0.5s ease-out;
+}
+
+.suggestion-screen h2 {
+  font-size: 1.875rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  color: #1f2937;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+}
+
+/* Suggestion Actions Container */
+.suggestion-actions {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* Primary Action Button */
+.suggestion-actions .primary-button {
+  background-color: #2563eb;
+  color: white;
+  padding: 0.75rem 1.75rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  min-width: 160px;
+  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.1);
+}
+
+.suggestion-actions .primary-button:hover {
+  background-color: #1d4ed8;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(37, 99, 235, 0.15);
+}
+
+.suggestion-actions .primary-button:active {
+  transform: translateY(0);
+}
+
+/* Secondary Action Button */
+.suggestion-actions .secondary-button {
+  background-color: white;
+  color: #1f2937;
+  padding: 0.75rem 1.75rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  min-width: 160px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.suggestion-actions .secondary-button:hover {
+  background-color: #f3f4f6;
+  border-color: #d1d5db;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.suggestion-actions .secondary-button:active {
+  transform: translateY(0);
+}
+
+/* Disabled State */
+.suggestion-actions button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Loading State */
+.suggestion-actions button:disabled {
+  background-color: #93c5fd;
+}
+
+/* Animation */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 640px) {
+  .suggestion-actions {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .suggestion-actions button {
+    width: 100%;
+  }
+
+  .suggestion-screen {
+    margin: 1rem;
+    padding: 1.5rem;
+  }
+}
+
+/* Question Pipeline Enhancements */
+.try-again-section {
+  margin-top: 2rem;
+  text-align: center;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.try-again-section .secondary-button {
+  background-color: white;
+  color: #6b7280;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+  border: 1px solid #e5e7eb;
+}
+
+.try-again-section .secondary-button:hover {
+  background-color: #f3f4f6;
+  color: #374151;
+  border-color: #d1d5db;
+}

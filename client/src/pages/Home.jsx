@@ -66,6 +66,11 @@ const Home = () => {
     }
   };
 
+  const handleStartOver = () => {
+    setStage('questions');
+    setCurrentSuggestion(null);
+  };
+
   return (
     <div className="app-container">
       <header className="app-header">
@@ -104,9 +109,17 @@ const Home = () => {
                 onClick={handleShareToFeed}
                 disabled={createDateMutation.isPending}
               >
-                {createDateMutation.isPending
-                  ? 'Sharing...'
-                  : 'Share to Feed'}
+                {createDateMutation.isPending ? (
+                  <span className="loading-text">Sharing...</span>
+                ) : (
+                  'Share to Feed'
+                )}
+              </button>
+              <button
+                className="secondary-button"
+                onClick={handleStartOver}
+              >
+                Try Different Preferences
               </button>
             </div>
           </div>
