@@ -26,6 +26,17 @@ export const createDateIdea = async (dateIdea) => {
     }
 };
 
+export const getAllDateIdeas = async () => {
+  try {
+    const response = await api.get('/dates/all');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching all date ideas:', error);
+    return [];
+  }
+};
+
+
 
 export const getDateIdea = async (id) => {
   const response = await api.get(`/dates/${id}`);

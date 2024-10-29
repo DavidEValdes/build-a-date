@@ -3,38 +3,59 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import QuestionPipeline from '../components/QuestionPipeline';
 import DateCard from '../components/DateCard';
-import { getDateIdeas, createDateIdea } from '../api';
+import { getDateIdeas, getAllDateIdeas, createDateIdea } from '../api';
 
 const Home = () => {
   const [stage, setStage] = useState('welcome');
   const [currentSuggestion, setCurrentSuggestion] = useState(null);
   const queryClient = useQueryClient();
 
-  const { data: dates = [] } = useQuery({
-    queryKey: ['dateIdeas'],
-    queryFn: getDateIdeas
+  // Fetch date ideas for the feed (only shared date ideas)
+  const { data: feedDates = [] } = useQuery({
+    queryKey: ['feedDateIdeas'],
+    queryFn: getDateIdeas,
+  });
+
+  // Fetch all date ideas for matching
+  const { data: allDates = [] } = useQuery({
+    queryKey: ['allDateIdeas'],
+    queryFn: getAllDateIdeas,
   });
 
   const createDateMutation = useMutation({
     mutationFn: createDateIdea,
     onSuccess: () => {
-      queryClient.invalidateQueries(['dateIdeas']);
+      queryClient.invalidateQueries(['feedDateIdeas']);
     },
   });
 
-  const handleQuestionnaireComplete = async (answers) => {
-    // Create a date idea based on answers
-    const suggestion = {
-      title: `${answers.preference.charAt(0).toUpperCase() + answers.preference.slice(1)} Date`,
-      description: `A ${answers.preference} date perfect for ${answers.duration} of fun!`,
-      location: answers.location,
-      cost_category: answers.budget,
-      activity_type: answers.preference,
-      duration: answers.duration,
-      image_url: "/api/placeholder/400/300"
-    };
+  const handleQuestionnaireComplete = (answers) => {
+    // Calculate scores for each date idea based on user answers
+    const scoredDates = allDates.map((date) => {
+      let score = 0;
 
-    setCurrentSuggestion(suggestion);
+      if (date.mood === answers.mood) score += 2;
+      if (date.time_of_day === answers.timeOfDay) score += 1;
+      if (
+        date.location === answers.indoorOutdoor ||
+        answers.indoorOutdoor === 'noPreference'
+      )
+        score += 1;
+      if (date.cost_category === answers.budget) score += 1;
+      if (date.activity_level === answers.activityLevel) score += 2;
+      if (date.distance === answers.distanceWilling) score += 1;
+      if (date.importance === answers.importance) score += 1;
+
+      return { ...date, score };
+    });
+
+    // Sort dates by score in descending order
+    const sortedDates = scoredDates.sort((a, b) => b.score - a.score);
+
+    // Select the top-scoring date idea
+    const bestMatch = sortedDates[0];
+
+    setCurrentSuggestion(bestMatch);
     setStage('suggestion');
   };
 
@@ -52,13 +73,15 @@ const Home = () => {
           <h1>Build a Date</h1>
         </div>
       </header>
-      
+
       <main className="main-content">
         {stage === 'welcome' && (
           <div className="welcome-screen">
             <h2>Find Your Perfect Date</h2>
-            <p>Let us help you plan the perfect date based on your preferences!</p>
-            <button 
+            <p>
+              Let us help you plan the perfect date based on your preferences!
+            </p>
+            <button
               className="primary-button"
               onClick={() => setStage('questions')}
             >
@@ -76,23 +99,25 @@ const Home = () => {
             <h2>Your Perfect Date Idea</h2>
             <DateCard date={currentSuggestion} />
             <div className="suggestion-actions">
-              <button 
+              <button
                 className="primary-button"
                 onClick={handleShareToFeed}
                 disabled={createDateMutation.isPending}
               >
-                {createDateMutation.isPending ? 'Sharing...' : 'Share to Feed'}
+                {createDateMutation.isPending
+                  ? 'Sharing...'
+                  : 'Share to Feed'}
               </button>
             </div>
           </div>
         )}
 
-        {(stage === 'feed' || dates.length > 0) && (
+        {(stage === 'feed' || feedDates.length > 0) && (
           <div className="feed-section">
             <div className="feed-header">
               <h2>Date Ideas Feed</h2>
               {stage === 'feed' && (
-                <button 
+                <button
                   className="secondary-button"
                   onClick={() => {
                     setStage('welcome');
@@ -104,7 +129,7 @@ const Home = () => {
               )}
             </div>
             <div className="dates-grid">
-              {dates.map((date) => (
+              {feedDates.map((date) => (
                 <DateCard key={date.id} date={date} />
               ))}
             </div>

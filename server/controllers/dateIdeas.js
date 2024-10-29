@@ -4,31 +4,32 @@ const DateIdeasController = {
     // Get all date ideas with basic filtering
     getDateIdeas: async (req, res) => {
         try {
-            const { location, budget, activity_type } = req.query
-            let query = 'SELECT * FROM date_ideas WHERE 1=1'
-            const values = []
-            
-            if (location) {
-                values.push(location)
-                query += ` AND location = $${values.length}`
-            }
-            if (budget) {
-                values.push(budget)
-                query += ` AND cost_category = $${values.length}`
-            }
-            if (activity_type) {
-                values.push(activity_type)
-                query += ` AND activity_type = $${values.length}`
-            }
-            
-            query += ' ORDER BY created_at DESC'
-            
-            const results = await pool.query(query, values)
-            res.json(results.rows)
+          const { location, budget, activity_type } = req.query;
+          let query = 'SELECT * FROM date_ideas WHERE is_shared = TRUE';
+          const values = [];
+      
+          if (location) {
+            values.push(location);
+            query += ` AND location = $${values.length}`;
+          }
+          if (budget) {
+            values.push(budget);
+            query += ` AND cost_category = $${values.length}`;
+          }
+          if (activity_type) {
+            values.push(activity_type);
+            query += ` AND activity_type = $${values.length}`;
+          }
+      
+          query += ' ORDER BY created_at DESC';
+      
+          const results = await pool.query(query, values);
+          res.json(results.rows);
         } catch (error) {
-            res.status(500).json({ error: error.message })
+          res.status(500).json({ error: error.message });
         }
-    },
+      },
+      
 
     // Get single date idea with its comments and likes count
     getDateIdea: async (req, res) => {
@@ -61,21 +62,47 @@ const DateIdeasController = {
     // Create new date idea
     createDateIdea: async (req, res) => {
         try {
-            const { title, description, location, cost_category, duration, activity_type, image_url } = req.body
-
-            const results = await pool.query(
-                `INSERT INTO date_ideas 
-                (title, description, location, cost_category, duration, activity_type, image_url)
-                VALUES ($1, $2, $3, $4, $5, $6, $7)
-                RETURNING *`,
-                [title, description, location, cost_category, duration, activity_type, image_url]
-            )
-
-            res.status(201).json(results.rows[0])
+          const {
+            title,
+            description,
+            location,
+            cost_category,
+            duration,
+            activity_type,
+            mood,
+            time_of_day,
+            distance,
+            importance,
+            activity_level,
+            image_url,
+          } = req.body;
+      
+          const results = await pool.query(
+            `INSERT INTO date_ideas 
+            (title, description, location, cost_category, duration, activity_type, mood, time_of_day, distance, importance, activity_level, image_url, is_shared, creator_id)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, TRUE, NULL)
+            RETURNING *`,
+            [
+              title,
+              description,
+              location,
+              cost_category,
+              duration,
+              activity_type,
+              mood,
+              time_of_day,
+              distance,
+              importance,
+              activity_level,
+              image_url,
+            ]
+          );
+      
+          res.status(201).json(results.rows[0]);
         } catch (error) {
-            res.status(500).json({ error: error.message })
+          res.status(500).json({ error: error.message });
         }
-    },
+      },
 
     // Update date idea
     updateDateIdea: async (req, res) => {
@@ -106,6 +133,17 @@ const DateIdeasController = {
             res.status(500).json({ error: error.message })
         }
     },
+
+
+    getAllDateIdeas: async (req, res) => {
+        try {
+          const results = await pool.query('SELECT * FROM date_ideas ORDER BY created_at DESC');
+          res.json(results.rows);
+        } catch (error) {
+          res.status(500).json({ error: error.message });
+        }
+      },
+      
 
     // Delete date idea
     deleteDateIdea: async (req, res) => {

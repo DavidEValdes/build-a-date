@@ -28,6 +28,8 @@ const resetDatabase = async () => {
         importance VARCHAR(50),
         activity_level VARCHAR(50),
         image_url VARCHAR(255),
+        is_shared BOOLEAN DEFAULT FALSE,
+        creator_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
@@ -1185,26 +1187,26 @@ const resetDatabase = async () => {
 
     // Insert sample data
     for (const idea of sampleDateIdeas) {
-      const result = await pool.query(
-        `INSERT INTO date_ideas 
-          (title, description, location, cost_category, duration, activity_type, mood, time_of_day, distance, importance, activity_level, image_url) 
-          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
-          RETURNING id`,
-        [
-          idea.title,
-          idea.description,
-          idea.location,
-          idea.cost_category,
-          idea.duration,
-          idea.activity_type,
-          idea.mood,
-          idea.time_of_day,
-          idea.distance,
-          idea.importance,
-          idea.activity_level,
-          idea.image_url,
-        ]
-      );
+        const result = await pool.query(
+          `INSERT INTO date_ideas 
+            (title, description, location, cost_category, duration, activity_type, mood, time_of_day, distance, importance, activity_level, image_url, is_shared, creator_id) 
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, FALSE, NULL)
+            RETURNING id`,
+          [
+            idea.title,
+            idea.description,
+            idea.location,
+            idea.cost_category,
+            idea.duration,
+            idea.activity_type,
+            idea.mood,
+            idea.time_of_day,
+            idea.distance,
+            idea.importance,
+            idea.activity_level,
+            idea.image_url,
+          ]
+        );
 
       // Add some sample likes and comments
       await pool.query('INSERT INTO likes (date_idea_id) VALUES ($1)', [
