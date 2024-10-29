@@ -1,0 +1,49 @@
+// src/api/index.js
+import axios from 'axios';
+
+const api = axios.create({
+    baseURL: 'http://localhost:3001/api',
+    withCredentials: true
+});
+
+export const getDateIdeas = async () => {
+    try {
+        const response = await api.get('/dates');
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching date ideas:', error);
+        return [];
+    }
+};
+
+export const createDateIdea = async (dateIdea) => {
+    try {
+        const response = await api.post('/dates', dateIdea);
+        return response.data;
+    } catch (error) {
+        console.error('Error creating date idea:', error);
+        throw error;
+    }
+};
+
+
+export const getDateIdea = async (id) => {
+  const response = await api.get(`/dates/${id}`);
+  return response.data;
+};
+
+
+export const likeDateIdea = async (id) => {
+  const response = await api.post(`/dates/${id}/like`);
+  return response.data;
+};
+
+export const addComment = async (id, content) => {
+  const response = await api.post(`/dates/${id}/comments`, { content });
+  return response.data;
+};
+
+export const getComments = async (id) => {
+  const response = await api.get(`/dates/${id}/comments`);
+  return response.data;
+};
