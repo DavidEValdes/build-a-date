@@ -1,116 +1,1230 @@
 // server/config/reset.js
-import { pool } from './database.js'
-import './dotenv.js'
+import { pool } from './database.js';
+import './dotenv.js';
 
 const resetDatabase = async () => {
-    try {
-        // Drop existing tables
-        await pool.query(`
-            DROP TABLE IF EXISTS comments CASCADE;
-            DROP TABLE IF EXISTS likes CASCADE;
-            DROP TABLE IF EXISTS date_ideas CASCADE;
-        `)
-        console.log('🗑️  Tables dropped successfully')
+  try {
+    // Drop existing tables
+    await pool.query(`
+      DROP TABLE IF EXISTS comments CASCADE;
+      DROP TABLE IF EXISTS likes CASCADE;
+      DROP TABLE IF EXISTS date_ideas CASCADE;
+    `);
+    console.log('🗑️  Tables dropped successfully');
 
-        // Create date_ideas table
-        await pool.query(`
-            CREATE TABLE date_ideas (
-                id SERIAL PRIMARY KEY,
-                title VARCHAR(255) NOT NULL,
-                description TEXT,
-                location VARCHAR(100),
-                cost_category VARCHAR(50),
-                duration VARCHAR(50),
-                activity_type VARCHAR(50),
-                image_url VARCHAR(255),
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            );
-        `)
-        console.log('🎉 date_ideas table created successfully')
+    // Create date_ideas table with updated schema
+    await pool.query(`
+      CREATE TABLE date_ideas (
+        id SERIAL PRIMARY KEY,
+        title VARCHAR(255) NOT NULL,
+        description TEXT,
+        location VARCHAR(100),
+        cost_category VARCHAR(50),
+        duration VARCHAR(50),
+        activity_type VARCHAR(50),
+        mood VARCHAR(50),
+        time_of_day VARCHAR(50),
+        distance VARCHAR(50),
+        importance VARCHAR(50),
+        activity_level VARCHAR(50),
+        image_url VARCHAR(255),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+    console.log('🎉 date_ideas table created successfully');
 
-        // Create likes table (simplified without user_id)
-        await pool.query(`
-            CREATE TABLE likes (
-                id SERIAL PRIMARY KEY,
-                date_idea_id INTEGER REFERENCES date_ideas(id) ON DELETE CASCADE,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            );
-        `)
-        console.log('🎉 likes table created successfully')
+    // Create likes table (simplified without user_id)
+    await pool.query(`
+      CREATE TABLE likes (
+        id SERIAL PRIMARY KEY,
+        date_idea_id INTEGER REFERENCES date_ideas(id) ON DELETE CASCADE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+    console.log('🎉 likes table created successfully');
 
-        // Create comments table (simplified without user_id)
-        await pool.query(`
-            CREATE TABLE comments (
-                id SERIAL PRIMARY KEY,
-                date_idea_id INTEGER REFERENCES date_ideas(id) ON DELETE CASCADE,
-                content TEXT NOT NULL,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            );
-        `)
-        console.log('🎉 comments table created successfully')
+    // Create comments table (simplified without user_id)
+    await pool.query(`
+      CREATE TABLE comments (
+        id SERIAL PRIMARY KEY,
+        date_idea_id INTEGER REFERENCES date_ideas(id) ON DELETE CASCADE,
+        content TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+    console.log('🎉 comments table created successfully');
 
-        // Insert sample date ideas
-        const sampleDateIdeas = [
-            {
-                title: "Indoor Rock Climbing Adventure",
-                description: "Experience the thrill of climbing in a safe, indoor environment. Perfect for active couples!",
-                location: "Indoor",
-                cost_category: "medium",
-                duration: "2-3 hours",
-                activity_type: "active",
-                image_url: "/api/placeholder/400/300"
-            },
-            {
-                title: "Romantic Sunset Picnic",
-                description: "Pack some favorite snacks and drinks for a romantic evening watching the sunset.",
-                location: "Outdoor",
-                cost_category: "low",
-                duration: "2-3 hours",
-                activity_type: "romantic",
-                image_url: "/api/placeholder/400/300"
-            },
-            {
-                title: "Cooking Class for Two",
-                description: "Learn to cook a gourmet meal together under the guidance of a professional chef.",
-                location: "Indoor",
-                cost_category: "high",
-                duration: "3-4 hours",
-                activity_type: "creative",
-                image_url: "/api/placeholder/400/300"
-            }
+    // Insert sample date ideas with the new attributes
+    const sampleDateIdeas = [
+      // 1
+      {
+        title: 'Sunrise Hike',
+        description: 'Begin your day with an invigorating hike to watch the sunrise from the mountaintop.',
+        location: 'outdoor',
+        cost_category: 'economy',
+        duration: '2-3 hours',
+        activity_type: 'hiking',
+        mood: 'adventurous',
+        time_of_day: 'morning',
+        distance: 'nearby',
+        importance: 'experience',
+        activity_level: 'high',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 2
+      {
+        title: 'Luxury Spa Evening',
+        description: 'Relax and rejuvenate with a premium spa experience, complete with massages and aromatherapy.',
+        location: 'indoor',
+        cost_category: 'luxury',
+        duration: '3-4 hours',
+        activity_type: 'spa',
+        mood: 'relaxed',
+        time_of_day: 'evening',
+        distance: 'local',
+        importance: 'comfort',
+        activity_level: 'low',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 3
+      {
+        title: 'Romantic Dinner Cruise',
+        description: 'Enjoy a candlelit dinner on a boat while cruising under the stars.',
+        location: 'outdoor',
+        cost_category: 'premium',
+        duration: '2-3 hours',
+        activity_type: 'boatRide',
+        mood: 'romantic',
+        time_of_day: 'night',
+        distance: 'local',
+        importance: 'connection',
+        activity_level: 'low',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 4
+      {
+        title: 'Artisan Cooking Class',
+        description: 'Learn to cook gourmet dishes together with a professional chef.',
+        location: 'indoor',
+        cost_category: 'standard',
+        duration: '3 hours',
+        activity_type: 'cooking',
+        mood: 'creative',
+        time_of_day: 'afternoon',
+        distance: 'nearby',
+        importance: 'experience',
+        activity_level: 'moderate',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 5
+      {
+        title: 'Stargazing Picnic',
+        description: 'Set up a cozy picnic and gaze at the stars with a telescope and constellation guide.',
+        location: 'outdoor',
+        cost_category: 'economy',
+        duration: '2-3 hours',
+        activity_type: 'stargazing',
+        mood: 'romantic',
+        time_of_day: 'night',
+        distance: 'nearby',
+        importance: 'connection',
+        activity_level: 'low',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 6
+      {
+        title: 'Local Coffee Shop Tour',
+        description: 'Explore the best coffee shops in town and enjoy different brews.',
+        location: 'indoor',
+        cost_category: 'economy',
+        duration: '2 hours',
+        activity_type: 'coffeeTour',
+        mood: 'relaxed',
+        time_of_day: 'morning',
+        distance: 'local',
+        importance: 'comfort',
+        activity_level: 'low',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 7
+      {
+        title: 'Museum Art Exploration',
+        description: 'Visit an art museum and immerse yourselves in creative masterpieces.',
+        location: 'indoor',
+        cost_category: 'standard',
+        duration: '3 hours',
+        activity_type: 'museum',
+        mood: 'creative',
+        time_of_day: 'afternoon',
+        distance: 'local',
+        importance: 'experience',
+        activity_level: 'low',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 8
+      {
+        title: 'Beach Sunset Walk',
+        description: 'Take a leisurely walk along the beach and watch the sunset together.',
+        location: 'outdoor',
+        cost_category: 'free',
+        duration: '1-2 hours',
+        activity_type: 'beachWalk',
+        mood: 'relaxed',
+        time_of_day: 'evening',
+        distance: 'nearby',
+        importance: 'connection',
+        activity_level: 'moderate',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 9
+      {
+        title: 'Surprise Mystery Trip',
+        description: 'Embark on a spontaneous trip to an unknown destination for an element of surprise.',
+        location: 'outdoor',
+        cost_category: 'standard',
+        duration: 'Full day',
+        activity_type: 'mysteryTrip',
+        mood: 'adventurous',
+        time_of_day: 'morning',
+        distance: 'far',
+        importance: 'surprise',
+        activity_level: 'moderate',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 10
+      {
+        title: 'Skydiving Adventure',
+        description: 'Feel the adrenaline rush with a tandem skydive over stunning landscapes.',
+        location: 'outdoor',
+        cost_category: 'premium',
+        duration: 'Full day',
+        activity_type: 'skydiving',
+        mood: 'adventurous',
+        time_of_day: 'afternoon',
+        distance: 'far',
+        importance: 'experience',
+        activity_level: 'high',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 11
+      {
+        title: 'Pottery Workshop',
+        description: 'Get creative together at a hands-on pottery class.',
+        location: 'indoor',
+        cost_category: 'standard',
+        duration: '2-3 hours',
+        activity_type: 'pottery',
+        mood: 'creative',
+        time_of_day: 'afternoon',
+        distance: 'local',
+        importance: 'experience',
+        activity_level: 'moderate',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 12
+      {
+        title: 'Wine Tasting Tour',
+        description: 'Visit local vineyards and enjoy a variety of wines.',
+        location: 'outdoor',
+        cost_category: 'premium',
+        duration: '4+ hours',
+        activity_type: 'wineTasting',
+        mood: 'relaxed',
+        time_of_day: 'afternoon',
+        distance: 'nearby',
+        importance: 'experience',
+        activity_level: 'low',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 13
+      {
+        title: 'Karaoke Night',
+        description: 'Sing your hearts out at a lively karaoke bar.',
+        location: 'indoor',
+        cost_category: 'economy',
+        duration: '2-3 hours',
+        activity_type: 'karaoke',
+        mood: 'creative',
+        time_of_day: 'night',
+        distance: 'local',
+        importance: 'experience',
+        activity_level: 'moderate',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 14
+      {
+        title: 'Escape Room Challenge',
+        description: 'Work together to solve puzzles and escape within the time limit.',
+        location: 'indoor',
+        cost_category: 'standard',
+        duration: '1-2 hours',
+        activity_type: 'escapeRoom',
+        mood: 'adventurous',
+        time_of_day: 'evening',
+        distance: 'local',
+        importance: 'experience',
+        activity_level: 'moderate',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 15
+      {
+        title: 'Bike Ride Through the Park',
+        description: 'Enjoy a leisurely bike ride through scenic paths.',
+        location: 'outdoor',
+        cost_category: 'free',
+        duration: '2-3 hours',
+        activity_type: 'biking',
+        mood: 'relaxed',
+        time_of_day: 'afternoon',
+        distance: 'local',
+        importance: 'comfort',
+        activity_level: 'moderate',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 16
+      {
+        title: 'Hot Air Balloon Ride',
+        description: 'Soar above the landscape in a hot air balloon.',
+        location: 'outdoor',
+        cost_category: 'luxury',
+        duration: '2-3 hours',
+        activity_type: 'balloonRide',
+        mood: 'romantic',
+        time_of_day: 'morning',
+        distance: 'nearby',
+        importance: 'experience',
+        activity_level: 'low',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 17
+      {
+        title: 'Attend a Live Concert',
+        description: 'Enjoy live music from your favorite artists.',
+        location: 'indoor',
+        cost_category: 'premium',
+        duration: '3-4 hours',
+        activity_type: 'concert',
+        mood: 'creative',
+        time_of_day: 'evening',
+        distance: 'local',
+        importance: 'experience',
+        activity_level: 'low',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 18
+      {
+        title: 'Couples Yoga Session',
+        description: 'Enhance your connection with a guided couples yoga class.',
+        location: 'indoor',
+        cost_category: 'standard',
+        duration: '1-2 hours',
+        activity_type: 'yoga',
+        mood: 'relaxed',
+        time_of_day: 'morning',
+        distance: 'local',
+        importance: 'connection',
+        activity_level: 'moderate',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 19
+      {
+        title: 'Visit a Botanical Garden',
+        description: 'Stroll through beautiful gardens and admire the flora.',
+        location: 'outdoor',
+        cost_category: 'economy',
+        duration: '2-3 hours',
+        activity_type: 'gardenVisit',
+        mood: 'relaxed',
+        time_of_day: 'afternoon',
+        distance: 'nearby',
+        importance: 'comfort',
+        activity_level: 'low',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 20
+      {
+        title: 'Movie Marathon at Home',
+        description: 'Cozy up at home with a selection of your favorite movies.',
+        location: 'indoor',
+        cost_category: 'free',
+        duration: '4+ hours',
+        activity_type: 'movieNight',
+        mood: 'relaxed',
+        time_of_day: 'evening',
+        distance: 'local',
+        importance: 'comfort',
+        activity_level: 'low',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 21
+      {
+        title: 'Picnic in the Park',
+        description: 'Pack a basket and enjoy a picnic in a picturesque park.',
+        location: 'outdoor',
+        cost_category: 'economy',
+        duration: '2-3 hours',
+        activity_type: 'picnic',
+        mood: 'romantic',
+        time_of_day: 'afternoon',
+        distance: 'local',
+        importance: 'connection',
+        activity_level: 'low',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 22
+      {
+        title: 'Go to a Comedy Show',
+        description: 'Laugh together at a stand-up comedy performance.',
+        location: 'indoor',
+        cost_category: 'standard',
+        duration: '2-3 hours',
+        activity_type: 'comedyShow',
+        mood: 'creative',
+        time_of_day: 'night',
+        distance: 'local',
+        importance: 'experience',
+        activity_level: 'low',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 23
+      {
+        title: 'Painting and Wine Night',
+        description: 'Enjoy a guided painting session while sipping on wine.',
+        location: 'indoor',
+        cost_category: 'standard',
+        duration: '2-3 hours',
+        activity_type: 'painting',
+        mood: 'creative',
+        time_of_day: 'evening',
+        distance: 'local',
+        importance: 'experience',
+        activity_level: 'low',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 24
+      {
+        title: 'Visit a Science Museum',
+        description: 'Explore interactive exhibits at the science museum.',
+        location: 'indoor',
+        cost_category: 'economy',
+        duration: '3-4 hours',
+        activity_type: 'scienceMuseum',
+        mood: 'creative',
+        time_of_day: 'afternoon',
+        distance: 'local',
+        importance: 'experience',
+        activity_level: 'moderate',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 25
+      {
+        title: 'Salsa Dancing Class',
+        description: 'Learn some new moves at a salsa dancing class.',
+        location: 'indoor',
+        cost_category: 'standard',
+        duration: '1-2 hours',
+        activity_type: 'dancing',
+        mood: 'romantic',
+        time_of_day: 'evening',
+        distance: 'local',
+        importance: 'experience',
+        activity_level: 'high',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 26
+      {
+        title: 'Bookstore Date',
+        description: 'Browse books together and share your favorite reads.',
+        location: 'indoor',
+        cost_category: 'free',
+        duration: '1-2 hours',
+        activity_type: 'bookstore',
+        mood: 'relaxed',
+        time_of_day: 'afternoon',
+        distance: 'local',
+        importance: 'connection',
+        activity_level: 'low',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 27
+      {
+        title: 'Attend a Sports Game',
+        description: 'Cheer on your favorite team at a live sports event.',
+        location: 'outdoor',
+        cost_category: 'standard',
+        duration: '3-4 hours',
+        activity_type: 'sportsGame',
+        mood: 'adventurous',
+        time_of_day: 'evening',
+        distance: 'local',
+        importance: 'experience',
+        activity_level: 'moderate',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 28
+      {
+        title: 'Indoor Rock Climbing',
+        description: 'Challenge yourselves at an indoor rock climbing gym.',
+        location: 'indoor',
+        cost_category: 'standard',
+        duration: '2-3 hours',
+        activity_type: 'rockClimbing',
+        mood: 'adventurous',
+        time_of_day: 'afternoon',
+        distance: 'local',
+        importance: 'experience',
+        activity_level: 'high',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 29
+      {
+        title: 'Volunteer Together',
+        description: 'Give back to the community by volunteering together.',
+        location: 'varies',
+        cost_category: 'free',
+        duration: '3-4 hours',
+        activity_type: 'volunteering',
+        mood: 'romantic',
+        time_of_day: 'morning',
+        distance: 'local',
+        importance: 'connection',
+        activity_level: 'moderate',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 30
+      {
+        title: 'Photography Walk',
+        description: 'Explore the city and capture moments with photography.',
+        location: 'outdoor',
+        cost_category: 'free',
+        duration: '2-3 hours',
+        activity_type: 'photography',
+        mood: 'creative',
+        time_of_day: 'afternoon',
+        distance: 'local',
+        importance: 'experience',
+        activity_level: 'moderate',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 31
+      {
+        title: 'Amusement Park Adventure',
+        description: 'Have fun on rides and games at the amusement park.',
+        location: 'outdoor',
+        cost_category: 'premium',
+        duration: 'Full day',
+        activity_type: 'amusementPark',
+        mood: 'adventurous',
+        time_of_day: 'morning',
+        distance: 'nearby',
+        importance: 'experience',
+        activity_level: 'high',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 32
+      {
+        title: 'Cooking Dinner Together at Home',
+        description: 'Prepare a meal together in the comfort of your home.',
+        location: 'indoor',
+        cost_category: 'economy',
+        duration: '2-3 hours',
+        activity_type: 'cooking',
+        mood: 'romantic',
+        time_of_day: 'evening',
+        distance: 'local',
+        importance: 'connection',
+        activity_level: 'low',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 33
+      {
+        title: 'Visit a Farmers Market',
+        description: 'Browse fresh produce and artisan goods at the market.',
+        location: 'outdoor',
+        cost_category: 'free',
+        duration: '1-2 hours',
+        activity_type: 'farmersMarket',
+        mood: 'relaxed',
+        time_of_day: 'morning',
+        distance: 'local',
+        importance: 'comfort',
+        activity_level: 'low',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 34
+      {
+        title: 'Go Kayaking or Canoeing',
+        description: 'Enjoy the water with a kayaking or canoeing trip.',
+        location: 'outdoor',
+        cost_category: 'standard',
+        duration: '2-3 hours',
+        activity_type: 'kayaking',
+        mood: 'adventurous',
+        time_of_day: 'afternoon',
+        distance: 'nearby',
+        importance: 'experience',
+        activity_level: 'high',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 35
+      {
+        title: 'Take a Language Class',
+        description: 'Learn a new language together in a fun environment.',
+        location: 'indoor',
+        cost_category: 'standard',
+        duration: '1-2 hours',
+        activity_type: 'languageClass',
+        mood: 'creative',
+        time_of_day: 'evening',
+        distance: 'local',
+        importance: 'experience',
+        activity_level: 'low',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 36
+      {
+        title: 'Attend a Poetry Reading',
+        description: 'Enjoy spoken word performances at a local venue.',
+        location: 'indoor',
+        cost_category: 'economy',
+        duration: '2-3 hours',
+        activity_type: 'poetry',
+        mood: 'creative',
+        time_of_day: 'night',
+        distance: 'local',
+        importance: 'experience',
+        activity_level: 'low',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 37
+      {
+        title: 'Meditation Retreat',
+        description: 'Find peace and relaxation at a guided meditation session.',
+        location: 'indoor',
+        cost_category: 'standard',
+        duration: '3-4 hours',
+        activity_type: 'meditation',
+        mood: 'relaxed',
+        time_of_day: 'morning',
+        distance: 'nearby',
+        importance: 'comfort',
+        activity_level: 'low',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 38
+      {
+        title: 'Road Trip to a Nearby Town',
+        description: 'Explore a new place with a spontaneous road trip.',
+        location: 'outdoor',
+        cost_category: 'economy',
+        duration: 'Full day',
+        activity_type: 'roadTrip',
+        mood: 'adventurous',
+        time_of_day: 'morning',
+        distance: 'far',
+        importance: 'experience',
+        activity_level: 'moderate',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 39
+      {
+        title: 'Camping Under the Stars',
+        description: 'Spend a night outdoors camping and stargazing.',
+        location: 'outdoor',
+        cost_category: 'economy',
+        duration: 'Overnight',
+        activity_type: 'camping',
+        mood: 'romantic',
+        time_of_day: 'night',
+        distance: 'nearby',
+        importance: 'connection',
+        activity_level: 'moderate',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 40
+      {
+        title: 'Visit an Aquarium',
+        description: 'Discover marine life at a local aquarium.',
+        location: 'indoor',
+        cost_category: 'standard',
+        duration: '2-3 hours',
+        activity_type: 'aquarium',
+        mood: 'relaxed',
+        time_of_day: 'afternoon',
+        distance: 'local',
+        importance: 'experience',
+        activity_level: 'low',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 41
+      {
+        title: 'Chocolate Factory Tour',
+        description: 'Indulge your sweet tooth with a chocolate factory tour.',
+        location: 'indoor',
+        cost_category: 'economy',
+        duration: '1-2 hours',
+        activity_type: 'factoryTour',
+        mood: 'creative',
+        time_of_day: 'afternoon',
+        distance: 'nearby',
+        importance: 'experience',
+        activity_level: 'low',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 42
+      {
+        title: 'Ghost Tour of the City',
+        description: 'Explore haunted sites on a guided ghost tour.',
+        location: 'outdoor',
+        cost_category: 'economy',
+        duration: '2-3 hours',
+        activity_type: 'ghostTour',
+        mood: 'adventurous',
+        time_of_day: 'night',
+        distance: 'local',
+        importance: 'experience',
+        activity_level: 'moderate',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 43
+      {
+        title: 'Stand-Up Paddleboarding',
+        description: 'Try out stand-up paddleboarding on calm waters.',
+        location: 'outdoor',
+        cost_category: 'standard',
+        duration: '2-3 hours',
+        activity_type: 'paddleboarding',
+        mood: 'adventurous',
+        time_of_day: 'morning',
+        distance: 'nearby',
+        importance: 'experience',
+        activity_level: 'high',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 44
+      {
+        title: 'Attend a Theater Play',
+        description: 'Enjoy a live performance at the theater.',
+        location: 'indoor',
+        cost_category: 'standard',
+        duration: '2-3 hours',
+        activity_type: 'theater',
+        mood: 'creative',
+        time_of_day: 'evening',
+        distance: 'local',
+        importance: 'experience',
+        activity_level: 'low',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 45
+      {
+        title: 'Visit a Planetarium',
+        description: 'Explore the cosmos at the planetarium.',
+        location: 'indoor',
+        cost_category: 'economy',
+        duration: '1-2 hours',
+        activity_type: 'planetarium',
+        mood: 'creative',
+        time_of_day: 'afternoon',
+        distance: 'local',
+        importance: 'experience',
+        activity_level: 'low',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 46
+      {
+        title: 'Horseback Riding',
+        description: 'Enjoy a scenic ride on horseback.',
+        location: 'outdoor',
+        cost_category: 'premium',
+        duration: '2-3 hours',
+        activity_type: 'horsebackRiding',
+        mood: 'adventurous',
+        time_of_day: 'morning',
+        distance: 'nearby',
+        importance: 'experience',
+        activity_level: 'moderate',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 47
+      {
+        title: 'Explore a Historical Site',
+        description: 'Visit a local historical landmark and learn its history.',
+        location: 'outdoor',
+        cost_category: 'free',
+        duration: '1-2 hours',
+        activity_type: 'historicalSite',
+        mood: 'creative',
+        time_of_day: 'afternoon',
+        distance: 'local',
+        importance: 'experience',
+        activity_level: 'moderate',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 48
+      {
+        title: 'Go Bowling',
+        description: 'Have fun competing in a game of bowling.',
+        location: 'indoor',
+        cost_category: 'economy',
+        duration: '1-2 hours',
+        activity_type: 'bowling',
+        mood: 'relaxed',
+        time_of_day: 'evening',
+        distance: 'local',
+        importance: 'comfort',
+        activity_level: 'moderate',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 49
+      {
+        title: 'Visit a Zoo',
+        description: 'See animals from around the world at the zoo.',
+        location: 'outdoor',
+        cost_category: 'standard',
+        duration: '3-4 hours',
+        activity_type: 'zoo',
+        mood: 'relaxed',
+        time_of_day: 'morning',
+        distance: 'local',
+        importance: 'experience',
+        activity_level: 'moderate',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 50
+      {
+        title: 'Mini Golf Date',
+        description: 'Enjoy a playful round of mini golf.',
+        location: 'outdoor',
+        cost_category: 'economy',
+        duration: '1-2 hours',
+        activity_type: 'miniGolf',
+        mood: 'relaxed',
+        time_of_day: 'afternoon',
+        distance: 'local',
+        importance: 'comfort',
+        activity_level: 'low',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 51
+      {
+        title: 'Ice Skating',
+        description: 'Glide together on the ice at a local rink.',
+        location: 'indoor',
+        cost_category: 'economy',
+        duration: '1-2 hours',
+        activity_type: 'iceSkating',
+        mood: 'romantic',
+        time_of_day: 'evening',
+        distance: 'local',
+        importance: 'experience',
+        activity_level: 'moderate',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 52
+      {
+        title: 'Attend a Food Festival',
+        description: 'Taste a variety of foods at a local festival.',
+        location: 'outdoor',
+        cost_category: 'economy',
+        duration: '3-4 hours',
+        activity_type: 'foodFestival',
+        mood: 'relaxed',
+        time_of_day: 'afternoon',
+        distance: 'nearby',
+        importance: 'experience',
+        activity_level: 'low',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 53
+      {
+        title: 'Glass Blowing Class',
+        description: 'Create your own glass art pieces.',
+        location: 'indoor',
+        cost_category: 'premium',
+        duration: '2-3 hours',
+        activity_type: 'glassBlowing',
+        mood: 'creative',
+        time_of_day: 'afternoon',
+        distance: 'local',
+        importance: 'experience',
+        activity_level: 'low',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 54
+      {
+        title: 'Go-Kart Racing',
+        description: 'Race each other on a go-kart track.',
+        location: 'outdoor',
+        cost_category: 'standard',
+        duration: '1-2 hours',
+        activity_type: 'goKarting',
+        mood: 'adventurous',
+        time_of_day: 'afternoon',
+        distance: 'nearby',
+        importance: 'experience',
+        activity_level: 'high',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 55
+      {
+        title: 'Attend a Workshop',
+        description: 'Learn a new skill at a local workshop.',
+        location: 'indoor',
+        cost_category: 'standard',
+        duration: '2-3 hours',
+        activity_type: 'workshop',
+        mood: 'creative',
+        time_of_day: 'morning',
+        distance: 'local',
+        importance: 'experience',
+        activity_level: 'low',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 56
+      {
+        title: 'Visit an Escape Game',
+        description: 'Challenge yourselves in a themed escape game.',
+        location: 'indoor',
+        cost_category: 'standard',
+        duration: '1-2 hours',
+        activity_type: 'escapeGame',
+        mood: 'adventurous',
+        time_of_day: 'evening',
+        distance: 'local',
+        importance: 'surprise',
+        activity_level: 'moderate',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 57
+      {
+        title: 'Laser Tag',
+        description: 'Engage in a fun game of laser tag.',
+        location: 'indoor',
+        cost_category: 'economy',
+        duration: '1-2 hours',
+        activity_type: 'laserTag',
+        mood: 'adventurous',
+        time_of_day: 'afternoon',
+        distance: 'local',
+        importance: 'experience',
+        activity_level: 'high',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 58
+      {
+        title: 'Visit a Theme Park',
+        description: 'Enjoy rides and attractions at a theme park.',
+        location: 'outdoor',
+        cost_category: 'premium',
+        duration: 'Full day',
+        activity_type: 'themePark',
+        mood: 'adventurous',
+        time_of_day: 'morning',
+        distance: 'far',
+        importance: 'experience',
+        activity_level: 'high',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 59
+      {
+        title: 'Attend a Music Festival',
+        description: 'Immerse yourselves in live music at a festival.',
+        location: 'outdoor',
+        cost_category: 'premium',
+        duration: 'Full day',
+        activity_type: 'musicFestival',
+        mood: 'creative',
+        time_of_day: 'afternoon',
+        distance: 'far',
+        importance: 'experience',
+        activity_level: 'moderate',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 60
+      {
+        title: 'Visit a Hot Spring',
+        description: 'Relax in the natural warmth of hot springs.',
+        location: 'outdoor',
+        cost_category: 'standard',
+        duration: '3-4 hours',
+        activity_type: 'hotSpring',
+        mood: 'relaxed',
+        time_of_day: 'morning',
+        distance: 'nearby',
+        importance: 'comfort',
+        activity_level: 'low',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 61
+      {
+        title: 'Visit an Art Gallery Opening',
+        description: 'Attend an art gallery opening and meet the artists.',
+        location: 'indoor',
+        cost_category: 'free',
+        duration: '2-3 hours',
+        activity_type: 'artGallery',
+        mood: 'creative',
+        time_of_day: 'evening',
+        distance: 'local',
+        importance: 'experience',
+        activity_level: 'low',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 62
+      {
+        title: 'Attend a Cooking Demonstration',
+        description: 'Watch professional chefs cook and learn new recipes.',
+        location: 'indoor',
+        cost_category: 'standard',
+        duration: '1-2 hours',
+        activity_type: 'cookingDemo',
+        mood: 'creative',
+        time_of_day: 'afternoon',
+        distance: 'local',
+        importance: 'experience',
+        activity_level: 'low',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 63
+      {
+        title: 'Visit a Brewery or Distillery',
+        description: 'Tour a brewery or distillery and sample their products.',
+        location: 'indoor',
+        cost_category: 'economy',
+        duration: '2-3 hours',
+        activity_type: 'breweryTour',
+        mood: 'relaxed',
+        time_of_day: 'afternoon',
+        distance: 'nearby',
+        importance: 'experience',
+        activity_level: 'low',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 64
+      {
+        title: 'Watch a Sunrise at the Beach',
+        description: 'Enjoy the tranquility of a beach sunrise.',
+        location: 'outdoor',
+        cost_category: 'free',
+        duration: '1-2 hours',
+        activity_type: 'beachSunrise',
+        mood: 'romantic',
+        time_of_day: 'morning',
+        distance: 'nearby',
+        importance: 'connection',
+        activity_level: 'low',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 65
+      {
+        title: 'Take a Dance Class Together',
+        description: 'Learn a new dance style as a couple.',
+        location: 'indoor',
+        cost_category: 'standard',
+        duration: '1-2 hours',
+        activity_type: 'danceClass',
+        mood: 'romantic',
+        time_of_day: 'evening',
+        distance: 'local',
+        importance: 'connection',
+        activity_level: 'moderate',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 66
+      {
+        title: 'Visit a Local Fair',
+        description: 'Enjoy rides, games, and food at a local fair.',
+        location: 'outdoor',
+        cost_category: 'economy',
+        duration: '3-4 hours',
+        activity_type: 'localFair',
+        mood: 'relaxed',
+        time_of_day: 'afternoon',
+        distance: 'nearby',
+        importance: 'experience',
+        activity_level: 'moderate',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 67
+      {
+        title: 'Attend a Meditation Class',
+        description: 'Find inner peace at a guided meditation session.',
+        location: 'indoor',
+        cost_category: 'economy',
+        duration: '1-2 hours',
+        activity_type: 'meditationClass',
+        mood: 'relaxed',
+        time_of_day: 'evening',
+        distance: 'local',
+        importance: 'comfort',
+        activity_level: 'low',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 68
+      {
+        title: 'Go Snowboarding or Skiing',
+        description: 'Hit the slopes for some winter sports fun.',
+        location: 'outdoor',
+        cost_category: 'premium',
+        duration: 'Full day',
+        activity_type: 'snowSports',
+        mood: 'adventurous',
+        time_of_day: 'morning',
+        distance: 'far',
+        importance: 'experience',
+        activity_level: 'high',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 69
+      {
+        title: 'Take a Pottery Painting Class',
+        description: 'Paint your own pottery pieces together.',
+        location: 'indoor',
+        cost_category: 'standard',
+        duration: '2-3 hours',
+        activity_type: 'potteryPainting',
+        mood: 'creative',
+        time_of_day: 'afternoon',
+        distance: 'local',
+        importance: 'experience',
+        activity_level: 'low',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 70
+      {
+        title: 'Visit a Cat Café or Animal Shelter',
+        description: 'Spend time with adorable animals.',
+        location: 'indoor',
+        cost_category: 'economy',
+        duration: '1-2 hours',
+        activity_type: 'animalVisit',
+        mood: 'relaxed',
+        time_of_day: 'morning',
+        distance: 'local',
+        importance: 'comfort',
+        activity_level: 'low',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 71
+      {
+        title: 'Have a Game Night at Home',
+        description: 'Enjoy board games or video games together.',
+        location: 'indoor',
+        cost_category: 'free',
+        duration: '4+ hours',
+        activity_type: 'gameNight',
+        mood: 'relaxed',
+        time_of_day: 'evening',
+        distance: 'local',
+        importance: 'comfort',
+        activity_level: 'low',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 72
+      {
+        title: 'Visit a Flower Festival',
+        description: 'Admire the beauty of flowers at a local festival.',
+        location: 'outdoor',
+        cost_category: 'economy',
+        duration: '2-3 hours',
+        activity_type: 'flowerFestival',
+        mood: 'romantic',
+        time_of_day: 'afternoon',
+        distance: 'nearby',
+        importance: 'experience',
+        activity_level: 'low',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 73
+      {
+        title: 'Take a Helicopter Tour',
+        description: 'See the city from above on a helicopter ride.',
+        location: 'outdoor',
+        cost_category: 'luxury',
+        duration: '1-2 hours',
+        activity_type: 'helicopterTour',
+        mood: 'adventurous',
+        time_of_day: 'afternoon',
+        distance: 'nearby',
+        importance: 'experience',
+        activity_level: 'low',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 74
+      {
+        title: 'Attend a Book Reading',
+        description: 'Listen to authors read from their latest works.',
+        location: 'indoor',
+        cost_category: 'free',
+        duration: '1-2 hours',
+        activity_type: 'bookReading',
+        mood: 'creative',
+        time_of_day: 'evening',
+        distance: 'local',
+        importance: 'experience',
+        activity_level: 'low',
+        image_url: '/api/placeholder/400/300',
+      },
+      // 75
+      {
+        title: 'Go Fruit Picking at a Farm',
+        description: 'Pick fresh fruits together at a local farm.',
+        location: 'outdoor',
+        cost_category: 'economy',
+        duration: '2-3 hours',
+        activity_type: 'fruitPicking',
+        mood: 'relaxed',
+        time_of_day: 'morning',
+        distance: 'nearby',
+        importance: 'experience',
+        activity_level: 'moderate',
+        image_url: '/api/placeholder/400/300',
+      },
+    ];
+
+    // Insert sample data
+    for (const idea of sampleDateIdeas) {
+      const result = await pool.query(
+        `INSERT INTO date_ideas 
+          (title, description, location, cost_category, duration, activity_type, mood, time_of_day, distance, importance, activity_level, image_url) 
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+          RETURNING id`,
+        [
+          idea.title,
+          idea.description,
+          idea.location,
+          idea.cost_category,
+          idea.duration,
+          idea.activity_type,
+          idea.mood,
+          idea.time_of_day,
+          idea.distance,
+          idea.importance,
+          idea.activity_level,
+          idea.image_url,
         ]
+      );
 
-        // Insert sample data
-        for (const idea of sampleDateIdeas) {
-            const result = await pool.query(
-                `INSERT INTO date_ideas 
-                (title, description, location, cost_category, duration, activity_type, image_url) 
-                VALUES ($1, $2, $3, $4, $5, $6, $7)
-                RETURNING id`,
-                [idea.title, idea.description, idea.location, idea.cost_category, 
-                 idea.duration, idea.activity_type, idea.image_url]
-            )
-            
-            // Add some sample likes and comments
-            await pool.query(
-                'INSERT INTO likes (date_idea_id) VALUES ($1)',
-                [result.rows[0].id]
-            )
-            
-            await pool.query(
-                'INSERT INTO comments (date_idea_id, content) VALUES ($1, $2)',
-                [result.rows[0].id, 'This looks amazing! Can\'t wait to try it!']
-            )
-            
-            console.log(`✅ Date idea "${idea.title}" added successfully`)
-        }
+      // Add some sample likes and comments
+      await pool.query('INSERT INTO likes (date_idea_id) VALUES ($1)', [
+        result.rows[0].id,
+      ]);
 
-        console.log('✨ Database reset and seeded successfully!')
-    } catch (error) {
-        console.error('⚠️ error resetting database:', error)
-    } finally {
-        await pool.end()
+      await pool.query(
+        'INSERT INTO comments (date_idea_id, content) VALUES ($1, $2)',
+        [result.rows[0].id, 'This sounds fantastic!']
+      );
+
+      console.log(`✅ Date idea "${idea.title}" added successfully`);
     }
-}
 
-resetDatabase()
+    console.log('✨ Database reset and seeded successfully!');
+  } catch (error) {
+    console.error('⚠️ Error resetting database:', error);
+  } finally {
+    await pool.end();
+  }
+};
+
+resetDatabase();
