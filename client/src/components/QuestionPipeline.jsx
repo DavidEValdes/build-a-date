@@ -43,54 +43,61 @@ const questions = [
 ];
 
 const QuestionPipeline = ({ onComplete }) => {
-  const [currentStep, setCurrentStep] = useState(0);
-  const [answers, setAnswers] = useState({});
-
-  const handleAnswer = (value) => {
-    setAnswers(prev => ({
-      ...prev,
-      [questions[currentStep].id]: value
-    }));
-    
-    if (currentStep < questions.length - 1) {
-      setCurrentStep(currentStep + 1);
-    } else {
-      onComplete(answers);
-    }
-  };
-
-  return (
-    <div className="question-pipeline">
-      <div className="progress-section">
-        <div className="progress-bar">
-          <div 
-            className="progress-fill" 
-            style={{ width: `${(currentStep + 1) / questions.length * 100}%` }}
-          ></div>
-        </div>
-        <p className="question-counter">
-          Question {currentStep + 1} of {questions.length}
-        </p>
-      </div>
-
-      <h3>{questions[currentStep].question}</h3>
-
-      <div className="options-list">
-        {questions[currentStep].options.map((option) => (
-          <div key={option.value} className="option-item">
-            <input
-              type="radio"
-              name="question"
-              id={option.value}
-              value={option.value}
-              onChange={() => handleAnswer(option.value)}
-            />
-            <label htmlFor={option.value}>{option.label}</label>
+    const [currentStep, setCurrentStep] = useState(0);
+    const [answers, setAnswers] = useState({});
+  
+    const handleAnswer = (value) => {
+      const updatedAnswers = {
+        ...answers,
+        [questions[currentStep].id]: value,
+      };
+  
+      setAnswers(updatedAnswers);
+  
+      if (currentStep < questions.length - 1) {
+        setCurrentStep(currentStep + 1);
+      } else {
+        onComplete(updatedAnswers);
+      }
+    };
+  
+    return (
+      <div className="question-pipeline">
+        <div className="progress-section">
+          <div className="progress-bar">
+            <div
+              className="progress-fill"
+              style={{ width: `${((currentStep + 1) / questions.length) * 100}%` }}
+            ></div>
           </div>
-        ))}
+          <p className="question-counter">
+            Question {currentStep + 1} of {questions.length}
+          </p>
+        </div>
+  
+        <h3>{questions[currentStep].question}</h3>
+  
+        <div className="options-list">
+          {questions[currentStep].options.map((option) => (
+            <div
+              key={option.value}
+              className="option-item"
+              onClick={() => handleAnswer(option.value)}
+            >
+              <input
+                type="radio"
+                name={questions[currentStep].id}
+                id={option.value}
+                value={option.value}
+                checked={answers[questions[currentStep].id] === option.value}
+                readOnly
+              />
+              <label htmlFor={option.value}>{option.label}</label>
+            </div>
+          ))}
+        </div>
       </div>
-    </div>
-  );
-};
-
-export default QuestionPipeline;
+    );
+  };
+  
+  export default QuestionPipeline;
