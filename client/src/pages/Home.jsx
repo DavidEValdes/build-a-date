@@ -73,12 +73,6 @@ const Home = () => {
 
   return (
     <div className="app-container">
-      <header className="app-header">
-        <div className="header-content">
-          <h1>Build a Date</h1>
-        </div>
-      </header>
-
       <main className="main-content">
         {stage === 'welcome' && (
           <div className="welcome-screen">

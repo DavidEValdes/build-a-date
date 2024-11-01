@@ -13,33 +13,44 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Layout */
-.app-container {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
+/* Header Styles */
 .app-header {
   background-color: white;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid #e5e7eb;
   padding: 1rem 0;
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 50;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .header-content {
   max-width: 64rem;
   margin: 0 auto;
   padding: 0 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.header-content h1 {
+.header-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+}
+
+.header-logo h1 {
   font-size: 1.5rem;
-  font-weight: 700;
-  color: #2563eb;
-  letter-spacing: -0.025em;
+  font-weight: 600;
+  color: #4f46e5;
+  margin: 0;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
 .main-content {
@@ -742,3 +753,4 @@ body {
 .duration-200 {
   transition-duration: 200ms;
 }
+
