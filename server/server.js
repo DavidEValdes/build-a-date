@@ -3,6 +3,7 @@ import express from 'express'
 import cors from 'cors'
 import './config/dotenv.js'
 import dateIdeasRouter from './routes/dateIdeas.js'
+import usersRouter from './routes/users.js' // Add this line
 
 const app = express()
 
@@ -20,6 +21,7 @@ app.get('/', (req, res) => {
 
 // Routes
 app.use('/api/dates', dateIdeasRouter)
+app.use('/api/users', usersRouter) // Add this line
 
 // Placeholder image route
 app.get('/api/placeholder/:width/:height', (req, res) => {

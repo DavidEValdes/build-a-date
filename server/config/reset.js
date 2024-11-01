@@ -6,11 +6,25 @@ const resetDatabase = async () => {
   try {
     // Drop existing tables
     await pool.query(`
+      DROP TABLE IF EXISTS saved_dates CASCADE;
       DROP TABLE IF EXISTS comments CASCADE;
       DROP TABLE IF EXISTS likes CASCADE;
       DROP TABLE IF EXISTS date_ideas CASCADE;
+      DROP TABLE IF EXISTS users CASCADE;
     `);
     console.log('🗑️  Tables dropped successfully');
+
+    // Create users table
+    await pool.query(`
+      CREATE TABLE users (
+        id SERIAL PRIMARY KEY,
+        username VARCHAR(255) NOT NULL UNIQUE,
+        email VARCHAR(255) NOT NULL UNIQUE,
+        password_hash VARCHAR(255) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+    console.log('🎉 users table created successfully');
 
     // Create date_ideas table with updated schema
     await pool.query(`
@@ -38,27 +52,42 @@ const resetDatabase = async () => {
     // Create likes table
     await pool.query(`
       CREATE TABLE likes (
-          id SERIAL PRIMARY KEY,
-          date_idea_id INTEGER REFERENCES date_ideas(id) ON DELETE CASCADE,
-          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        id SERIAL PRIMARY KEY,
+        date_idea_id INTEGER REFERENCES date_ideas(id) ON DELETE CASCADE,
+        user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(user_id, date_idea_id)
       );
     `);
     console.log('🎉 likes table created successfully');
 
-    // Create comments table (simplified without user reference)
+    // Create comments table with user reference
     await pool.query(`
       CREATE TABLE comments (
-          id SERIAL PRIMARY KEY,
-          date_idea_id INTEGER REFERENCES date_ideas(id) ON DELETE CASCADE,
-          content TEXT NOT NULL,
-          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        id SERIAL PRIMARY KEY,
+        date_idea_id INTEGER REFERENCES date_ideas(id) ON DELETE CASCADE,
+        user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+        content TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
     console.log('🎉 comments table created successfully');
 
-    // Insert sample date ideas with the new attributes
+    // Create saved_dates table
+    await pool.query(`
+      CREATE TABLE saved_dates (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+        date_idea_id INTEGER REFERENCES date_ideas(id) ON DELETE CASCADE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(user_id, date_idea_id)
+      );
+    `);
+    console.log('🎉 saved_dates table created successfully');
+
+    // Insert sample date ideas
     const sampleDateIdeas = [
-      // 1
+      // Your existing sample date ideas array...
       {
         title: 'Sunrise Hike',
         description: 'Begin your day with an invigorating hike to watch the sunrise from the mountaintop.',
@@ -1187,35 +1216,25 @@ const resetDatabase = async () => {
 
     // Insert sample data
     for (const idea of sampleDateIdeas) {
-        const result = await pool.query(
-          `INSERT INTO date_ideas 
-            (title, description, location, cost_category, duration, activity_type, mood, time_of_day, distance, importance, activity_level, image_url, is_shared, creator_id) 
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, FALSE, NULL)
-            RETURNING id`,
-          [
-            idea.title,
-            idea.description,
-            idea.location,
-            idea.cost_category,
-            idea.duration,
-            idea.activity_type,
-            idea.mood,
-            idea.time_of_day,
-            idea.distance,
-            idea.importance,
-            idea.activity_level,
-            idea.image_url,
-          ]
-        );
-
-      // Add some sample likes and comments
-      await pool.query('INSERT INTO likes (date_idea_id) VALUES ($1)', [
-        result.rows[0].id,
-      ]);
-
-      await pool.query(
-        'INSERT INTO comments (date_idea_id, content) VALUES ($1, $2)',
-        [result.rows[0].id, 'This sounds fantastic!']
+      const result = await pool.query(
+        `INSERT INTO date_ideas 
+          (title, description, location, cost_category, duration, activity_type, mood, time_of_day, distance, importance, activity_level, image_url, is_shared)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, TRUE)
+          RETURNING id`,
+        [
+          idea.title,
+          idea.description,
+          idea.location,
+          idea.cost_category,
+          idea.duration,
+          idea.activity_type,
+          idea.mood,
+          idea.time_of_day,
+          idea.distance,
+          idea.importance,
+          idea.activity_level,
+          idea.image_url,
+        ]
       );
 
       console.log(`✅ Date idea "${idea.title}" added successfully`);
