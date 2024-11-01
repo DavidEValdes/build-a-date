@@ -1214,14 +1214,16 @@ const resetDatabase = async () => {
       },
     ];
 
-    // Insert sample data
-    for (const idea of sampleDateIdeas) {
-      const result = await pool.query(
-        `INSERT INTO date_ideas 
-          (title, description, location, cost_category, duration, activity_type, mood, time_of_day, distance, importance, activity_level, image_url, is_shared)
-          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, TRUE)
-          RETURNING id`,
-        [
+    // Find this part in your reset.js where it inserts sample data
+for (const idea of sampleDateIdeas) {
+  const result = await pool.query(
+      `INSERT INTO date_ideas 
+      (title, description, location, cost_category, duration, 
+      activity_type, mood, time_of_day, distance, importance, 
+      activity_level, image_url, is_shared, creator_id) 
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, FALSE, NULL)
+      RETURNING id`,
+      [
           idea.title,
           idea.description,
           idea.location,
@@ -1234,11 +1236,11 @@ const resetDatabase = async () => {
           idea.importance,
           idea.activity_level,
           idea.image_url,
-        ]
-      );
+      ]
+  );
 
-      console.log(`✅ Date idea "${idea.title}" added successfully`);
-    }
+  console.log(`✅ Date idea "${idea.title}" added successfully`);
+}
 
     console.log('✨ Database reset and seeded successfully!');
   } catch (error) {

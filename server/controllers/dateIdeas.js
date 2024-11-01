@@ -3,77 +3,43 @@ import { pool } from '../config/database.js';
 import { fetchImageUrl } from '../helpers/pexels.js';
 
 const DateIdeasController = {
-  // Get all date ideas with basic filtering and counts
+  // Get all date ideas with basic filtering and counts (only shared ones)
   getDateIdeas: async (req, res) => {
     try {
-      const { location, budget, activity_type } = req.query;
-      let query = `
-        SELECT d.*, 
-          COUNT(DISTINCT l.id) as likes_count,
-          COUNT(DISTINCT c.id) as comments_count
-        FROM date_ideas d
-        LEFT JOIN likes l ON d.id = l.date_idea_id
-        LEFT JOIN comments c ON d.id = c.date_idea_id
-        WHERE d.is_shared = TRUE
-      `;
-      const values = [];
+        const { location, budget, activity_type } = req.query;
+        let query = `
+            SELECT d.*, 
+                COUNT(DISTINCT l.id) as likes_count,
+                COUNT(DISTINCT c.id) as comments_count
+            FROM date_ideas d
+            LEFT JOIN likes l ON d.id = l.date_idea_id
+            LEFT JOIN comments c ON d.id = c.date_idea_id
+            WHERE d.is_shared = TRUE
+        `;
+        const values = [];
 
-      if (location) {
-        values.push(location);
-        query += ` AND d.location = $${values.length}`;
-      }
-      if (budget) {
-        values.push(budget);
-        query += ` AND d.cost_category = $${values.length}`;
-      }
-      if (activity_type) {
-        values.push(activity_type);
-        query += ` AND d.activity_type = $${values.length}`;
-      }
+        if (location) {
+            values.push(location);
+            query += ` AND d.location = $${values.length}`;
+        }
+        if (budget) {
+            values.push(budget);
+            query += ` AND d.cost_category = $${values.length}`;
+        }
+        if (activity_type) {
+            values.push(activity_type);
+            query += ` AND d.activity_type = $${values.length}`;
+        }
 
-      query += ' GROUP BY d.id ORDER BY d.created_at DESC';
+        query += ` GROUP BY d.id ORDER BY d.created_at DESC`;
 
-      const results = await pool.query(query, values);
-      const dateIdeas = results.rows;
-
-      const enhancedDateIdeas = await Promise.all(
-        dateIdeas.map(async (idea) => {
-          // Check if image_url is a placeholder
-          if (
-            !idea.image_url ||
-            idea.image_url.startsWith('/api/placeholder')
-          ) {
-            // Define search query based on activity_type and mood
-            const searchQuery = `${idea.activity_type} ${idea.mood}`.trim();
-
-            // Fetch image URL from Pexels
-            const imageUrl = await fetchImageUrl(searchQuery);
-
-            if (imageUrl) {
-              // Update the database with the new image URL
-              await pool.query(
-                'UPDATE date_ideas SET image_url = $1 WHERE id = $2',
-                [imageUrl, idea.id]
-              );
-
-              // Update the idea object
-              idea.image_url = imageUrl;
-            } else {
-              // If fetching from Pexels fails, retain the placeholder or set to a default image
-              idea.image_url = 'https://via.placeholder.com/400x300?text=No+Image+Available';
-            }
-          }
-
-          return idea;
-        })
-      );
-
-      res.json(enhancedDateIdeas);
+        const results = await pool.query(query, values);
+        res.json(results.rows);
     } catch (error) {
-      console.error('Error getting date ideas:', error);
-      res.status(500).json({ error: error.message });
+        console.error('Error getting date ideas:', error);
+        res.status(500).json({ error: error.message });
     }
-  },
+},
 
   // Get single date idea with its comments and likes count
   getDateIdea: async (req, res) => {
@@ -132,67 +98,54 @@ const DateIdeasController = {
     }
   },
 
-  // Create new date idea
+  // Also update the createDateIdea method to properly set is_shared
   createDateIdea: async (req, res) => {
     try {
-      const {
-        title,
-        description,
-        location,
-        cost_category,
-        duration,
-        activity_type,
-        mood,
-        time_of_day,
-        distance,
-        importance,
-        activity_level,
-        image_url,
-      } = req.body;
+        const {
+            title,
+            description,
+            location,
+            cost_category,
+            duration,
+            activity_type,
+            mood,
+            time_of_day,
+            distance,
+            importance,
+            activity_level,
+            image_url,
+        } = req.body;
 
-      let finalImageUrl = image_url;
+        const results = await pool.query(
+            `INSERT INTO date_ideas 
+            (title, description, location, cost_category, duration, 
+            activity_type, mood, time_of_day, distance, importance, 
+            activity_level, image_url, is_shared, creator_id)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+            RETURNING *`,
+            [
+                title,
+                description,
+                location,
+                cost_category,
+                duration,
+                activity_type,
+                mood,
+                time_of_day,
+                distance,
+                importance,
+                activity_level,
+                image_url,
+                true, // Set is_shared to true when creating through the API
+                null // You can add user ID here when authentication is implemented
+            ]
+        );
 
-      // If image_url is a placeholder or not provided, fetch from Pexels
-      if (
-        !finalImageUrl ||
-        finalImageUrl.startsWith('/api/placeholder')
-      ) {
-        const searchQuery = `${activity_type} ${mood}`.trim();
-        const fetchedImageUrl = await fetchImageUrl(searchQuery);
-
-        if (fetchedImageUrl) {
-          finalImageUrl = fetchedImageUrl;
-        } else {
-          finalImageUrl = 'https://via.placeholder.com/400x300?text=No+Image+Available';
-        }
-      }
-
-      const results = await pool.query(
-        `INSERT INTO date_ideas 
-          (title, description, location, cost_category, duration, activity_type, mood, time_of_day, distance, importance, activity_level, image_url, is_shared, creator_id) 
-          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, TRUE, NULL)
-          RETURNING *`,
-        [
-          title,
-          description,
-          location,
-          cost_category,
-          duration,
-          activity_type,
-          mood,
-          time_of_day,
-          distance,
-          importance,
-          activity_level,
-          finalImageUrl,
-        ]
-      );
-
-      res.status(201).json(results.rows[0]);
+        res.status(201).json(results.rows[0]);
     } catch (error) {
-      res.status(500).json({ error: error.message });
+        res.status(500).json({ error: error.message });
     }
-  },
+},
 
     // Update date idea
     updateDateIdea: async (req, res) => {
