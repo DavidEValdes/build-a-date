@@ -1,5 +1,5 @@
-// src/components/auth/UserMenu.jsx
-import { useState } from 'react';
+// /client/src/components/UserMenu.jsx
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UserCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -12,23 +12,91 @@ const UserMenu = () => {
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const { user, logout, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const menuRef = useRef(null);
 
   const handleProfileClick = () => {
     setShowMenu(false);
     navigate('/profile');
   };
 
+  // Toggle menu visibility
+  const toggleMenu = () => {
+    setShowMenu((prev) => !prev);
+  };
+
+  // Close menu when clicking outside
+  const handleClickOutside = (e) => {
+    if (!e.target.closest('.user-menu-container')) {
+      setShowMenu(false);
+    }
+  };
+
+  // Handle Escape key to close menu
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setShowMenu(false);
+      }
+    };
+
+    if (showMenu) {
+      document.addEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'hidden'; // Prevent background scroll
+    } else {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'auto'; // Restore scroll
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'auto';
+    };
+  }, [showMenu]);
+
+  // Handle clicks outside the menu
+  useEffect(() => {
+    if (showMenu) {
+      document.addEventListener('click', handleClickOutside);
+    } else {
+      document.removeEventListener('click', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, [showMenu]);
+
+  // Shift focus to first menu item when menu opens
+  useEffect(() => {
+    if (showMenu && menuRef.current) {
+      const firstButton = menuRef.current.querySelector('button');
+      if (firstButton) {
+        firstButton.focus();
+      }
+    }
+  }, [showMenu]);
+
   return (
-    <div className="relative">
+    <div className="user-menu-container relative">
       <button
-        onClick={() => setShowMenu(!showMenu)}
-        className="p-2 rounded-full hover:bg-gray-100"
+        onClick={toggleMenu}
+        className="profile-button p-2 rounded-full hover:bg-gray-100 focus:outline-none transition-colors"
+        aria-haspopup="true"
+        aria-expanded={showMenu}
+        aria-label="User menu"
       >
-        <UserCircle className="w-6 h-6" />
+        <UserCircle
+          className={`w-6 h-6 text-gray-600 transition-transform duration-300 ${
+            showMenu ? 'icon-active' : ''
+          }`}
+        />
       </button>
 
       {showMenu && (
-        <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+        <div
+          className="dropdown-menu absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 animate-dropdown"
+          ref={menuRef}
+        >
           {isAuthenticated ? (
             <>
               <div className="px-4 py-2 text-sm text-gray-700 border-b">
@@ -36,7 +104,7 @@ const UserMenu = () => {
               </div>
               <button
                 onClick={handleProfileClick}
-                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
               >
                 My Profile
               </button>
@@ -45,7 +113,7 @@ const UserMenu = () => {
                   logout();
                   setShowMenu(false);
                 }}
-                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
               >
                 Logout
               </button>
@@ -57,7 +125,7 @@ const UserMenu = () => {
                   setShowLoginModal(true);
                   setShowMenu(false);
                 }}
-                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
               >
                 Login
               </button>
@@ -66,7 +134,7 @@ const UserMenu = () => {
                   setShowRegisterModal(true);
                   setShowMenu(false);
                 }}
-                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
               >
                 Register
               </button>
@@ -76,7 +144,9 @@ const UserMenu = () => {
       )}
 
       {showLoginModal && <LoginModal onClose={() => setShowLoginModal(false)} />}
-      {showRegisterModal && <RegisterModal onClose={() => setShowRegisterModal(false)} />}
+      {showRegisterModal && (
+        <RegisterModal onClose={() => setShowRegisterModal(false)} />
+      )}
     </div>
   );
 };

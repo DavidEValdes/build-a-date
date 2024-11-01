@@ -1,8 +1,7 @@
-// /client/src/pages/DateDetail.jsx
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Heart, MessageCircle, Bookmark, Share2, ArrowLeft } from 'lucide-react';
+import { Heart, Bookmark, Share2, ArrowLeft } from 'lucide-react';
 import { getDateIdea, likeDateIdea, addComment, getComments } from '../api';
 
 const DateDetail = () => {
@@ -53,8 +52,6 @@ const DateDetail = () => {
   }
 
   const handleImageError = () => {
-    // Optionally, you can set a default image URL or remove the image
-    // Here, we'll set a fallback image
     const img = document.getElementById('detail-image');
     if (img) {
       img.src = 'https://via.placeholder.com/400x300?text=No+Image+Available';
@@ -63,30 +60,25 @@ const DateDetail = () => {
 
   return (
     <div className="app-container">
-      <header className="app-header">
-        <div className="header-content">
-          <button 
-            onClick={() => navigate(-1)} 
-            className="back-button"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            Back
-          </button>
-          <h1>Date Details</h1>
-        </div>
-      </header>
-
       <main className="main-content">
         <div className="date-detail-container">
           <div className="date-detail-header">
-            <img 
-              src={date.image_url} 
-              alt={date.title} 
-              className="detail-image" 
-              id="detail-image"
-              onError={handleImageError}
-              loading="lazy"
-            />
+            <div className="image-container">
+              <button 
+                onClick={() => navigate(-1)} 
+                className="back-button"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+              <img 
+                src={date.image_url} 
+                alt={date.title} 
+                className="detail-image" 
+                id="detail-image"
+                onError={handleImageError}
+                loading="lazy"
+              />
+            </div>
             
             <div className="detail-info">
               <h2>{date.title}</h2>
