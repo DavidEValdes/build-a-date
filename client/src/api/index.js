@@ -45,8 +45,13 @@ export const getDateIdea = async (id) => {
 
 
 export const likeDateIdea = async (id) => {
-  const response = await api.post(`/dates/${id}/like`);
-  return response.data;
+  try {
+      const response = await api.post(`/dates/${id}/like`);
+      return response.data;
+  } catch (error) {
+      console.error('Error liking date idea:', error);
+      throw error;
+  }
 };
 
 export const addComment = async (id, content) => {

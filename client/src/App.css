@@ -712,3 +712,33 @@ body {
     padding: 1rem;
   }
 }
+
+.icon-button svg {
+  transition: transform 0.2s ease, fill 0.2s ease;
+}
+
+.icon-button:hover svg {
+  transform: scale(1.1);
+}
+
+.icon-button.liked svg {
+  fill: #ef4444;
+  color: #ef4444;
+}
+
+.icon-button.saved svg {
+  fill: #2563eb;
+  color: #2563eb;
+}
+
+.ml-1 {
+  margin-left: 0.25rem;
+}
+
+.transition-all {
+  transition-property: all;
+}
+
+.duration-200 {
+  transition-duration: 200ms;
+}

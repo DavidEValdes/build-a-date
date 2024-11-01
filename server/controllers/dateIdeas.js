@@ -189,18 +189,38 @@ const DateIdeasController = {
     // Like a date idea
     likeDateIdea: async (req, res) => {
         try {
-            const { id } = req.params
-            await pool.query(
-                'INSERT INTO likes (user_id, date_idea_id) VALUES ($1, $2)',
-                [req.user.id, id]
-            )
-            res.json({ message: 'Date idea liked successfully' })
-        } catch (error) {
-            if (error.code === '23505') { // Unique violation
-                res.status(400).json({ error: 'Already liked this date idea' })
-            } else {
-                res.status(500).json({ error: error.message })
+            const { id } = req.params;
+            
+            // First verify the date idea exists
+            const dateExists = await pool.query(
+                'SELECT id FROM date_ideas WHERE id = $1',
+                [id]
+            );
+
+            if (dateExists.rows.length === 0) {
+                return res.status(404).json({ error: 'Date idea not found' });
             }
+
+            // Add the like
+            const results = await pool.query(
+                'INSERT INTO likes (date_idea_id) VALUES ($1) RETURNING *',
+                [id]
+            );
+
+            // Get updated like count
+            const likeCount = await pool.query(
+                'SELECT COUNT(*) as likes_count FROM likes WHERE date_idea_id = $1',
+                [id]
+            );
+
+            res.status(201).json({
+                message: 'Date idea liked successfully',
+                like: results.rows[0],
+                likes_count: parseInt(likeCount.rows[0].likes_count)
+            });
+        } catch (error) {
+            console.error('Error liking date idea:', error);
+            res.status(500).json({ error: error.message });
         }
     },
 
@@ -217,6 +237,22 @@ const DateIdeasController = {
             res.status(500).json({ error: error.message })
         }
     },
+
+    // Get like count for a date idea
+    getLikes: async (req, res) => {
+        try {
+            const { id } = req.params;
+            const results = await pool.query(
+                'SELECT COUNT(*) as count FROM likes WHERE date_idea_id = $1',
+                [id]
+            );
+            res.json({ likes_count: parseInt(results.rows[0].count) });
+        } catch (error) {
+            console.error('Error getting likes:', error);
+            res.status(500).json({ error: error.message });
+        }
+    },
+
 
     // Get comments for a date idea
     getComments: async (req, res) => {

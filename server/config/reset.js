@@ -35,12 +35,12 @@ const resetDatabase = async () => {
     `);
     console.log('🎉 date_ideas table created successfully');
 
-    // Create likes table (simplified without user_id)
+    // Create likes table
     await pool.query(`
       CREATE TABLE likes (
-        id SERIAL PRIMARY KEY,
-        date_idea_id INTEGER REFERENCES date_ideas(id) ON DELETE CASCADE,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          id SERIAL PRIMARY KEY,
+          date_idea_id INTEGER REFERENCES date_ideas(id) ON DELETE CASCADE,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
     console.log('🎉 likes table created successfully');
