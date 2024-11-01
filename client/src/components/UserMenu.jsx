@@ -31,34 +31,35 @@ const UserMenu = () => {
 
   // Close menu when clicking outside
   const handleClickOutside = (e) => {
-    if (!e.target.closest('.user-menu-container')) {
+    if (!menuRef.current || !menuRef.current.contains(e.target)) {
       setShowMenu(false);
     }
   };
 
-  useEffect(() => {
-    if (showMenu) {
-      document.addEventListener('click', handleClickOutside);
-      document.addEventListener('keydown', handleKeyDown);
-    } else {
-      document.removeEventListener('click', handleClickOutside);
-      document.removeEventListener('keydown', handleKeyDown);
-    }
-
-    return () => {
-      document.removeEventListener('click', handleClickOutside);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [showMenu]);
-
+  // Close menu on Escape key press
   const handleKeyDown = (e) => {
     if (e.key === 'Escape') {
       setShowMenu(false);
     }
   };
 
+  useEffect(() => {
+    if (showMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('keydown', handleKeyDown);
+    } else {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [showMenu]);
+
   return (
-    <div className="user-menu-container relative">
+    <div className="user-menu-container relative" ref={menuRef}>
       <button
         onClick={toggleMenu}
         className="profile-button p-2 rounded-full hover:bg-gray-100 focus:outline-none transition-colors"
@@ -66,11 +67,11 @@ const UserMenu = () => {
         aria-expanded={showMenu}
         aria-label="User menu"
       >
-        <UserCircle className={`w-6 h-6 text-gray-600 transition-transform duration-300 ${showMenu ? 'icon-active' : ''}`} />
+        <UserCircle className={`w-6 h-6 text-gray-600 transition-transform duration-300 ${showMenu ? 'transform rotate-90' : ''}`} />
       </button>
 
       {showMenu && (
-        <div className="dropdown-menu absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 animate-dropdown" ref={menuRef}>
+        <div className="dropdown-menu absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
           {isAuthenticated ? (
             <>
               <div className="px-4 py-2 text-sm text-gray-700 border-b">

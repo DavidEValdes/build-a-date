@@ -1,6 +1,7 @@
-// src/components/auth/RegisterModal.jsx
+// src/components/RegisterModal.jsx
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import PropTypes from 'prop-types';
 
 const RegisterModal = ({ onClose }) => {
   const [username, setUsername] = useState('');
@@ -20,9 +21,12 @@ const RegisterModal = ({ onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-4">Register</h2>
+    <div className="modal-overlay">
+      <div className="modal-content">
+        <button className="modal-close" onClick={onClose} aria-label="Close Modal">
+          &times;
+        </button>
+        <h2 className="modal-title">Register</h2>
         {error && <div className="text-red-500 mb-4">{error}</div>}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -31,7 +35,7 @@ const RegisterModal = ({ onClose }) => {
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+              className="modal-input"
               required
             />
           </div>
@@ -41,7 +45,7 @@ const RegisterModal = ({ onClose }) => {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+              className="modal-input"
               required
             />
           </div>
@@ -51,7 +55,7 @@ const RegisterModal = ({ onClose }) => {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+              className="modal-input"
               required
             />
           </div>
@@ -59,13 +63,13 @@ const RegisterModal = ({ onClose }) => {
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 border rounded-md text-gray-600"
+              className="modal-button"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              className="save-button"
             >
               Register
             </button>
@@ -74,6 +78,10 @@ const RegisterModal = ({ onClose }) => {
       </div>
     </div>
   );
+};
+
+RegisterModal.propTypes = {
+  onClose: PropTypes.func.isRequired,
 };
 
 export default RegisterModal;
