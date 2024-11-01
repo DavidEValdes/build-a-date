@@ -5,6 +5,7 @@ import { AuthProvider } from './context/AuthContext';
 import Home from './pages/Home';
 import DateDetail from './pages/DateDetail';
 import Profile from './pages/Profile';
+import SavedDates from './pages/SavedDates';
 import UserMenu from './components/UserMenu';
 import './App.css';
 
@@ -31,6 +32,7 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/dates/:id" element={<DateDetail />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/saved-dates" element={<SavedDates />} />
             </Routes>
           </div>
         </Router>

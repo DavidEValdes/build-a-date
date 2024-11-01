@@ -1,4 +1,4 @@
-// src/components/auth/LoginModal.jsx
+// src/components/LoginModal.jsx
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 
@@ -10,11 +10,15 @@ const LoginModal = ({ onClose }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const result = await login(email, password);
-    if (result.success) {
-      onClose();
-    } else {
-      setError(result.error);
+    try {
+      const result = await login(email, password);
+      if (result.success) {
+        onClose();
+      } else {
+        setError(result.error || 'Login failed');
+      }
+    } catch (error) {
+      setError(error.message || 'Login failed');
     }
   };
 

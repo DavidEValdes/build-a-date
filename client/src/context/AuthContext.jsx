@@ -1,6 +1,6 @@
 // src/context/AuthContext.jsx
 import { createContext, useContext, useState, useCallback } from 'react';
-import { registerUser, loginUser } from '../api';
+import { loginUser, registerUser } from '../api';
 
 const AuthContext = createContext(null);
 
@@ -10,29 +10,19 @@ export const AuthProvider = ({ children }) => {
     return savedUser ? JSON.parse(savedUser) : null;
   });
 
-  const register = useCallback(async (username, email, password) => {
-    try {
-      const data = await registerUser(username, email, password);
-      setUser(data.user);
-      localStorage.setItem('user', JSON.stringify(data.user));
-      localStorage.setItem('token', data.token);
-      return { success: true };
-    } catch (error) {
-      return {
-        success: false,
-        error: error.response?.data?.error || 'Failed to register'
-      };
-    }
-  }, []);
-
   const login = useCallback(async (email, password) => {
     try {
-      const data = await loginUser(email, password);
-      setUser(data.user);
-      localStorage.setItem('user', JSON.stringify(data.user));
-      localStorage.setItem('token', data.token);
+      const response = await loginUser(email, password);
+      const { user: userData, token } = response;
+      
+      // Store both user data and token
+      localStorage.setItem('user', JSON.stringify(userData));
+      localStorage.setItem('token', token);
+      setUser(userData);
+      
       return { success: true };
     } catch (error) {
+      console.error('Login error:', error);
       return {
         success: false,
         error: error.response?.data?.error || 'Failed to login'
@@ -40,10 +30,30 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
+  const register = useCallback(async (username, email, password) => {
+    try {
+      const response = await registerUser(username, email, password);
+      const { user: userData, token } = response;
+      
+      // Store both user data and token
+      localStorage.setItem('user', JSON.stringify(userData));
+      localStorage.setItem('token', token);
+      setUser(userData);
+      
+      return { success: true };
+    } catch (error) {
+      console.error('Register error:', error);
+      return {
+        success: false,
+        error: error.response?.data?.error || 'Failed to register'
+      };
+    }
+  }, []);
+
   const logout = useCallback(() => {
-    setUser(null);
     localStorage.removeItem('user');
     localStorage.removeItem('token');
+    setUser(null);
   }, []);
 
   const value = {
@@ -64,3 +74,5 @@ export const useAuth = () => {
   }
   return context;
 };
+
+export default AuthContext;

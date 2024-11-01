@@ -1,4 +1,4 @@
-// /client/src/components/UserMenu.jsx
+// src/components/UserMenu.jsx
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UserCircle } from 'lucide-react';
@@ -19,6 +19,11 @@ const UserMenu = () => {
     navigate('/profile');
   };
 
+  const handleSavedDatesClick = () => {
+    setShowMenu(false);
+    navigate('/saved-dates');
+  };
+
   // Toggle menu visibility
   const toggleMenu = () => {
     setShowMenu((prev) => !prev);
@@ -31,50 +36,26 @@ const UserMenu = () => {
     }
   };
 
-  // Handle Escape key to close menu
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === 'Escape') {
-        setShowMenu(false);
-      }
-    };
-
-    if (showMenu) {
-      document.addEventListener('keydown', handleKeyDown);
-      document.body.style.overflow = 'hidden'; // Prevent background scroll
-    } else {
-      document.removeEventListener('keydown', handleKeyDown);
-      document.body.style.overflow = 'auto'; // Restore scroll
-    }
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-      document.body.style.overflow = 'auto';
-    };
-  }, [showMenu]);
-
-  // Handle clicks outside the menu
   useEffect(() => {
     if (showMenu) {
       document.addEventListener('click', handleClickOutside);
+      document.addEventListener('keydown', handleKeyDown);
     } else {
       document.removeEventListener('click', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
     }
 
     return () => {
       document.removeEventListener('click', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
     };
   }, [showMenu]);
 
-  // Shift focus to first menu item when menu opens
-  useEffect(() => {
-    if (showMenu && menuRef.current) {
-      const firstButton = menuRef.current.querySelector('button');
-      if (firstButton) {
-        firstButton.focus();
-      }
+  const handleKeyDown = (e) => {
+    if (e.key === 'Escape') {
+      setShowMenu(false);
     }
-  }, [showMenu]);
+  };
 
   return (
     <div className="user-menu-container relative">
@@ -85,18 +66,11 @@ const UserMenu = () => {
         aria-expanded={showMenu}
         aria-label="User menu"
       >
-        <UserCircle
-          className={`w-6 h-6 text-gray-600 transition-transform duration-300 ${
-            showMenu ? 'icon-active' : ''
-          }`}
-        />
+        <UserCircle className={`w-6 h-6 text-gray-600 transition-transform duration-300 ${showMenu ? 'icon-active' : ''}`} />
       </button>
 
       {showMenu && (
-        <div
-          className="dropdown-menu absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 animate-dropdown"
-          ref={menuRef}
-        >
+        <div className="dropdown-menu absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 animate-dropdown" ref={menuRef}>
           {isAuthenticated ? (
             <>
               <div className="px-4 py-2 text-sm text-gray-700 border-b">
@@ -107,6 +81,12 @@ const UserMenu = () => {
                 className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
               >
                 My Profile
+              </button>
+              <button
+                onClick={handleSavedDatesClick}
+                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+              >
+                Saved Dates
               </button>
               <button
                 onClick={() => {
@@ -144,9 +124,7 @@ const UserMenu = () => {
       )}
 
       {showLoginModal && <LoginModal onClose={() => setShowLoginModal(false)} />}
-      {showRegisterModal && (
-        <RegisterModal onClose={() => setShowRegisterModal(false)} />
-      )}
+      {showRegisterModal && <RegisterModal onClose={() => setShowRegisterModal(false)} />}
     </div>
   );
 };

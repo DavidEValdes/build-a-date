@@ -1,5 +1,5 @@
 // src/components/DateCard.jsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Heart, MessageCircle, Bookmark, Share2 } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -11,6 +11,11 @@ const DateCard = ({ date }) => {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
     const { isAuthenticated } = useAuth();
+
+    // Update local state when date prop changes
+    useEffect(() => {
+        setIsSaved(date.is_saved || false);
+    }, [date.is_saved]);
 
     const likeMutation = useMutation({
         mutationFn: likeDateIdea,
@@ -27,17 +32,25 @@ const DateCard = ({ date }) => {
         mutationFn: (id) => (isSaved ? unsaveDateIdea(id) : saveDateIdea(id)),
         onSuccess: () => {
             setIsSaved(!isSaved);
+            // Invalidate all relevant queries to update UI everywhere
             queryClient.invalidateQueries(['savedDates']);
+            queryClient.invalidateQueries(['dateIdeas']);
+            queryClient.invalidateQueries(['dateIdea', date.id]);
+            queryClient.invalidateQueries(['allDateIdeas']);
         },
         onError: (error) => {
             console.error('Error saving date:', error);
+            if (error.response?.status === 403) {
+                alert('Please login to save dates');
+            } else if (error.response?.status === 400 && error.response?.data?.error === 'Date already saved') {
+                setIsSaved(true);
+            }
         }
     });
 
     const handleLike = (e) => {
         e.stopPropagation();
         if (!isAuthenticated) {
-            // You could show a login prompt here
             alert('Please login to like dates');
             return;
         }

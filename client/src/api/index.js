@@ -13,9 +13,24 @@ api.interceptors.request.use((config) => {
         config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
+}, (error) => {
+    return Promise.reject(error);
 });
 
-// User-related endpoints
+// Add response interceptor to handle token expiration
+api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (error.response?.status === 403) {
+            // Clear local storage if token is invalid/expired
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            // Optionally redirect to login or show message
+        }
+        return Promise.reject(error);
+    }
+);
+
 export const loginUser = async (email, password) => {
     try {
         const response = await api.post('/users/login', { email, password });
@@ -76,7 +91,6 @@ export const unsaveDateIdea = async (dateId) => {
     }
 };
 
-// Date ideas endpoints
 export const getDateIdeas = async () => {
     try {
         const response = await api.get('/dates');

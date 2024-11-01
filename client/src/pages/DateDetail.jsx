@@ -1,8 +1,10 @@
-import { useState } from 'react';
+// src/pages/DateDetail.jsx
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Heart, Bookmark, Share2, ArrowLeft } from 'lucide-react';
-import { getDateIdea, likeDateIdea, addComment, getComments } from '../api';
+import { getDateIdea, likeDateIdea, addComment, getComments, saveDateIdea, unsaveDateIdea } from '../api';
+import { useAuth } from '../context/AuthContext';
 
 const DateDetail = () => {
   const { id } = useParams();
@@ -10,11 +12,19 @@ const DateDetail = () => {
   const [comment, setComment] = useState('');
   const [isSaved, setIsSaved] = useState(false);
   const queryClient = useQueryClient();
+  const { isAuthenticated } = useAuth();
 
   const { data: date, isLoading } = useQuery({
     queryKey: ['dateIdea', id],
     queryFn: () => getDateIdea(id)
   });
+
+  // Update local saved state when date data changes
+  useEffect(() => {
+    if (date) {
+      setIsSaved(date.is_saved || false);
+    }
+  }, [date]);
 
   const { data: comments = [] } = useQuery({
     queryKey: ['comments', id],
@@ -26,6 +36,24 @@ const DateDetail = () => {
     onSuccess: () => {
       queryClient.invalidateQueries(['dateIdea', id]);
     },
+  });
+
+  const saveMutation = useMutation({
+    mutationFn: (dateId) => (isSaved ? unsaveDateIdea(dateId) : saveDateIdea(dateId)),
+    onSuccess: () => {
+      setIsSaved(!isSaved);
+      // Invalidate all relevant queries
+      queryClient.invalidateQueries(['savedDates']);
+      queryClient.invalidateQueries(['dateIdeas']);
+      queryClient.invalidateQueries(['dateIdea', id]);
+      queryClient.invalidateQueries(['allDateIdeas']);
+    },
+    onError: (error) => {
+      console.error('Error saving date:', error);
+      if (error.response?.status === 403) {
+        alert('Please login to save dates');
+      }
+    }
   });
 
   const commentMutation = useMutation({
@@ -43,6 +71,42 @@ const DateDetail = () => {
     }
   };
 
+  const handleImageError = () => {
+    const img = document.getElementById('detail-image');
+    if (img) {
+      img.src = 'https://via.placeholder.com/400x300?text=No+Image+Available';
+    }
+  };
+
+  const handleBack = () => {
+    navigate(-1);
+  };
+
+  const handleShare = (e) => {
+    e.stopPropagation();
+    // Implement share functionality
+  };
+
+  const handleSave = (e) => {
+    e.stopPropagation();
+    if (!isAuthenticated) {
+      alert('Please login to save dates');
+      return;
+    }
+    saveMutation.mutate(id);
+  };
+
+  const handleLike = (e) => {
+    e.stopPropagation();
+    if (!isAuthenticated) {
+      alert('Please login to like dates');
+      return;
+    }
+    if (!likeMutation.isPending) {
+      likeMutation.mutate(id);
+    }
+  };
+
   if (isLoading) {
     return <div className="loading">Loading...</div>;
   }
@@ -51,13 +115,6 @@ const DateDetail = () => {
     return <div className="error-message">Date idea not found</div>;
   }
 
-  const handleImageError = () => {
-    const img = document.getElementById('detail-image');
-    if (img) {
-      img.src = 'https://via.placeholder.com/400x300?text=No+Image+Available';
-    }
-  };
-
   return (
     <div className="app-container">
       <main className="main-content">
@@ -65,7 +122,7 @@ const DateDetail = () => {
           <div className="date-detail-header">
             <div className="image-container">
               <button 
-                onClick={() => navigate(-1)} 
+                onClick={handleBack} 
                 className="back-button"
               >
                 <ArrowLeft className="w-5 h-5" />
@@ -122,22 +179,27 @@ const DateDetail = () => {
               <div className="interaction-buttons detail-actions">
                 <button 
                   className={`icon-button large ${likeMutation.isSuccess ? 'liked' : ''}`}
-                  onClick={() => likeMutation.mutate(id)}
-                  disabled={likeMutation.isLoading}
+                  onClick={handleLike}
+                  disabled={likeMutation.isPending}
                   aria-label={`Like this date idea (${date.likes_count || 0} likes)`}
                 >
-                  <Heart />
+                  <Heart className={`w-5 h-5 ${likeMutation.isPending ? 'opacity-50' : ''}`} />
                   <span>{date.likes_count || 0} Likes</span>
                 </button>
                 <button 
                   className={`icon-button large ${isSaved ? 'saved' : ''}`}
-                  onClick={() => setIsSaved(!isSaved)}
+                  onClick={handleSave}
+                  disabled={saveMutation.isPending}
                   aria-label={isSaved ? 'Remove from saved' : 'Save this date idea'}
                 >
-                  <Bookmark />
-                  <span>Save</span>
+                  <Bookmark 
+                    className={`w-5 h-5 transition-all duration-200 ${
+                      isSaved ? 'fill-current' : ''
+                    }`}
+                  />
+                  <span>{isSaved ? 'Saved' : 'Save'}</span>
                 </button>
-                <button className="icon-button large">
+                <button className="icon-button large" onClick={handleShare}>
                   <Share2 />
                   <span>Share</span>
                 </button>
@@ -157,7 +219,7 @@ const DateDetail = () => {
                 <button 
                   type="submit" 
                   className="primary-button"
-                  disabled={commentMutation.isLoading}
+                  disabled={commentMutation.isPending}
                 >
                   Post
                 </button>
