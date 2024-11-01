@@ -1,8 +1,8 @@
-// src/pages/Profile.jsx
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import DateCard from '../components/DateCard';
+import { ArrowLeft } from 'lucide-react';
 import api from '../api';
 
 const Profile = () => {
@@ -36,8 +36,20 @@ const Profile = () => {
     return null;
   }
 
+  const handleBack = () => {
+    navigate(-1);
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
+      <button
+        onClick={handleBack}
+        className="flex items-center mb-6 text-gray-600 hover:text-gray-900 transition-colors"
+      >
+        <ArrowLeft className="w-5 h-5 mr-2" />
+        <span>Back</span>
+      </button>
+
       <div className="bg-white rounded-lg shadow-md p-6 mb-8">
         <h1 className="text-3xl font-bold mb-4">My Profile</h1>
         <div className="text-gray-600">
