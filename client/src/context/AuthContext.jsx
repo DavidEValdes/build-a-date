@@ -15,7 +15,6 @@ export const AuthProvider = ({ children }) => {
       const response = await loginUser(email, password);
       const { user: userData, token } = response;
       
-      // Store both user data and token
       localStorage.setItem('user', JSON.stringify(userData));
       localStorage.setItem('token', token);
       setUser(userData);
@@ -35,7 +34,6 @@ export const AuthProvider = ({ children }) => {
       const response = await registerUser(username, email, password);
       const { user: userData, token } = response;
       
-      // Store both user data and token
       localStorage.setItem('user', JSON.stringify(userData));
       localStorage.setItem('token', token);
       setUser(userData);
@@ -56,11 +54,17 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   }, []);
 
+  const updateUser = useCallback((userData) => {
+    setUser(userData);
+    localStorage.setItem('user', JSON.stringify(userData));
+  }, []);
+
   const value = {
     user,
     login,
     register,
     logout,
+    updateUser,
     isAuthenticated: !!user
   };
 

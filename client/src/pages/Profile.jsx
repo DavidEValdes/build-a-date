@@ -1,36 +1,18 @@
-// /client/src/pages/Profile.jsx
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import DateCard from '../components/DateCard';
-import { ArrowLeft, Edit2 } from 'lucide-react';
-import api from '../api';
+import { ArrowLeft, Edit2, User } from 'lucide-react';
+import EditProfileModal from '../components/EditProfileModal';
 
 const Profile = () => {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, updateUser } = useAuth();
   const navigate = useNavigate();
-  const [savedDates, setSavedDates] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [showEditModal, setShowEditModal] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated) {
       navigate('/');
-      return;
     }
-
-    const fetchSavedDates = async () => {
-      try {
-        setLoading(true);
-        const response = await api.get('/users/saved-dates');
-        setSavedDates(response.data);
-      } catch (error) {
-        console.error('Error fetching saved dates:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchSavedDates();
   }, [isAuthenticated, navigate]);
 
   if (!isAuthenticated || !user) {
@@ -42,56 +24,55 @@ const Profile = () => {
   };
 
   const handleEditProfile = () => {
-    navigate('/edit-profile'); // Ensure you have an edit profile route and component
+    setShowEditModal(true);
   };
 
   return (
-    <div className="profile-container">
-      <button
-        onClick={handleBack}
-        className="back-button flex items-center mb-6 text-gray-600 hover:text-gray-900 transition-colors"
-      >
-        <ArrowLeft className="w-5 h-5 mr-2" />
-        <span>Back</span>
-      </button>
+    <div className="profile-page flex items-center justify-center min-h-screen bg-gray-100 p-4">
+      <div className="profile-card bg-white rounded-xl shadow-lg max-w-md w-full p-8 flex flex-col items-center space-y-8">
+        
+        {/* Back Button */}
+        <button
+          onClick={handleBack}
+          className="self-start flex items-center text-gray-600 hover:text-gray-900 transition duration-200 mb-4"
+        >
+          <ArrowLeft className="w-5 h-5 mr-2" />
+          <span>Back</span>
+        </button>
 
-      <div className="profile-card bg-white rounded-lg shadow-md p-6 mb-8 flex items-center">
-        <div className="avatar-wrapper mr-6">
-          <img
-            src="/path/to/default/avatar.png" /* Replace with actual avatar source */
-            alt={`${user.username}'s avatar`}
-            className="avatar"
-          />
+        {/* Profile Avatar */}
+        <div className="w-24 h-24 rounded-full border-4 border-gray-200 bg-gray-100 flex items-center justify-center shadow-md">
+          <User className="w-12 h-12 text-gray-400" />
         </div>
-        <div className="flex-1">
-          <h1 className="text-3xl font-bold mb-2">{user.username}</h1>
-          <p className="text-gray-600 mb-2">
-            <span className="font-semibold">Email:</span> {user.email}
-          </p>
-          <button
-            onClick={handleEditProfile}
-            className="edit-button flex items-center text-blue-600 hover:text-blue-800 transition-colors"
-          >
-            <Edit2 className="w-4 h-4 mr-1" />
-            Edit Profile
-          </button>
-        </div>
-      </div>
 
-      <div className="saved-dates-card bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-2xl font-bold mb-6">Saved Dates</h2>
-        {loading ? (
-          <div className="text-center py-4">Loading...</div>
-        ) : savedDates.length === 0 ? (
-          <p className="text-gray-500 text-center py-4">
-            You haven't saved any dates yet.
-          </p>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {savedDates.map((date) => (
-              <DateCard key={date.id} date={date} />
-            ))}
+        {/* Profile Information with Labels */}
+        <div className="text-center space-y-4 w-full">
+          <div className="text-left">
+            <p className="text-sm font-bold text-gray-500 uppercase">Username</p>
+            <p className="text-lg text-gray-800">{user.username}</p>
           </div>
+          <div className="text-left">
+            <p className="text-sm font-bold text-gray-500 uppercase">Email</p>
+            <p className="text-lg text-gray-800">{user.email}</p>
+          </div>
+        </div>
+
+        {/* Edit Profile Button */}
+        <button
+          onClick={handleEditProfile}
+          className="px-6 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition-colors duration-200"
+        >
+          <Edit2 className="w-4 h-4 mr-2 inline" />
+          Edit Profile
+        </button>
+
+        {/* Edit Profile Modal */}
+        {showEditModal && (
+          <EditProfileModal
+            user={user}
+            onClose={() => setShowEditModal(false)}
+            onUpdate={updateUser}
+          />
         )}
       </div>
     </div>

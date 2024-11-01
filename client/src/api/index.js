@@ -161,4 +161,27 @@ export const getComments = async (id) => {
     }
 };
 
+export const updateUserProfile = async (userData) => {
+    try {
+        const response = await api.patch('/users/profile', userData);
+        return response.data;
+    } catch (error) {
+        console.error('Error updating profile:', error);
+        throw error;
+    }
+};
+
+export const changePassword = async (currentPassword, newPassword) => {
+    try {
+        const response = await api.post('/users/change-password', {
+            currentPassword,
+            newPassword
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error changing password:', error);
+        throw error;
+    }
+};
+
 export default api;

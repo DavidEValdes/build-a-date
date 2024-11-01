@@ -148,7 +148,92 @@ const UsersController = {
             console.error('Error saving date:', error);
             res.status(500).json({ error: error.message });
         }
+    },updateProfile: async (req, res) => {
+        try {
+            const { username, email, currentPassword } = req.body;
+            const userId = req.user.id;
+
+            // First verify the current password
+            const userResult = await pool.query(
+                'SELECT password_hash FROM users WHERE id = $1',
+                [userId]
+            );
+
+            if (!userResult.rows.length) {
+                return res.status(404).json({ error: 'User not found' });
+            }
+
+            const validPassword = await bcrypt.compare(
+                currentPassword,
+                userResult.rows[0].password_hash
+            );
+
+            if (!validPassword) {
+                return res.status(401).json({ error: 'Current password is incorrect' });
+            }
+
+            // Update the user profile
+            const result = await pool.query(
+                `UPDATE users 
+                SET username = COALESCE($1, username),
+                    email = COALESCE($2, email)
+                WHERE id = $3
+                RETURNING id, username, email`,
+                [username, email, userId]
+            );
+
+            res.json(result.rows[0]);
+        } catch (error) {
+            console.error('Error updating profile:', error);
+            if (error.code === '23505') { // Unique violation
+                res.status(400).json({ error: 'Username or email already exists' });
+            } else {
+                res.status(500).json({ error: error.message });
+            }
+        }
     },
+
+    changePassword: async (req, res) => {
+        try {
+            const { currentPassword, newPassword } = req.body;
+            const userId = req.user.id;
+
+            // First verify the current password
+            const userResult = await pool.query(
+                'SELECT password_hash FROM users WHERE id = $1',
+                [userId]
+            );
+
+            if (!userResult.rows.length) {
+                return res.status(404).json({ error: 'User not found' });
+            }
+
+            const validPassword = await bcrypt.compare(
+                currentPassword,
+                userResult.rows[0].password_hash
+            );
+
+            if (!validPassword) {
+                return res.status(401).json({ error: 'Current password is incorrect' });
+            }
+
+            // Hash the new password
+            const salt = await bcrypt.genSalt(10);
+            const newPasswordHash = await bcrypt.hash(newPassword, salt);
+
+            // Update the password
+            await pool.query(
+                'UPDATE users SET password_hash = $1 WHERE id = $2',
+                [newPasswordHash, userId]
+            );
+
+            res.json({ message: 'Password updated successfully' });
+        } catch (error) {
+            console.error('Error changing password:', error);
+            res.status(500).json({ error: error.message });
+        }
+    },
+
 
     unsaveDateIdea: async (req, res) => {
         try {
