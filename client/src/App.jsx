@@ -9,7 +9,18 @@ import SavedDates from './pages/SavedDates';
 import UserMenu from './components/UserMenu';
 import './App.css';
 
-const queryClient = new QueryClient();
+// Create a client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 0, // Consider data stale immediately
+      cacheTime: 1000 * 60 * 5, // Cache for 5 minutes
+      refetchOnMount: true,
+      refetchOnWindowFocus: true,
+      refetchOnReconnect: true,
+    },
+  },
+});
 
 function App() {
   return (

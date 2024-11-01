@@ -5,19 +5,16 @@ import { pool } from '../config/database.js';
 export const authenticateToken = async (req, res, next) => {
     try {
         const authHeader = req.headers['authorization'];
-        console.log('Auth Header:', authHeader); // Debug log
-        
         const token = authHeader && authHeader.split(' ')[1];
-        console.log('Token:', token); // Debug log
 
         if (!token) {
-            console.log('No token provided'); // Debug log
-            return res.status(403).json({ error: 'No token provided' });
+            // Instead of returning error, just continue without user
+            req.user = null;
+            return next();
         }
 
         try {
             const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
-            console.log('Decoded token:', decoded); // Debug log
             
             const result = await pool.query(
                 'SELECT id, username, email FROM users WHERE id = $1',
@@ -25,19 +22,22 @@ export const authenticateToken = async (req, res, next) => {
             );
 
             if (result.rows.length === 0) {
-                console.log('User not found for id:', decoded.id); // Debug log
-                return res.status(403).json({ error: 'User not found' });
+                req.user = null;
+                return next();
             }
 
             req.user = result.rows[0];
             next();
         } catch (jwtError) {
-            console.log('JWT verification error:', jwtError); // Debug log
-            return res.status(403).json({ error: 'Invalid token' });
+            // If token is invalid, continue without user
+            console.log('JWT verification error:', jwtError);
+            req.user = null;
+            next();
         }
     } catch (error) {
         console.error('Auth middleware error:', error);
-        return res.status(403).json({ error: 'Authentication failed' });
+        req.user = null;
+        next();
     }
 };
 

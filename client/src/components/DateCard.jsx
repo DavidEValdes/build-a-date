@@ -32,18 +32,16 @@ const DateCard = ({ date }) => {
         mutationFn: (id) => (isSaved ? unsaveDateIdea(id) : saveDateIdea(id)),
         onSuccess: () => {
             setIsSaved(!isSaved);
-            // Invalidate all relevant queries to update UI everywhere
-            queryClient.invalidateQueries(['savedDates']);
-            queryClient.invalidateQueries(['dateIdeas']);
-            queryClient.invalidateQueries(['dateIdea', date.id]);
-            queryClient.invalidateQueries(['allDateIdeas']);
+            // Invalidate with consistent query keys
+            queryClient.invalidateQueries({ queryKey: ['savedDates'] });
+            queryClient.invalidateQueries({ queryKey: ['feedDateIdeas'] });
+            queryClient.invalidateQueries({ queryKey: ['dateIdeas'] });
+            queryClient.invalidateQueries({ queryKey: ['dateIdea', date.id] });
         },
         onError: (error) => {
             console.error('Error saving date:', error);
             if (error.response?.status === 403) {
                 alert('Please login to save dates');
-            } else if (error.response?.status === 400 && error.response?.data?.error === 'Date already saved') {
-                setIsSaved(true);
             }
         }
     });
