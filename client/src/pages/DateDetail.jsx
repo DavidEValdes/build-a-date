@@ -1,3 +1,4 @@
+// /client/src/pages/DateDetail.jsx
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -51,6 +52,15 @@ const DateDetail = () => {
     return <div className="error-message">Date idea not found</div>;
   }
 
+  const handleImageError = () => {
+    // Optionally, you can set a default image URL or remove the image
+    // Here, we'll set a fallback image
+    const img = document.getElementById('detail-image');
+    if (img) {
+      img.src = 'https://via.placeholder.com/400x300?text=No+Image+Available';
+    }
+  };
+
   return (
     <div className="app-container">
       <header className="app-header">
@@ -69,7 +79,14 @@ const DateDetail = () => {
       <main className="main-content">
         <div className="date-detail-container">
           <div className="date-detail-header">
-            <img src={date.image_url} alt={date.title} className="detail-image" />
+            <img 
+              src={date.image_url} 
+              alt={date.title} 
+              className="detail-image" 
+              id="detail-image"
+              onError={handleImageError}
+              loading="lazy"
+            />
             
             <div className="detail-info">
               <h2>{date.title}</h2>
@@ -114,7 +131,8 @@ const DateDetail = () => {
                 <button 
                   className={`icon-button large ${likeMutation.isSuccess ? 'liked' : ''}`}
                   onClick={() => likeMutation.mutate(id)}
-                  disabled={likeMutation.isPending}
+                  disabled={likeMutation.isLoading}
+                  aria-label={`Like this date idea (${date.likes_count || 0} likes)`}
                 >
                   <Heart />
                   <span>{date.likes_count || 0} Likes</span>
@@ -122,6 +140,7 @@ const DateDetail = () => {
                 <button 
                   className={`icon-button large ${isSaved ? 'saved' : ''}`}
                   onClick={() => setIsSaved(!isSaved)}
+                  aria-label={isSaved ? 'Remove from saved' : 'Save this date idea'}
                 >
                   <Bookmark />
                   <span>Save</span>
@@ -146,7 +165,7 @@ const DateDetail = () => {
                 <button 
                   type="submit" 
                   className="primary-button"
-                  disabled={commentMutation.isPending}
+                  disabled={commentMutation.isLoading}
                 >
                   Post
                 </button>

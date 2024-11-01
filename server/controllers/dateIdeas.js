@@ -1,117 +1,198 @@
-import { pool } from '../config/database.js'
+// /server/controllers/dateIdeas.js
+import { pool } from '../config/database.js';
+import { fetchImageUrl } from '../helpers/pexels.js';
 
 const DateIdeasController = {
-    // Get all date ideas with basic filtering and counts
-    getDateIdeas: async (req, res) => {
-        try {
-            const { location, budget, activity_type } = req.query;
-            let query = `
-                SELECT d.*, 
-                    COUNT(DISTINCT l.id) as likes_count,
-                    COUNT(DISTINCT c.id) as comments_count
-                FROM date_ideas d
-                LEFT JOIN likes l ON d.id = l.date_idea_id
-                LEFT JOIN comments c ON d.id = c.date_idea_id
-                WHERE d.is_shared = TRUE
-            `;
-            const values = [];
+  // Get all date ideas with basic filtering and counts
+  getDateIdeas: async (req, res) => {
+    try {
+      const { location, budget, activity_type } = req.query;
+      let query = `
+        SELECT d.*, 
+          COUNT(DISTINCT l.id) as likes_count,
+          COUNT(DISTINCT c.id) as comments_count
+        FROM date_ideas d
+        LEFT JOIN likes l ON d.id = l.date_idea_id
+        LEFT JOIN comments c ON d.id = c.date_idea_id
+        WHERE d.is_shared = TRUE
+      `;
+      const values = [];
 
-            if (location) {
-                values.push(location);
-                query += ` AND d.location = $${values.length}`;
+      if (location) {
+        values.push(location);
+        query += ` AND d.location = $${values.length}`;
+      }
+      if (budget) {
+        values.push(budget);
+        query += ` AND d.cost_category = $${values.length}`;
+      }
+      if (activity_type) {
+        values.push(activity_type);
+        query += ` AND d.activity_type = $${values.length}`;
+      }
+
+      query += ' GROUP BY d.id ORDER BY d.created_at DESC';
+
+      const results = await pool.query(query, values);
+      const dateIdeas = results.rows;
+
+      const enhancedDateIdeas = await Promise.all(
+        dateIdeas.map(async (idea) => {
+          // Check if image_url is a placeholder
+          if (
+            !idea.image_url ||
+            idea.image_url.startsWith('/api/placeholder')
+          ) {
+            // Define search query based on activity_type and mood
+            const searchQuery = `${idea.activity_type} ${idea.mood}`.trim();
+
+            // Fetch image URL from Pexels
+            const imageUrl = await fetchImageUrl(searchQuery);
+
+            if (imageUrl) {
+              // Update the database with the new image URL
+              await pool.query(
+                'UPDATE date_ideas SET image_url = $1 WHERE id = $2',
+                [imageUrl, idea.id]
+              );
+
+              // Update the idea object
+              idea.image_url = imageUrl;
+            } else {
+              // If fetching from Pexels fails, retain the placeholder or set to a default image
+              idea.image_url = 'https://via.placeholder.com/400x300?text=No+Image+Available';
             }
-            if (budget) {
-                values.push(budget);
-                query += ` AND d.cost_category = $${values.length}`;
-            }
-            if (activity_type) {
-                values.push(activity_type);
-                query += ` AND d.activity_type = $${values.length}`;
-            }
+          }
 
-            query += ' GROUP BY d.id ORDER BY d.created_at DESC';
+          return idea;
+        })
+      );
 
-            const results = await pool.query(query, values);
-            res.json(results.rows);
-        } catch (error) {
-            console.error('Error getting date ideas:', error);
-            res.status(500).json({ error: error.message });
-        }
-    },
-      
+      res.json(enhancedDateIdeas);
+    } catch (error) {
+      console.error('Error getting date ideas:', error);
+      res.status(500).json({ error: error.message });
+    }
+  },
 
-    // Get single date idea with its comments and likes count
-    getDateIdea: async (req, res) => {
-        try {
-            const { id } = req.params
-            const dateQuery = await pool.query(
-                `SELECT d.*, 
-                    COUNT(DISTINCT l.id) as likes_count,
-                    COUNT(DISTINCT c.id) as comments_count,
-                    u.username as creator_name
-                FROM date_ideas d
-                LEFT JOIN likes l ON d.id = l.date_idea_id
-                LEFT JOIN comments c ON d.id = c.date_idea_id
-                LEFT JOIN users u ON d.creator_id = u.id
-                WHERE d.id = $1
-                GROUP BY d.id, u.username`,
-                [id]
-            )
+  // Get single date idea with its comments and likes count
+  getDateIdea: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const dateQuery = await pool.query(
+        `SELECT d.*, 
+          COUNT(DISTINCT l.id) as likes_count,
+          COUNT(DISTINCT c.id) as comments_count,
+          u.username as creator_name
+        FROM date_ideas d
+        LEFT JOIN likes l ON d.id = l.date_idea_id
+        LEFT JOIN comments c ON d.id = c.date_idea_id
+        LEFT JOIN users u ON d.creator_id = u.id
+        WHERE d.id = $1
+        GROUP BY d.id, u.username`,
+        [id]
+      );
 
-            if (dateQuery.rows.length === 0) {
-                return res.status(404).json({ error: 'Date idea not found' })
-            }
+      if (dateQuery.rows.length === 0) {
+        return res.status(404).json({ error: 'Date idea not found' });
+      }
 
-            res.json(dateQuery.rows[0])
-        } catch (error) {
-            res.status(500).json({ error: error.message })
-        }
-    },
+      let dateIdea = dateQuery.rows[0];
 
-    // Create new date idea
-    createDateIdea: async (req, res) => {
-        try {
-          const {
-            title,
-            description,
-            location,
-            cost_category,
-            duration,
-            activity_type,
-            mood,
-            time_of_day,
-            distance,
-            importance,
-            activity_level,
-            image_url,
-          } = req.body;
-      
-          const results = await pool.query(
-            `INSERT INTO date_ideas 
-            (title, description, location, cost_category, duration, activity_type, mood, time_of_day, distance, importance, activity_level, image_url, is_shared, creator_id)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, TRUE, NULL)
-            RETURNING *`,
-            [
-              title,
-              description,
-              location,
-              cost_category,
-              duration,
-              activity_type,
-              mood,
-              time_of_day,
-              distance,
-              importance,
-              activity_level,
-              image_url,
-            ]
+      // Check if image_url is a placeholder
+      if (
+        !dateIdea.image_url ||
+        dateIdea.image_url.startsWith('/api/placeholder')
+      ) {
+        // Define search query based on activity_type and mood
+        const searchQuery = `${dateIdea.activity_type} ${dateIdea.mood}`.trim();
+
+        // Fetch image URL from Pexels
+        const imageUrl = await fetchImageUrl(searchQuery);
+
+        if (imageUrl) {
+          // Update the database with the new image URL
+          await pool.query(
+            'UPDATE date_ideas SET image_url = $1 WHERE id = $2',
+            [imageUrl, dateIdea.id]
           );
-      
-          res.status(201).json(results.rows[0]);
-        } catch (error) {
-          res.status(500).json({ error: error.message });
+
+          // Update the dateIdea object
+          dateIdea.image_url = imageUrl;
+        } else {
+          // If fetching from Pexels fails, retain the placeholder or set to a default image
+          dateIdea.image_url = 'https://via.placeholder.com/400x300?text=No+Image+Available';
         }
-      },
+      }
+
+      res.json(dateIdea);
+    } catch (error) {
+      console.error('Error getting date idea:', error);
+      res.status(500).json({ error: error.message });
+    }
+  },
+
+  // Create new date idea
+  createDateIdea: async (req, res) => {
+    try {
+      const {
+        title,
+        description,
+        location,
+        cost_category,
+        duration,
+        activity_type,
+        mood,
+        time_of_day,
+        distance,
+        importance,
+        activity_level,
+        image_url,
+      } = req.body;
+
+      let finalImageUrl = image_url;
+
+      // If image_url is a placeholder or not provided, fetch from Pexels
+      if (
+        !finalImageUrl ||
+        finalImageUrl.startsWith('/api/placeholder')
+      ) {
+        const searchQuery = `${activity_type} ${mood}`.trim();
+        const fetchedImageUrl = await fetchImageUrl(searchQuery);
+
+        if (fetchedImageUrl) {
+          finalImageUrl = fetchedImageUrl;
+        } else {
+          finalImageUrl = 'https://via.placeholder.com/400x300?text=No+Image+Available';
+        }
+      }
+
+      const results = await pool.query(
+        `INSERT INTO date_ideas 
+          (title, description, location, cost_category, duration, activity_type, mood, time_of_day, distance, importance, activity_level, image_url, is_shared, creator_id) 
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, TRUE, NULL)
+          RETURNING *`,
+        [
+          title,
+          description,
+          location,
+          cost_category,
+          duration,
+          activity_type,
+          mood,
+          time_of_day,
+          distance,
+          importance,
+          activity_level,
+          finalImageUrl,
+        ]
+      );
+
+      res.status(201).json(results.rows[0]);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  },
 
     // Update date idea
     updateDateIdea: async (req, res) => {
