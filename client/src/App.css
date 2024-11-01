@@ -48,11 +48,7 @@ body {
   margin: 0;
 }
 
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
+
 
 .main-content {
   flex: 1;
@@ -915,12 +911,33 @@ body {
   color: #2563eb; /* blue-600 when active */
 }
 
-/* Dropdown Menu */
+/* Dropdown Menu Fix */
 .dropdown-menu {
-  opacity: 0;
-  transform: translateY(-10px);
-  animation: fadeInSlideDown 0.3s forwards;
-  border-radius: 0.375rem; /* rounded-md */
+  position: absolute;
+  top: 100%;
+  right: 0;
+  left: auto; /* Override left alignment */
+  background-color: white;
+  border-radius: 0.375rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  z-index: 60;
+  padding: 0.5rem 0;
+  min-width: 150px; /* Ensures it has enough width */
+}
+/* Dropdown Menu Fix */
+.header-actions .dropdown-menu {
+  position: absolute; /* Ensure it displays over the header */
+  top: 100%; /* Position it just below the header actions */
+  right: 0; /* Align it with the right edge of the header actions */
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  z-index: 60; /* Higher than the header's z-index */
+  padding: 0.5rem 0;
+  overflow: hidden;
+}
+.header-actions{
+  position: relative;
 }
 
 @keyframes fadeInSlideDown {
@@ -930,11 +947,6 @@ body {
   }
 }
 
-/* Option Buttons */
-.dropdown-menu button {
-  width: 100%;
-  text-align: left;
-}
 
 .dropdown-menu button:hover {
   background-color: #f3f4f6; /* hover:bg-gray-100 */
@@ -1007,6 +1019,19 @@ body {
 .header-actions {
   flex-shrink: 0;
 }
+
+.header-actions .dropdown-menu button {
+  display: block;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  text-align: left;
+  background: none;
+  border: none;
+  color: #1f2937;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
 
 /* Ensure Consistent Layout */
 .app-header, .header-content {
@@ -1102,7 +1127,7 @@ body {
 
 /* Profile Page */
 .profile-page {
-  background-color: #f3f4f6;
+  background: linear-gradient(to bottom, #e0e7ff, #f8fafc); /* Soft gradient background */
   min-height: 100vh;
   display: flex;
   justify-content: center;
@@ -1112,21 +1137,21 @@ body {
 
 .profile-card {
   width: 100%;
-  max-width: 400px;
+  max-width: 500px;
   background-color: white;
-  border-radius: 1rem;
-  padding: 2rem;
+  border-radius: 1.5rem;
+  padding: 2.5rem;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2rem;
+  gap: 2.5rem;
 }
 
 /* Avatar Styling */
 .profile-card .avatar {
-  width: 96px;
-  height: 96px;
+  width: 128px;
+  height: 128px;
   border-radius: 50%;
   background-color: #e2e8f0;
   display: flex;
@@ -1142,19 +1167,21 @@ body {
   color: #6b7280;
   font-weight: bold;
   margin-bottom: 0.25rem;
+  text-transform: uppercase;
 }
 
-.profile-card p.text-lg {
-  font-size: 1.125rem;
+.profile-card p.text-xl {
+  font-size: 1.25rem;
   color: #1f2937;
+  font-weight: 500;
 }
 
 /* Edit Button */
 .profile-card .edit-button {
-  padding: 0.75rem 1.5rem;
+  padding: 0.75rem 2rem;
   background-color: #4f46e5;
   color: white;
-  font-size: 1rem;
+  font-size: 1.125rem;
   font-weight: 500;
   border: none;
   border-radius: 0.5rem;
@@ -1165,6 +1192,8 @@ body {
 .profile-card .edit-button:hover {
   background-color: #4338ca;
 }
+
+
 
 
 
@@ -1238,7 +1267,6 @@ body {
   border-color: #4f46e5;
   box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.3);
 }
-
 /* Modal Buttons */
 .modal-buttons {
   display: flex;
