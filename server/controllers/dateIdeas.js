@@ -1,34 +1,43 @@
 import { pool } from '../config/database.js'
 
 const DateIdeasController = {
-    // Get all date ideas with basic filtering
+    // Get all date ideas with basic filtering and counts
     getDateIdeas: async (req, res) => {
         try {
-          const { location, budget, activity_type } = req.query;
-          let query = 'SELECT * FROM date_ideas WHERE is_shared = TRUE';
-          const values = [];
-      
-          if (location) {
-            values.push(location);
-            query += ` AND location = $${values.length}`;
-          }
-          if (budget) {
-            values.push(budget);
-            query += ` AND cost_category = $${values.length}`;
-          }
-          if (activity_type) {
-            values.push(activity_type);
-            query += ` AND activity_type = $${values.length}`;
-          }
-      
-          query += ' ORDER BY created_at DESC';
-      
-          const results = await pool.query(query, values);
-          res.json(results.rows);
+            const { location, budget, activity_type } = req.query;
+            let query = `
+                SELECT d.*, 
+                    COUNT(DISTINCT l.id) as likes_count,
+                    COUNT(DISTINCT c.id) as comments_count
+                FROM date_ideas d
+                LEFT JOIN likes l ON d.id = l.date_idea_id
+                LEFT JOIN comments c ON d.id = c.date_idea_id
+                WHERE d.is_shared = TRUE
+            `;
+            const values = [];
+
+            if (location) {
+                values.push(location);
+                query += ` AND d.location = $${values.length}`;
+            }
+            if (budget) {
+                values.push(budget);
+                query += ` AND d.cost_category = $${values.length}`;
+            }
+            if (activity_type) {
+                values.push(activity_type);
+                query += ` AND d.activity_type = $${values.length}`;
+            }
+
+            query += ' GROUP BY d.id ORDER BY d.created_at DESC';
+
+            const results = await pool.query(query, values);
+            res.json(results.rows);
         } catch (error) {
-          res.status(500).json({ error: error.message });
+            console.error('Error getting date ideas:', error);
+            res.status(500).json({ error: error.message });
         }
-      },
+    },
       
 
     // Get single date idea with its comments and likes count
@@ -135,14 +144,26 @@ const DateIdeasController = {
     },
 
 
+    // Make sure getAllDateIdeas also includes counts
     getAllDateIdeas: async (req, res) => {
         try {
-          const results = await pool.query('SELECT * FROM date_ideas ORDER BY created_at DESC');
-          res.json(results.rows);
+            const query = `
+                SELECT d.*, 
+                    COUNT(DISTINCT l.id) as likes_count,
+                    COUNT(DISTINCT c.id) as comments_count
+                FROM date_ideas d
+                LEFT JOIN likes l ON d.id = l.date_idea_id
+                LEFT JOIN comments c ON d.id = c.date_idea_id
+                GROUP BY d.id
+                ORDER BY d.created_at DESC
+            `;
+            const results = await pool.query(query);
+            res.json(results.rows);
         } catch (error) {
-          res.status(500).json({ error: error.message });
+            console.error('Error getting all date ideas:', error);
+            res.status(500).json({ error: error.message });
         }
-      },
+    },
       
 
     // Delete date idea
@@ -197,40 +218,45 @@ const DateIdeasController = {
         }
     },
 
-    // Add comment to date idea
-    addComment: async (req, res) => {
-        try {
-            const { id } = req.params
-            const { content } = req.body
-            
-            const results = await pool.query(
-                'INSERT INTO comments (user_id, date_idea_id, content) VALUES ($1, $2, $3) RETURNING *',
-                [req.user.id, id, content]
-            )
-
-            res.status(201).json(results.rows[0])
-        } catch (error) {
-            res.status(500).json({ error: error.message })
-        }
-    },
-
     // Get comments for a date idea
     getComments: async (req, res) => {
         try {
-            const { id } = req.params
+            const { id } = req.params;
+            console.log('Getting comments for date idea:', id); // Debug log
             
             const results = await pool.query(
-                `SELECT c.*, u.username
-                FROM comments c
-                JOIN users u ON c.user_id = u.id
-                WHERE c.date_idea_id = $1
-                ORDER BY c.created_at DESC`,
+                'SELECT * FROM comments WHERE date_idea_id = $1 ORDER BY created_at DESC',
                 [id]
-            )
+            );
 
-            res.json(results.rows)
+            res.json(results.rows);
         } catch (error) {
-            res.status(500).json({ error: error.message })
+            console.error('Error getting comments:', error);
+            res.status(500).json({ error: error.message });
+        }
+    },
+
+    // Add comment to date idea
+    addComment: async (req, res) => {
+        try {
+            const { id } = req.params;
+            const { content } = req.body;
+            
+            console.log('Adding comment to date idea:', id, 'Content:', content); // Debug log
+
+            if (!content) {
+                return res.status(400).json({ error: 'Comment content is required' });
+            }
+
+            const results = await pool.query(
+                'INSERT INTO comments (date_idea_id, content) VALUES ($1, $2) RETURNING *',
+                [id, content]
+            );
+
+            res.status(201).json(results.rows[0]);
+        } catch (error) {
+            console.error('Error adding comment:', error);
+            res.status(500).json({ error: error.message });
         }
     }
 }

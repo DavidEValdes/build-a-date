@@ -45,13 +45,13 @@ const resetDatabase = async () => {
     `);
     console.log('🎉 likes table created successfully');
 
-    // Create comments table (simplified without user_id)
+    // Create comments table (simplified without user reference)
     await pool.query(`
       CREATE TABLE comments (
-        id SERIAL PRIMARY KEY,
-        date_idea_id INTEGER REFERENCES date_ideas(id) ON DELETE CASCADE,
-        content TEXT NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          id SERIAL PRIMARY KEY,
+          date_idea_id INTEGER REFERENCES date_ideas(id) ON DELETE CASCADE,
+          content TEXT NOT NULL,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
     console.log('🎉 comments table created successfully');

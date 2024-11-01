@@ -50,11 +50,22 @@ export const likeDateIdea = async (id) => {
 };
 
 export const addComment = async (id, content) => {
-  const response = await api.post(`/dates/${id}/comments`, { content });
-  return response.data;
+  try {
+      // Changed from comments to comment to match the route
+      const response = await api.post(`/dates/${id}/comment`, { content });
+      return response.data;
+  } catch (error) {
+      console.error('Error adding comment:', error);
+      throw error;
+  }
 };
 
 export const getComments = async (id) => {
-  const response = await api.get(`/dates/${id}/comments`);
-  return response.data;
+  try {
+      const response = await api.get(`/dates/${id}/comments`);
+      return response.data;
+  } catch (error) {
+      console.error('Error getting comments:', error);
+      return [];
+  }
 };

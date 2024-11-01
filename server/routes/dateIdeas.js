@@ -4,20 +4,20 @@ import DateIdeasController from '../controllers/dateIdeas.js';
 
 const router = express.Router();
 
-// Define the '/all' route first
+// Date idea routes
 router.get('/all', DateIdeasController.getAllDateIdeas);
-
-// Other routes
 router.get('/', DateIdeasController.getDateIdeas);
 router.post('/', DateIdeasController.createDateIdea);
-
-// Place the '/:id' route after more specific routes
 router.get('/:id', DateIdeasController.getDateIdea);
 router.patch('/:id', DateIdeasController.updateDateIdea);
 router.delete('/:id', DateIdeasController.deleteDateIdea);
+
+// Like routes
 router.post('/:id/like', DateIdeasController.likeDateIdea);
 router.post('/:id/unlike', DateIdeasController.unlikeDateIdea);
-router.post('/:id/comment', DateIdeasController.addComment);
+
+// Comment routes
 router.get('/:id/comments', DateIdeasController.getComments);
+router.post('/:id/comment', DateIdeasController.addComment);  
 
 export default router;
