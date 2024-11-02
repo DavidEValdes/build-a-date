@@ -2053,6 +2053,40 @@ body {
   transform: scale(1.05);
 }
 
+/* Saved Dates Header Styles */
+.saved-dates-header {
+  display: flex;
+  justify-content: center;
+  margin: 1.5rem 0 3rem 0;
+  position: relative;
+  width: 100%;
+}
+
+.saved-dates-title {
+  font-size: 2rem;
+  font-weight: 600;
+  color: #1f2937;
+  padding: 0.75rem 2.5rem;
+  position: relative;
+  z-index: 1;
+  letter-spacing: -0.01em;
+}
+
+.saved-dates-title::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 110%;
+  height: 120%;
+  background-color: rgba(79, 70, 229, 0.18);
+  border-radius: 8px;
+  z-index: -1;
+}
+
+
+
 /* Responsive Adjustments for SuggestionDisplay */
 @media (max-width: 640px) {
   .suggestion-display-image-container {

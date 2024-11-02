@@ -237,8 +237,8 @@ const QuestionPipeline = ({ onComplete }) => {
             >
               <span className="mr-2">
                 {answers[currentQuestion.id] && answers[currentQuestion.id].includes(option.value)
-                  ? '✅'
-                  : '⬜️'}
+                  ? '✅ '
+                  : '⬜️ '}
               </span>
               {option.label}
             </button>

@@ -1,4 +1,3 @@
-// src/pages/SavedDates.jsx
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -10,7 +9,7 @@ import { getSavedDates } from '../api';
 const SavedDates = () => {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
-
+  
   const { data: savedDates = [], isLoading } = useQuery({
     queryKey: ['savedDates'],
     queryFn: getSavedDates,
@@ -40,9 +39,11 @@ const SavedDates = () => {
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
-
-        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-          <h1 className="text-3xl font-bold mb-4">Saved Dates</h1>
+        
+        <div className="saved-dates-header">
+          <h1 className="saved-dates-title">
+            Saved Dates
+          </h1>
         </div>
 
         <div className="dates-grid">
