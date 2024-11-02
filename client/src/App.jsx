@@ -7,6 +7,7 @@ import DateDetail from './pages/DateDetail';
 import Profile from './pages/Profile';
 import SavedDates from './pages/SavedDates';
 import UserMenu from './components/UserMenu';
+import PlanADate from './pages/PlanADate';
 import './App.css';
 
 // Create a client
@@ -44,6 +45,7 @@ function App() {
               <Route path="/dates/:id" element={<DateDetail />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/saved-dates" element={<SavedDates />} />
+              <Route path="/plan-a-date" element={<PlanADate />} />
             </Routes>
           </div>
         </Router>

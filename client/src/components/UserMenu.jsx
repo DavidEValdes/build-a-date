@@ -43,6 +43,11 @@ const UserMenu = () => {
     }
   };
 
+  const handlePlanADateClick = () => {
+    setShowMenu(false);
+    navigate('/plan-a-date');
+  };
+
   useEffect(() => {
     if (showMenu) {
       document.addEventListener('mousedown', handleClickOutside);
@@ -74,9 +79,22 @@ const UserMenu = () => {
         <div className="dropdown-menu absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
           {isAuthenticated ? (
             <>
-              <div className="px-4 py-2 text-sm text-gray-700 border-b">
+              <div
+                className="px-4 py-2 text-sm"
+                style={{
+                  fontWeight: 'bold',
+                  textAlign: 'center',
+                  backgroundColor: '#507acf', // Original solid color
+                  color: 'white', // White text for contrast
+                  padding: '8px 16px', // Adjusted padding for shape
+                  borderRadius: '25px', // Slightly less rounded for a more subtle oval shape
+                  margin: '8px', // Add margin to separate it from the border
+                  boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)' // Subtle shadow for depth
+                }}
+              >
                 {user.username}
               </div>
+
               <button
                 onClick={handleProfileClick}
                 className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
@@ -88,6 +106,13 @@ const UserMenu = () => {
                 className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
               >
                 Saved Dates
+              </button>
+              <button
+                onClick={handlePlanADateClick}
+                className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 transition-colors"
+                style={{ color: '#507acf', fontWeight: 'bold' }}
+              >
+                Plan a Date
               </button>
               <button
                 onClick={() => {

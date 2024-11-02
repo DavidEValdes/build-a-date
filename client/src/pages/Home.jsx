@@ -82,7 +82,7 @@ const Home = () => {
               className="primary-button"
               onClick={() => setStage('questions')}
             >
-              Start Planning
+              Start Building
             </button>
           </div>
         )}
