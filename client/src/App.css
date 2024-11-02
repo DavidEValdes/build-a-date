@@ -195,8 +195,10 @@ body {
 }
 
 .date-card-title .location {
-  color: #6b7280;
+  color: #507acf;
   font-size: 0.875rem;
+  text-transform: capitalize;
+  font-weight: bold;
 }
 
 .date-tags {
@@ -239,6 +241,7 @@ body {
   color: #6b7280;
   font-size: 0.875rem;
   font-weight: 500;
+  font-weight: bold;
 }
 
 .date-card-footer {

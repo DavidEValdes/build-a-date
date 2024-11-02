@@ -14,6 +14,21 @@ const DateDetail = () => {
   const queryClient = useQueryClient();
   const { isAuthenticated } = useAuth();
 
+  // 1. Define a mapping from cost_category to dollar signs
+  const COST_CATEGORY_MAP = {
+    free: 'Free',
+    economy: '$',
+    standard: '$$',
+    premium: '$$$',
+    luxury: '$$$$',
+    // Add more mappings if there are additional categories
+  };
+
+  // 2. Helper function to get dollar signs based on cost_category
+  const getDollarSigns = (category) => {
+    return COST_CATEGORY_MAP[category.toLowerCase()] || '$';
+  };
+
   const { data: date, isLoading } = useQuery({
     queryKey: ['dateIdea', id],
     queryFn: () => getDateIdea(id)
@@ -35,24 +50,31 @@ const DateDetail = () => {
     mutationFn: likeDateIdea,
     onSuccess: () => {
       queryClient.invalidateQueries(['dateIdea', id]);
+      queryClient.invalidateQueries(['dateIdeas']);
     },
+    onError: (error) => {
+      console.error('Error liking date:', error);
+      // Optionally, you can add user-facing error handling here
+    }
   });
 
   const saveMutation = useMutation({
     mutationFn: (dateId) => (isSaved ? unsaveDateIdea(dateId) : saveDateIdea(dateId)),
     onSuccess: () => {
       setIsSaved(!isSaved);
-      // Invalidate all relevant queries
-      queryClient.invalidateQueries(['savedDates']);
-      queryClient.invalidateQueries(['dateIdeas']);
-      queryClient.invalidateQueries(['dateIdea', id]);
-      queryClient.invalidateQueries(['allDateIdeas']);
+      // Invalidate with consistent query keys
+      queryClient.invalidateQueries({ queryKey: ['savedDates'] });
+      queryClient.invalidateQueries({ queryKey: ['feedDateIdeas'] });
+      queryClient.invalidateQueries({ queryKey: ['dateIdeas'] });
+      queryClient.invalidateQueries({ queryKey: ['dateIdea', id] });
+      queryClient.invalidateQueries({ queryKey: ['allDateIdeas'] });
     },
     onError: (error) => {
       console.error('Error saving date:', error);
       if (error.response?.status === 403) {
         alert('Please login to save dates');
       }
+      // Optionally, handle other error statuses
     }
   });
 
@@ -62,6 +84,10 @@ const DateDetail = () => {
       queryClient.invalidateQueries(['comments', id]);
       setComment('');
     },
+    onError: (error) => {
+      console.error('Error adding comment:', error);
+      // Optionally, notify the user of the error
+    }
   });
 
   const handleSubmitComment = (e) => {
@@ -84,7 +110,14 @@ const DateDetail = () => {
 
   const handleShare = (e) => {
     e.stopPropagation();
-    // Implement share functionality
+    // Implement share functionality, e.g., copy link to clipboard
+    navigator.clipboard.writeText(window.location.origin + `/dates/${date.id}`)
+      .then(() => {
+        alert('Date link copied to clipboard!');
+      })
+      .catch(() => {
+        alert('Failed to copy the link.');
+      });
   };
 
   const handleSave = (e) => {
@@ -102,7 +135,7 @@ const DateDetail = () => {
       alert('Please login to like dates');
       return;
     }
-    if (!likeMutation.isPending) {
+    if (!likeMutation.isLoading) {
       likeMutation.mutate(id);
     }
   };
@@ -140,8 +173,8 @@ const DateDetail = () => {
             <div className="detail-info">
               <h2>{date.title}</h2>
               <div className="detail-tags">
-                <span className="activity-tag">{date.activity_type}</span>
-                <span className="cost-tag">{date.cost_category}</span>
+                {/* 3. Replace cost_category text with dollar signs */}
+                <span className="cost-tag">{getDollarSigns(date.cost_category)}</span>
                 <span className="duration-tag">{date.duration}</span>
               </div>
             </div>
@@ -177,19 +210,20 @@ const DateDetail = () => {
 
             <section className="detail-section">
               <div className="interaction-buttons detail-actions">
-                <button 
+                <button
                   className={`icon-button large ${likeMutation.isSuccess ? 'liked' : ''}`}
                   onClick={handleLike}
-                  disabled={likeMutation.isPending}
+                  disabled={likeMutation.isLoading}
                   aria-label={`Like this date idea (${date.likes_count || 0} likes)`}
                 >
-                  <Heart className={`w-5 h-5 ${likeMutation.isPending ? 'opacity-50' : ''}`} />
+                  <Heart className={`w-5 h-5 ${likeMutation.isLoading ? 'opacity-50' : ''}`} />
                   <span>{date.likes_count || 0} Likes</span>
                 </button>
-                <button 
+
+                <button
                   className={`icon-button large ${isSaved ? 'saved' : ''}`}
                   onClick={handleSave}
-                  disabled={saveMutation.isPending}
+                  disabled={saveMutation.isLoading}
                   aria-label={isSaved ? 'Remove from saved' : 'Save this date idea'}
                 >
                   <Bookmark 
@@ -199,6 +233,7 @@ const DateDetail = () => {
                   />
                   <span>{isSaved ? 'Saved' : 'Save'}</span>
                 </button>
+
                 <button className="icon-button large" onClick={handleShare}>
                   <Share2 />
                   <span>Share</span>
@@ -219,7 +254,7 @@ const DateDetail = () => {
                 <button 
                   type="submit" 
                   className="primary-button"
-                  disabled={commentMutation.isPending}
+                  disabled={commentMutation.isLoading}
                 >
                   Post
                 </button>
