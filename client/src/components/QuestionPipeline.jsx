@@ -3,6 +3,17 @@ import PropTypes from 'prop-types';
 
 const questions = [
   {
+    id: 'timeOfDay',
+    question: 'What time of day will your date be?',
+    type: 'singleChoice',
+    options: [
+      { value: 'morning', label: 'Morning' },
+      { value: 'afternoon', label: 'Afternoon' },
+      { value: 'evening', label: 'Evening' },
+      { value: 'night', label: 'Night' },
+    ],
+  },
+  {
     id: 'mood',
     question: 'What mood are you in today?',
     type: 'singleChoice',
@@ -15,17 +26,6 @@ const questions = [
       { value: 'serene', label: 'Serene' },
       { value: 'playful', label: 'Playful' },
       { value: 'curious', label: 'Curious' },
-    ],
-  },
-  {
-    id: 'timeOfDay',
-    question: 'What time of day will your date be?',
-    type: 'singleChoice',
-    options: [
-      { value: 'morning', label: 'Morning' },
-      { value: 'afternoon', label: 'Afternoon' },
-      { value: 'evening', label: 'Evening' },
-      { value: 'night', label: 'Night' },
     ],
   },
   {

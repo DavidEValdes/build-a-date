@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import QuestionPipeline from '../components/QuestionPipeline';
 import DateCard from '../components/DateCard';
+import SuggestionDisplay from '../components/SuggestionDisplay';
 import { getDateIdeas, getAllDateIdeas, createDateIdea } from '../api';
 
 const Home = () => {
@@ -77,7 +78,6 @@ const Home = () => {
             <p style={{ fontSize: '1.125rem', marginTop: '0.5rem' }}>
               Choose from over <span style={{ fontWeight: 'bold' }}>200+ unique date ideas</span>, each crafted to create an unforgettable experience.
             </p>
-
             <button
               className="primary-button"
               onClick={() => setStage('questions')}
@@ -93,9 +93,9 @@ const Home = () => {
 
         {stage === 'suggestion' && currentSuggestion && (
           <div className="suggestion-screen">
-            <h2>Your Perfect Date Idea</h2>
-            <DateCard date={currentSuggestion} />
-            <div className="suggestion-actions">
+            <h2 className="text-2xl font-bold text-center mb-6">Your Perfect Date Match!</h2>
+            <SuggestionDisplay date={currentSuggestion} />
+            <div className="suggestion-actions mt-8 flex justify-center gap-4">
               <button
                 className="primary-button"
                 onClick={handleShareToFeed}
