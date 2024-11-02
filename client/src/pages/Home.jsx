@@ -10,13 +10,11 @@ const Home = () => {
   const [currentSuggestion, setCurrentSuggestion] = useState(null);
   const queryClient = useQueryClient();
 
-  // Fetch date ideas for the feed (only shared date ideas)
   const { data: feedDates = [] } = useQuery({
     queryKey: ['feedDateIdeas'],
     queryFn: getDateIdeas,
   });
 
-  // Fetch all date ideas for matching
   const { data: allDates = [] } = useQuery({
     queryKey: ['allDateIdeas'],
     queryFn: getAllDateIdeas,
@@ -30,7 +28,6 @@ const Home = () => {
   });
 
   const handleQuestionnaireComplete = (answers) => {
-    // Calculate scores for each date idea based on user answers
     const scoredDates = allDates.map((date) => {
       let score = 0;
 
@@ -49,10 +46,7 @@ const Home = () => {
       return { ...date, score };
     });
 
-    // Sort dates by score in descending order
     const sortedDates = scoredDates.sort((a, b) => b.score - a.score);
-
-    // Select the top-scoring date idea
     const bestMatch = sortedDates[0];
 
     setCurrentSuggestion(bestMatch);
@@ -77,9 +71,13 @@ const Home = () => {
         {stage === 'welcome' && (
           <div className="welcome-screen">
             <h2>Find Your Perfect Date</h2>
-            <p>
-              Let us help you plan the perfect date based on your preferences!
+            <p style={{ fontSize: '1.125rem' }}>
+              Let our <span style={{ fontWeight: 'bold' }}>AI-tailored matchmaker</span> find your perfect date.
             </p>
+            <p style={{ fontSize: '1.125rem', marginTop: '0.5rem' }}>
+              Choose from over <span style={{ fontWeight: 'bold' }}>200+ unique date ideas</span>, each crafted to create an unforgettable experience.
+            </p>
+
             <button
               className="primary-button"
               onClick={() => setStage('questions')}

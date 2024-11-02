@@ -112,7 +112,7 @@ const questions = [
   },
   {
     id: 'season',
-    question: 'Which season do you prefer for your date?',
+    question: 'Which season will you be in during your date?',
     type: 'singleChoice',
     options: [
       { value: 'spring', label: 'Spring' },
