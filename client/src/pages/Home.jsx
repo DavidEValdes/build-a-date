@@ -69,7 +69,8 @@ const Home = () => {
   return (
     <div className="app-container">
       <main className="main-content">
-        {stage === 'welcome' && (
+        {/* Show welcome screen on welcome stage or after sharing to feed */}
+        {(stage === 'welcome' || stage === 'feed') && (
           <div className="welcome-screen">
             <h2>Find Your Perfect Date</h2>
             <p style={{ fontSize: '1.125rem' }}>
@@ -117,21 +118,11 @@ const Home = () => {
           </div>
         )}
 
-        {(stage === 'feed' || feedDates.length > 0) && (
+        {/* Always show feed if there are dates */}
+        {feedDates.length > 0 && (
           <div className="feed-section">
             <div className="feed-header">
               <h2>Date Ideas Feed</h2>
-              {stage === 'feed' && (
-                <button
-                  className="secondary-button"
-                  onClick={() => {
-                    setStage('welcome');
-                    setCurrentSuggestion(null);
-                  }}
-                >
-                  Plan Another Date
-                </button>
-              )}
             </div>
             <div className="dates-grid">
               {feedDates.map((date) => (
