@@ -32,21 +32,23 @@ const SavedDates = () => {
 
   return (
     <div className="app-container">
-      <main className="main-content">
-        <button
-          onClick={handleBack}
-          className="back-button"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </button>
-        
-        <div className="saved-dates-header">
-          <h1 className="saved-dates-title">
-            Saved Dates
-          </h1>
+  <main className="main-content">
+    <button onClick={handleBack} className="back-button">
+      <ArrowLeft className="w-5 h-5" />
+    </button>
+    <div className="saved-dates-header">
+      <div className="header-with-divider">
+        <h1 className="saved-dates-title">
+          Saved Dates
+        </h1>
+        <div className="styled-divider">
+          <span className="divider-line"></span>
+          <div className="divider-dot"></div>
+          <span className="divider-line"></span>
         </div>
-
-        <div className="dates-grid">
+      </div>
+    </div>
+    <div className="dates-grid">
           {isLoading ? (
             <div className="loading">Loading...</div>
           ) : savedDates.length === 0 ? (
