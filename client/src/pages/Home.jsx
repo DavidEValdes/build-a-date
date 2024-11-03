@@ -1,10 +1,12 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import QuestionPipeline from '../components/QuestionPipeline';
 import DateCard from '../components/DateCard';
 import SuggestionDisplay from '../components/SuggestionDisplay';
 import Spinner from '../components/Spinner';
 import { getDateIdeas, getAllDateIdeas, createDateIdea } from '../api';
+import { ArrowRight } from 'lucide-react'; // Import ArrowRight icon
 
 const Home = () => {
   const [stage, setStage] = useState('welcome');
@@ -69,7 +71,6 @@ const Home = () => {
   return (
     <div className="app-container">
       <main className="main-content">
-        {/* Show welcome screen on welcome stage or after sharing to feed */}
         {(stage === 'welcome' || stage === 'feed') && (
           <div className="welcome-screen">
             <h2 style={{ color: '#000000' }}>Find Your Perfect Date</h2>
@@ -83,26 +84,63 @@ const Home = () => {
               className="primary-button"
               onClick={() => setStage('questions')}
               disabled={isAllDatesLoading}
+              style={{ marginBottom: '2rem' }}
             >
               Start Building
             </button>
-            <a 
-              href="/plan-a-date" 
-              className="secondary-cta"
+            <div
               style={{
-                display: 'block',
-                marginTop: '1rem',
-                color: '#6b7280',
-                fontSize: '0.875rem',
-                textDecoration: 'none',
-                transition: 'color 0.2s ease',
-                textAlign: 'center'
+                width: '100%',
+                maxWidth: '400px',
+                margin: '0 auto',
+                
+                borderRadius: '12px',
+                
+                
+                position: 'relative',
+                transition: 'transform 0.2s ease, box-shadow 0.2s ease',
               }}
-              onMouseOver={(e) => e.target.style.color = '#4f46e5'}
-              onMouseLeave={(e) => e.target.style.color = '#6b7280'}
+              onMouseOver={(e) => {
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.05)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.05)';
+              }}
             >
-              Already have a date idea? Plan it here →
-            </a>
+              <Link 
+                to="/plan-a-date"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.5rem',
+                  padding: '1rem',
+                  color: '#507acf',
+                  fontSize: '0.95rem',
+                  fontWeight: '500',
+                  textDecoration: 'none',
+                  transition: 'all 0.2s ease',
+                  letterSpacing: '0.01em',
+                }}
+              >
+                <span>Already have a date idea? Plan it here</span>
+                <ArrowRight size={18} style={{ marginLeft: '4px', transition: 'transform 0.2s ease' }}/>
+              </Link>
+              <div 
+                style={{
+                  position: 'absolute',
+                  bottom: '-1px',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  width: '50%',
+                  height: '2px',
+                  background: 'linear-gradient(90deg, transparent, #507acf, transparent)',
+                  opacity: 0.5,
+                }}
+              />
+            </div>
           </div>
         )}
 
