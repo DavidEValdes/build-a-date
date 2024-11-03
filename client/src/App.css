@@ -1269,6 +1269,7 @@ body {
   grid-template-columns: repeat(2, 1fr);
   gap: 1.5rem;
   margin-bottom: 1.5rem;
+  text-transform: capitalize;
 }
 
 .suggestion-display-grid-title {
@@ -1277,6 +1278,7 @@ body {
   color: #6B7280;
   margin-bottom: 0.25rem;
   font-weight: 600;
+  
 }
 
 .suggestion-display-grid-value {

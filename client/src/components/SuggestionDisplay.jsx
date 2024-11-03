@@ -2,6 +2,24 @@ import React from 'react';
 import '../app.css'; // Ensure this path is correct based on your project structure
 
 const SuggestionDisplay = ({ date }) => {
+  // Helper function to format the cost category
+  const formatCostCategory = (category) => {
+    switch (category.toLowerCase()) {
+      case 'free':
+        return 'Free';
+      case 'economy':
+        return '$';
+      case 'standard':
+        return '$$';
+      case 'premium':
+        return '$$$';
+      case 'luxury':
+        return '$$$$';
+      default:
+        return category; // return the original text if no match
+    }
+  };
+
   return (
     <div className="suggestion-display">
       <div className="suggestion-display-image-container">
@@ -29,7 +47,7 @@ const SuggestionDisplay = ({ date }) => {
           </div>
           <div>
             <h3 className="suggestion-display-grid-title">Cost</h3>
-            <p className="suggestion-display-grid-value">{date.cost_category}</p>
+            <p className="suggestion-display-grid-value">{formatCostCategory(date.cost_category)}</p>
           </div>
           <div>
             <h3 className="suggestion-display-grid-title">Activity Level</h3>
@@ -38,8 +56,8 @@ const SuggestionDisplay = ({ date }) => {
         </div>
 
         <div className="suggestion-display-tags">
-          <span className="tag mood">{date.mood}</span>
-          <span className="tag time-of-day">{date.time_of_day}</span>
+        <span className="tag mood" style={{ textTransform: 'capitalize' }}>{date.mood}</span>
+        <span className="tag time-of-day" style={{ textTransform: 'capitalize' }}>{date.time_of_day}</span>
         </div>
       </div>
     </div>
