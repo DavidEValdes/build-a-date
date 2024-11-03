@@ -6,11 +6,12 @@ import DateCard from '../components/DateCard';
 import SuggestionDisplay from '../components/SuggestionDisplay';
 import Spinner from '../components/Spinner';
 import { getDateIdeas, getAllDateIdeas, createDateIdea } from '../api';
-import { ArrowRight } from 'lucide-react'; // Import ArrowRight icon
+import { ArrowRight, SlidersHorizontal } from 'lucide-react';
 
 const Home = () => {
   const [stage, setStage] = useState('welcome');
   const [currentSuggestion, setCurrentSuggestion] = useState(null);
+  const [sortBy, setSortBy] = useState('newest');
   const queryClient = useQueryClient();
 
   const { data: feedDates = [], isLoading: isFeedLoading } = useQuery({
@@ -68,6 +69,27 @@ const Home = () => {
     setCurrentSuggestion(null);
   };
 
+  const getSortedDates = (dates) => {
+    return [...dates].sort((a, b) => {
+      switch (sortBy) {
+        case 'newest':
+          return new Date(b.created_at) - new Date(a.created_at);
+        case 'oldest':
+          return new Date(a.created_at) - new Date(b.created_at);
+        case 'mostLiked':
+          return (b.likes_count || 0) - (a.likes_count || 0);
+        case 'leastLiked':
+          return (a.likes_count || 0) - (b.likes_count || 0);
+        case 'mostCommented':
+          return (b.comments_count || 0) - (a.comments_count || 0);
+        case 'alphabetical':
+          return a.title.localeCompare(b.title);
+        default:
+          return 0;
+      }
+    });
+  };
+
   return (
     <div className="app-container">
       <main className="main-content">
@@ -93,10 +115,7 @@ const Home = () => {
                 width: '100%',
                 maxWidth: '400px',
                 margin: '0 auto',
-                
                 borderRadius: '12px',
-                
-                
                 position: 'relative',
                 transition: 'transform 0.2s ease, box-shadow 0.2s ease',
               }}
@@ -111,6 +130,7 @@ const Home = () => {
             >
               <Link 
                 to="/plan-a-date"
+                className="plan-date-link"
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -170,7 +190,6 @@ const Home = () => {
           </div>
         )}
 
-        {/* Feed section - always show */}
         <div className="feed-section">
           <div
             className="feed-header-container"
@@ -179,18 +198,64 @@ const Home = () => {
               marginBottom: '1rem',
             }}
           >
-            <h2
-              className="feed-title custom-feed-title"
-              style={{
-                fontSize: '1.75rem',
-                marginBottom: '0.5rem',
-                fontWeight: 'bold',
-                textAlign: 'left',
-                color: '#000000',
-              }}
-            >
-              Date Ideas Feed
-            </h2>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+              <h2
+                className="feed-title custom-feed-title"
+                style={{
+                  fontSize: '1.75rem',
+                  fontWeight: 'bold',
+                  color: '#000000',
+                }}
+              >
+                Date Ideas Feed
+              </h2>
+              
+              <div className="sort-container" style={{ position: 'relative' }}>
+                <button
+                  onClick={() => document.getElementById('sort-select').click()}
+                  className="sort-button"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    padding: '0.5rem 1rem',
+                    borderRadius: '0.5rem',
+                    border: '1px solid #e5e7eb',
+                    backgroundColor: 'white',
+                    color: '#374151',
+                    fontSize: '0.875rem',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                  }}
+                >
+                  <SlidersHorizontal size={16} />
+                  <span>Sort By</span>
+                </button>
+                <select
+                  id="sort-select"
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="sort-select"
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    opacity: 0,
+                    cursor: 'pointer',
+                  }}
+                >
+                  <option value="newest">Newest First</option>
+                  <option value="oldest">Oldest First</option>
+                  <option value="mostLiked">Most Liked</option>
+                  <option value="leastLiked">Least Liked</option>
+                  <option value="mostCommented">Most Commented</option>
+                  <option value="alphabetical">A-Z</option>
+                </select>
+              </div>
+            </div>
+            
             <div
               style={{
                 display: 'flex',
@@ -232,10 +297,22 @@ const Home = () => {
               <Spinner size={50} />
             </div>
           ) : feedDates.length > 0 ? (
-            <div className="dates-grid">
-              {feedDates.map((date) => (
-                <DateCard key={date.id} date={date} />
-              ))}
+            <div 
+              className="feed-container"
+              style={{ 
+                height: '1100px',
+                overflow: 'auto',
+                padding: '1rem',
+                borderRadius: '8px',
+                backgroundColor: '#f8f9fa',
+                marginBottom: '2rem',
+              }}
+            >
+              <div className="dates-grid">
+                {getSortedDates(feedDates).map((date) => (
+                  <DateCard key={date.id} date={date} />
+                ))}
+              </div>
             </div>
           ) : (
             <div className="center mt-4">
@@ -244,6 +321,53 @@ const Home = () => {
           )}
         </div>
       </main>
+
+      <style>
+        {`
+          .feed-container::-webkit-scrollbar {
+            width: 8px;
+          }
+
+          .feed-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+          }
+
+          .feed-container::-webkit-scrollbar-thumb {
+            background: #ddd;
+            border-radius: 4px;
+          }
+
+          .feed-container::-webkit-scrollbar-thumb:hover {
+            background: #ccc;
+          }
+
+          .plan-date-link {
+            color: #507acf !important;
+          }
+
+         
+
+          .sort-button {
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+          }
+
+          .sort-button:hover {
+            border-color: #507acf;
+            color: #507acf;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+          }
+
+          .sort-container:active .sort-button {
+            transform: translateY(0);
+          }
+
+          .sort-select {
+            outline: none;
+          }
+        `}
+      </style>
     </div>
   );
 };
