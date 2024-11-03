@@ -33,17 +33,15 @@ const SavedDates = () => {
   }
 
   return (
-    <div className="app-container">
-      <main className="main-content">
+    <div className="app-container" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <main className="main-content" style={{ flex: '1', paddingBottom: '2rem' }}>
         <button onClick={handleBack} className="back-button">
           <ArrowLeft className="w-5 h-5" />
         </button>
         
         <div className="saved-dates-header">
           <div className="header-with-divider">
-            <h1 className="saved-dates-title">
-              Saved Dates
-            </h1>
+            <h1 className="saved-dates-title">Saved Dates</h1>
             <div className="styled-divider">
               <span className="divider-line"></span>
               <div className="divider-dot"></div>
@@ -53,7 +51,7 @@ const SavedDates = () => {
         </div>
 
         {isLoading ? (
-          <div className="loading-spinner-container">
+          <div className="loading-spinner-container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
             <Spinner size={50} />
           </div>
         ) : savedDates.length === 0 ? (
@@ -65,7 +63,6 @@ const SavedDates = () => {
             ))}
           </div>
         )}
-        
       </main>
       <Footer />
     </div>

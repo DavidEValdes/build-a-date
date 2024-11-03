@@ -38,11 +38,7 @@ const Home = () => {
 
       if (date.mood === answers.mood) score += 2;
       if (date.time_of_day === answers.timeOfDay) score += 1;
-      if (
-        date.location === answers.indoorOutdoor ||
-        answers.indoorOutdoor === 'noPreference'
-      )
-        score += 1;
+      if (date.location === answers.indoorOutdoor || answers.indoorOutdoor === 'noPreference') score += 1;
       if (date.cost_category === answers.budget) score += 1;
       if (date.activity_level === answers.activityLevel) score += 2;
       if (date.distance === answers.distanceWilling) score += 1;
@@ -92,8 +88,9 @@ const Home = () => {
   };
 
   return (
-    <div className="app-container">
-      <main className="main-content">
+    <div className="app-container" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <main className="main-content" style={{ flex: '1', paddingBottom: '2rem' }}>
+        
         {(stage === 'welcome' || stage === 'feed') && (
           <div className="welcome-screen">
             <h2 style={{ color: '#000000' }}>Find Your Perfect Date</h2>
@@ -294,7 +291,7 @@ const Home = () => {
           </div>
 
           {isFeedLoading ? (
-            <div className="loading-spinner-container">
+            <div className="loading-spinner-container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' }}>
               <Spinner size={50} />
             </div>
           ) : feedDates.length > 0 ? (
@@ -346,8 +343,6 @@ const Home = () => {
           .plan-date-link {
             color: #507acf !important;
           }
-
-         
 
           .sort-button {
             box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
