@@ -1,9 +1,10 @@
 // src/pages/DateDetail.jsx
+
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Heart, Bookmark, Share2, ArrowLeft } from 'lucide-react';
-import { getDateIdea, likeDateIdea, addComment, getComments, saveDateIdea, unsaveDateIdea } from '../api';
+import { getDateIdea, likeDateIdea, unlikeDateIdea, addComment, getComments, saveDateIdea, unsaveDateIdea } from '../api';
 import { useAuth } from '../context/AuthContext';
 import Spinner from '../components/Spinner';
 import Footer from '../components/Footer';
@@ -13,71 +14,73 @@ const DateDetail = () => {
   const navigate = useNavigate();
   const [comment, setComment] = useState('');
   const [isSaved, setIsSaved] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
+  const [likesCount, setLikesCount] = useState(0);
   const queryClient = useQueryClient();
   const { isAuthenticated } = useAuth();
 
-  // 1. Define a mapping from cost_category to dollar signs
   const COST_CATEGORY_MAP = {
     free: 'Free',
     economy: '$',
     standard: '$$',
     premium: '$$$',
     luxury: '$$$$',
-    // Add more mappings if there are additional categories
   };
 
-  // 2. Helper function to get dollar signs based on cost_category
   const getDollarSigns = (category) => {
     return COST_CATEGORY_MAP[category.toLowerCase()] || '$';
   };
 
   const { data: date, isLoading } = useQuery({
     queryKey: ['dateIdea', id],
-    queryFn: () => getDateIdea(id)
+    queryFn: () => getDateIdea(id),
   });
 
-  // Update local saved state when date data changes
   useEffect(() => {
     if (date) {
       setIsSaved(date.is_saved || false);
+      setIsLiked(date.is_liked || false);
+      setLikesCount(date.likes_count || 0);
     }
   }, [date]);
 
   const { data: comments = [] } = useQuery({
     queryKey: ['comments', id],
-    queryFn: () => getComments(id)
+    queryFn: () => getComments(id),
   });
 
   const likeMutation = useMutation({
-    mutationFn: likeDateIdea,
+    mutationFn: () => (isLiked ? unlikeDateIdea(id) : likeDateIdea(id)),
     onSuccess: () => {
+      setIsLiked(!isLiked);
+      setLikesCount((prev) => (isLiked ? prev - 1 : prev + 1));
       queryClient.invalidateQueries(['dateIdea', id]);
       queryClient.invalidateQueries(['dateIdeas']);
     },
     onError: (error) => {
-      console.error('Error liking date:', error);
-      // Optionally, you can add user-facing error handling here
-    }
+      console.error('Error updating like:', error);
+      if (error.response?.status === 403) {
+        alert('Please login to like dates');
+      }
+    },
   });
 
   const saveMutation = useMutation({
-    mutationFn: (dateId) => (isSaved ? unsaveDateIdea(dateId) : saveDateIdea(dateId)),
+    mutationFn: () => (isSaved ? unsaveDateIdea(id) : saveDateIdea(id)),
     onSuccess: () => {
       setIsSaved(!isSaved);
-      // Invalidate with consistent query keys
-      queryClient.invalidateQueries({ queryKey: ['savedDates'] });
-      queryClient.invalidateQueries({ queryKey: ['feedDateIdeas'] });
-      queryClient.invalidateQueries({ queryKey: ['dateIdeas'] });
-      queryClient.invalidateQueries({ queryKey: ['dateIdea', id] });
-      queryClient.invalidateQueries({ queryKey: ['allDateIdeas'] });
+      queryClient.invalidateQueries(['savedDates']);
+      queryClient.invalidateQueries(['feedDateIdeas']);
+      queryClient.invalidateQueries(['dateIdeas']);
+      queryClient.invalidateQueries(['dateIdea', id]);
+      queryClient.invalidateQueries(['allDateIdeas']);
     },
     onError: (error) => {
       console.error('Error saving date:', error);
       if (error.response?.status === 403) {
         alert('Please login to save dates');
       }
-      // Optionally, handle other error statuses
-    }
+    },
   });
 
   const commentMutation = useMutation({
@@ -88,8 +91,7 @@ const DateDetail = () => {
     },
     onError: (error) => {
       console.error('Error adding comment:', error);
-      // Optionally, notify the user of the error
-    }
+    },
   });
 
   const handleSubmitComment = (e) => {
@@ -112,7 +114,6 @@ const DateDetail = () => {
 
   const handleShare = (e) => {
     e.stopPropagation();
-    // Implement share functionality, e.g., copy link to clipboard
     navigator.clipboard.writeText(window.location.origin + `/dates/${date.id}`)
       .then(() => {
         alert('Date link copied to clipboard!');
@@ -128,7 +129,7 @@ const DateDetail = () => {
       alert('Please login to save dates');
       return;
     }
-    saveMutation.mutate(id);
+    saveMutation.mutate();
   };
 
   const handleLike = (e) => {
@@ -138,7 +139,7 @@ const DateDetail = () => {
       return;
     }
     if (!likeMutation.isLoading) {
-      likeMutation.mutate(id);
+      likeMutation.mutate();
     }
   };
 
@@ -165,7 +166,7 @@ const DateDetail = () => {
           <div className="date-detail-header">
             <div className="image-container">
               <button 
-                onClick={() => navigate(-1)} 
+                onClick={handleBack} 
                 className="back-button"
               >
                 <ArrowLeft className="w-5 h-5" />
@@ -175,13 +176,10 @@ const DateDetail = () => {
                 alt={date.title} 
                 className="detail-image" 
                 id="detail-image"
-                onError={(e) => {
-                  e.target.src = 'https://via.placeholder.com/400x300?text=No+Image+Available';
-                }}
+                onError={handleImageError}
                 loading="lazy"
               />
             </div>
-            
             <div className="detail-info">
               <h2>{date.title}</h2>
               <div className="detail-tags">
@@ -190,15 +188,13 @@ const DateDetail = () => {
               </div>
             </div>
           </div>
-
           <div className="detail-content">
             <section className="detail-section">
               <h3>About this Date</h3>
               <p>{date.description}</p>
             </section>
-
             <section className="detail-section details-info-section" style={{
-              backgroundColor: '#4b5563 !important', // Darker grey background
+              backgroundColor: '#4b5563 !important',
               borderRadius: '0.75rem',
               padding: '1.5rem',
               margin: '1rem 0'
@@ -246,66 +242,37 @@ const DateDetail = () => {
                 ))}
               </div>
             </section>
-
             <section className="detail-section">
               <div className="interaction-buttons detail-actions">
                 <button
-                  className={`icon-button large ${date.is_liked ? 'liked' : ''}`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (!isAuthenticated) {
-                      alert('Please login to like dates');
-                      return;
-                    }
-                    likeDateIdea(id);
-                  }}
+                  className={`icon-button large ${isLiked ? 'liked' : ''}`}
+                  onClick={handleLike}
+                  disabled={likeMutation.isLoading}
                 >
-                  <Heart className="w-5 h-5" />
-                  <span>{date.likes_count || 0} Likes</span>
+                  <Heart className={`w-5 h-5 ${isLiked ? 'fill-current text-red-500' : ''}`} />
+                  <span>{likesCount} {likesCount === 1 ? 'Like' : 'Likes'}</span>
                 </button>
-
                 <button
                   className={`icon-button large ${isSaved ? 'saved' : ''}`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (!isAuthenticated) {
-                      alert('Please login to save dates');
-                      return;
-                    }
-                    saveMutation.mutate(id);
-                  }}
+                  onClick={handleSave}
+                  disabled={saveMutation.isLoading}
                 >
                   <Bookmark className={`w-5 h-5 transition-all duration-200 ${isSaved ? 'fill-current' : ''}`} />
                   <span>{isSaved ? 'Saved' : 'Save'}</span>
                 </button>
-
                 <button 
                   className="icon-button large" 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigator.clipboard.writeText(window.location.origin + `/dates/${date.id}`)
-                      .then(() => alert('Date link copied to clipboard!'))
-                      .catch(() => alert('Failed to copy the link.'));
-                  }}
+                  onClick={handleShare}
                 >
                   <Share2 className="w-5 h-5" />
                   <span>Share</span>
                 </button>
               </div>
             </section>
-
             <section className="detail-section">
               <h3>Comments</h3>
               <form 
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  if (comment.trim()) {
-                    addComment(id, comment).then(() => {
-                      queryClient.invalidateQueries(['comments', id]);
-                      setComment('');
-                    });
-                  }
-                }} 
+                onSubmit={handleSubmitComment} 
                 className="comment-form"
               >
                 <input
@@ -319,7 +286,6 @@ const DateDetail = () => {
                   Post
                 </button>
               </form>
-              
               <div className="comments-list">
                 {comments.map((comment) => (
                   <div key={comment.id} className="comment-item">

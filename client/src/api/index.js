@@ -140,6 +140,15 @@ export const likeDateIdea = async (id) => {
         throw error;
     }
 };
+export const unlikeDateIdea = async (id) => {
+    try {
+        const response = await api.post(`/dates/${id}/unlike`);
+        return response.data;
+    } catch (error) {
+        console.error('Error unliking date idea:', error);
+        throw error;
+    }
+};
 
 export const addComment = async (id, content) => {
     try {

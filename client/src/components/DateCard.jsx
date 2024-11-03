@@ -1,8 +1,10 @@
+// src/components/DateCard.jsx
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Heart, MessageCircle, Bookmark, Share2 } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { likeDateIdea, saveDateIdea, unsaveDateIdea } from '../api';
+import { likeDateIdea, unlikeDateIdea, saveDateIdea, unsaveDateIdea } from '../api';
 import { useAuth } from '../context/AuthContext';
 
 const COST_CATEGORY_MAP = {
@@ -15,40 +17,49 @@ const COST_CATEGORY_MAP = {
 
 const DateCard = ({ date }) => {
     const [isSaved, setIsSaved] = useState(date.is_saved || false);
+    const [isLiked, setIsLiked] = useState(date.is_liked || false);
+    const [likesCount, setLikesCount] = useState(date.likes_count || 0);
     const navigate = useNavigate();
     const queryClient = useQueryClient();
     const { isAuthenticated } = useAuth();
 
     useEffect(() => {
         setIsSaved(date.is_saved || false);
-    }, [date.is_saved]);
+        setIsLiked(date.is_liked || false);
+        setLikesCount(date.likes_count || 0);
+    }, [date.is_saved, date.is_liked, date.likes_count]);
 
     const likeMutation = useMutation({
-        mutationFn: likeDateIdea,
+        mutationFn: (id) => (isLiked ? unlikeDateIdea(id) : likeDateIdea(id)),
         onSuccess: () => {
+            setIsLiked(!isLiked);
+            setLikesCount((prev) => (isLiked ? prev - 1 : prev + 1));
             queryClient.invalidateQueries(['dateIdeas']);
             queryClient.invalidateQueries(['dateIdea', date.id]);
         },
         onError: (error) => {
-            console.error('Error liking date:', error);
-        }
+            console.error('Error updating like:', error);
+            if (error.response?.status === 403) {
+                alert('Please login to like dates');
+            }
+        },
     });
 
     const saveMutation = useMutation({
         mutationFn: (id) => (isSaved ? unsaveDateIdea(id) : saveDateIdea(id)),
         onSuccess: () => {
             setIsSaved(!isSaved);
-            queryClient.invalidateQueries({ queryKey: ['savedDates'] });
-            queryClient.invalidateQueries({ queryKey: ['feedDateIdeas'] });
-            queryClient.invalidateQueries({ queryKey: ['dateIdeas'] });
-            queryClient.invalidateQueries({ queryKey: ['dateIdea', date.id] });
+            queryClient.invalidateQueries(['savedDates']);
+            queryClient.invalidateQueries(['feedDateIdeas']);
+            queryClient.invalidateQueries(['dateIdeas']);
+            queryClient.invalidateQueries(['dateIdea', date.id]);
         },
         onError: (error) => {
             console.error('Error saving date:', error);
             if (error.response?.status === 403) {
                 alert('Please login to save dates');
             }
-        }
+        },
     });
 
     const handleLike = (e) => {
@@ -106,68 +117,66 @@ const DateCard = ({ date }) => {
             </div>
             
             <div className="date-card-content" style={{ 
-  display: 'flex', 
-  flexDirection: 'column', 
-  height: '100%', 
-  padding: '1.5rem' 
-}}>
-  <div className="date-card-title">
-    <div>
-      <h2>{date.title}</h2>
-      <p className="location">{date.location}</p>
-    </div>
-    <div className="cost-tag">
-      <span className="tag">{getDollarSigns(date.cost_category)}</span>
-    </div>
-  </div>
-  
-  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-  <p className="description" style={{ 
-    marginTop: '0.75rem', 
-    paddingTop: '0.75rem', 
-    paddingBottom: '0.75rem',
-    borderTop: '1px solid #eee',
-    flex: 1,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    textAlign: 'center',
-    fontWeight: '500'         // Makes text medium-bold
-    // or use fontWeight: '600' for even bolder
-    // or use fontWeight: 'bold' for maximum boldness
-  }}>
-    {date.description}
-  </p>
-  
-  <div className="duration" style={{ 
-    marginTop: 'auto', 
-    paddingTop: '0.75rem',
-    paddingBottom: '0.75rem',
-    borderTop: '1px solid #eee',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    textAlign: 'center'
-  }}>
-    Duration: {date.duration}
-  </div>
-</div>
-</div>
+                display: 'flex', 
+                flexDirection: 'column', 
+                height: '100%', 
+                padding: '1.5rem' 
+            }}>
+                <div className="date-card-title">
+                    <div>
+                        <h2>{date.title}</h2>
+                        <p className="location">{date.location}</p>
+                    </div>
+                    <div className="cost-tag">
+                        <span className="tag">{getDollarSigns(date.cost_category)}</span>
+                    </div>
+                </div>
+                
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                    <p className="description" style={{ 
+                        marginTop: '0.75rem', 
+                        paddingTop: '0.75rem', 
+                        paddingBottom: '0.75rem',
+                        borderTop: '1px solid #eee',
+                        flex: 1,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        textAlign: 'center',
+                        fontWeight: '500'
+                    }}>
+                        {date.description}
+                    </p>
+                    
+                    <div className="duration" style={{ 
+                        marginTop: 'auto', 
+                        paddingTop: '0.75rem',
+                        paddingBottom: '0.75rem',
+                        borderTop: '1px solid #eee',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        textAlign: 'center'
+                    }}>
+                        Duration: {date.duration}
+                    </div>
+                </div>
+            </div>
             
             <div className="date-card-footer">
                 <div className="interaction-buttons">
                     <button
-                        className={`icon-button ${likeMutation.isSuccess ? 'liked' : ''}`}
+                        className={`icon-button ${isLiked ? 'liked' : ''}`}
                         onClick={handleLike}
                         disabled={likeMutation.isLoading}
-                        aria-label={`Like this date idea (${date.likes_count || 0} likes)`}
+                        aria-label={`Like this date idea (${likesCount} likes)`}
                     >
                         <Heart 
                             className={`w-5 h-5 transition-all duration-200 ${
-                                likeMutation.isLoading ? 'opacity-50' : ''
+                                isLiked ? 'fill-current text-red-500' : ''
                             }`} 
                         />
-                        <span className="ml-1">{date.likes_count || 0}</span>
+                        <span className="ml-1">{likesCount}</span>
                     </button>
 
                     <button
