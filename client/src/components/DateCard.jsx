@@ -1,4 +1,3 @@
-// src/components/DateCard.jsx
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Heart, MessageCircle, Bookmark, Share2 } from 'lucide-react';
@@ -6,14 +5,12 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { likeDateIdea, saveDateIdea, unsaveDateIdea } from '../api';
 import { useAuth } from '../context/AuthContext';
 
-// 1. Define a mapping from cost_category to dollar signs
 const COST_CATEGORY_MAP = {
     free: 'Free',
     economy: '$',
     standard: '$$',
     premium: '$$$',
     luxury: '$$$$',
-    // Add more mappings if there are additional categories
 };
 
 const DateCard = ({ date }) => {
@@ -22,7 +19,6 @@ const DateCard = ({ date }) => {
     const queryClient = useQueryClient();
     const { isAuthenticated } = useAuth();
 
-    // Update local state when date prop changes
     useEffect(() => {
         setIsSaved(date.is_saved || false);
     }, [date.is_saved]);
@@ -35,7 +31,6 @@ const DateCard = ({ date }) => {
         },
         onError: (error) => {
             console.error('Error liking date:', error);
-            // Optionally, you can add user-facing error handling here
         }
     });
 
@@ -43,7 +38,6 @@ const DateCard = ({ date }) => {
         mutationFn: (id) => (isSaved ? unsaveDateIdea(id) : saveDateIdea(id)),
         onSuccess: () => {
             setIsSaved(!isSaved);
-            // Invalidate with consistent query keys
             queryClient.invalidateQueries({ queryKey: ['savedDates'] });
             queryClient.invalidateQueries({ queryKey: ['feedDateIdeas'] });
             queryClient.invalidateQueries({ queryKey: ['dateIdeas'] });
@@ -54,7 +48,6 @@ const DateCard = ({ date }) => {
             if (error.response?.status === 403) {
                 alert('Please login to save dates');
             }
-            // Optionally, handle other error statuses
         }
     });
 
@@ -80,7 +73,6 @@ const DateCard = ({ date }) => {
 
     const handleShare = (e) => {
         e.stopPropagation();
-        // Implement share functionality, e.g., copy link to clipboard
         navigator.clipboard.writeText(window.location.origin + `/dates/${date.id}`)
             .then(() => {
                 alert('Date link copied to clipboard!');
@@ -99,7 +91,6 @@ const DateCard = ({ date }) => {
         navigate(`/dates/${date.id}?focus=comments`);
     };
 
-    // 2. Function to get dollar signs based on cost_category
     const getDollarSigns = (category) => {
         return COST_CATEGORY_MAP[category.toLowerCase()] || '$';
     };
@@ -114,20 +105,22 @@ const DateCard = ({ date }) => {
                 <img src={date.image_url} alt={date.title} />
             </div>
             
-            <div className="date-card-content">
+            <div className="date-card-content" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
                 <div className="date-card-title">
                     <div>
                         <h2>{date.title}</h2>
                         <p className="location">{date.location}</p>
                     </div>
                     <div className="cost-tag">
-                        {/* 3. Replace cost_category text with dollar signs */}
                         <span className="tag">{getDollarSigns(date.cost_category)}</span>
                     </div>
                 </div>
                 
-                <p className="description">{date.description}</p>
-                <div className="duration">Duration: {date.duration}</div>
+                <p className="description" style={{ flexGrow: 1 }}>{date.description}</p>
+                
+                <div className="duration" style={{ marginTop: 'auto', paddingTop: '0.75rem', borderTop: '1px solid #eee' }}>
+                    Duration: {date.duration}
+                </div>
             </div>
             
             <div className="date-card-footer">
