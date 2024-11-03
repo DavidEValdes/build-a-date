@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Heart, Bookmark, Share2, ArrowLeft } from 'lucide-react';
 import { getDateIdea, likeDateIdea, addComment, getComments, saveDateIdea, unsaveDateIdea } from '../api';
 import { useAuth } from '../context/AuthContext';
+import Spinner from '../components/Spinner';
 
 const DateDetail = () => {
   const { id } = useParams();
@@ -141,7 +142,15 @@ const DateDetail = () => {
   };
 
   if (isLoading) {
-    return <div className="loading">Loading...</div>;
+    return (
+      <div className="app-container">
+        <main className="main-content">
+          <div className="loading-spinner-container">
+            <Spinner size={50} />
+          </div>
+        </main>
+      </div>
+    );
   }
 
   if (!date) {

@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import QuestionPipeline from '../components/QuestionPipeline';
 import DateCard from '../components/DateCard';
 import SuggestionDisplay from '../components/SuggestionDisplay';
+import Spinner from '../components/Spinner';
 import { getDateIdeas, getAllDateIdeas, createDateIdea } from '../api';
 
 const Home = () => {
@@ -11,12 +12,12 @@ const Home = () => {
   const [currentSuggestion, setCurrentSuggestion] = useState(null);
   const queryClient = useQueryClient();
 
-  const { data: feedDates = [] } = useQuery({
+  const { data: feedDates = [], isLoading: isFeedLoading } = useQuery({
     queryKey: ['feedDateIdeas'],
     queryFn: getDateIdeas,
   });
 
-  const { data: allDates = [] } = useQuery({
+  const { data: allDates = [], isLoading: isAllDatesLoading } = useQuery({
     queryKey: ['allDateIdeas'],
     queryFn: getAllDateIdeas,
   });
@@ -82,6 +83,7 @@ const Home = () => {
             <button
               className="primary-button"
               onClick={() => setStage('questions')}
+              disabled={isAllDatesLoading}
             >
               Start Building
             </button>
@@ -100,13 +102,9 @@ const Home = () => {
               <button
                 className="primary-button"
                 onClick={handleShareToFeed}
-                disabled={createDateMutation.isPending}
+                disabled={createDateMutation.isLoading}
               >
-                {createDateMutation.isPending ? (
-                  <span className="loading-text">Sharing...</span>
-                ) : (
-                  'Share to Feed'
-                )}
+                Share to Feed
               </button>
               <button
                 className="secondary-button"
@@ -118,19 +116,28 @@ const Home = () => {
           </div>
         )}
 
-        {/* Always show feed if there are dates */}
-        {feedDates.length > 0 && (
-          <div className="feed-section">
-            <div className="feed-header">
-              <h2>Date Ideas Feed</h2>
-            </div>
-            <div className="dates-grid">
-              {feedDates.map((date) => (
-                <DateCard key={date.id} date={date} />
-              ))}
-            </div>
-          </div>
-        )}
+        {/* Feed section - always show */}
+        <div className="feed-section">
+  <div className="feed-header">
+    <h2>Date Ideas Feed</h2>
+  </div>
+  
+  {isFeedLoading ? (
+    <div className="loading-spinner-container">
+      <Spinner size={50} />
+    </div>
+  ) : feedDates.length > 0 ? (
+    <div className="dates-grid">
+      {feedDates.map((date) => (
+        <DateCard key={date.id} date={date} />
+      ))}
+    </div>
+  ) : (
+    <div className="center mt-4">
+      <p>No dates found</p>
+    </div>
+  )}
+</div>
       </main>
     </div>
   );
