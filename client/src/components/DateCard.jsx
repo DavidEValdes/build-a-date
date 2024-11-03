@@ -27,10 +27,10 @@ const DateCard = ({ date }) => {
         setIsSaved(date.is_saved || false);
         setIsLiked(date.is_liked || false);
         setLikesCount(date.likes_count || 0);
-    }, [date.is_saved, date.is_liked, date.likes_count]);
+    }, [date]); // Changed dependency array to depend only on 'date'
 
     const likeMutation = useMutation({
-        mutationFn: (id) => (isLiked ? unlikeDateIdea(id) : likeDateIdea(id)),
+        mutationFn: () => (isLiked ? unlikeDateIdea(date.id) : likeDateIdea(date.id)),
         onSuccess: () => {
             setIsLiked(!isLiked);
             setLikesCount((prev) => (isLiked ? prev - 1 : prev + 1));
@@ -46,7 +46,7 @@ const DateCard = ({ date }) => {
     });
 
     const saveMutation = useMutation({
-        mutationFn: (id) => (isSaved ? unsaveDateIdea(id) : saveDateIdea(id)),
+        mutationFn: () => (isSaved ? unsaveDateIdea(date.id) : saveDateIdea(date.id)),
         onSuccess: () => {
             setIsSaved(!isSaved);
             queryClient.invalidateQueries(['savedDates']);
@@ -69,7 +69,7 @@ const DateCard = ({ date }) => {
             return;
         }
         if (!likeMutation.isLoading) {
-            likeMutation.mutate(date.id);
+            likeMutation.mutate();
         }
     };
 
@@ -79,7 +79,7 @@ const DateCard = ({ date }) => {
             alert('Please login to save dates');
             return;
         }
-        saveMutation.mutate(date.id);
+        saveMutation.mutate();
     };
 
     const handleShare = (e) => {
