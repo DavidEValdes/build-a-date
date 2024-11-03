@@ -2,9 +2,17 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query'; // Add this import
 import { Heart, Bookmark, Share2, ArrowLeft } from 'lucide-react';
-import { getDateIdea, likeDateIdea, unlikeDateIdea, addComment, getComments, saveDateIdea, unsaveDateIdea } from '../api';
+import {
+  getDateIdea,
+  likeDateIdea,
+  unlikeDateIdea,
+  addComment,
+  getComments,
+  saveDateIdea,
+  unsaveDateIdea,
+} from '../api';
 import { useAuth } from '../context/AuthContext';
 import Spinner from '../components/Spinner';
 import Footer from '../components/Footer';
@@ -16,7 +24,6 @@ const DateDetail = () => {
   const [isSaved, setIsSaved] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(0);
-  const queryClient = useQueryClient();
   const { isAuthenticated } = useAuth();
 
   const COST_CATEGORY_MAP = {
@@ -40,7 +47,7 @@ const DateDetail = () => {
     if (date) {
       setIsSaved(date.is_saved || false);
       setIsLiked(date.is_liked || false);
-      setLikesCount(date.likes_count || 0);
+      setLikesCount(Number(date.likes_count) || 0); // Ensure likesCount is a number
     }
   }, [date]);
 
@@ -49,55 +56,79 @@ const DateDetail = () => {
     queryFn: () => getComments(id),
   });
 
-  const likeMutation = useMutation({
-    mutationFn: () => (isLiked ? unlikeDateIdea(id) : likeDateIdea(id)),
-    onSuccess: () => {
-      setIsLiked(!isLiked);
-      setLikesCount((prev) => (isLiked ? prev - 1 : prev + 1));
-      queryClient.invalidateQueries(['dateIdea', id]);
-      queryClient.invalidateQueries(['dateIdeas']);
-    },
-    onError: (error) => {
-      console.error('Error updating like:', error);
-      if (error.response?.status === 403) {
-        alert('Please login to like dates');
-      }
-    },
-  });
+  const handleLike = (e) => {
+    e.stopPropagation();
+    if (!isAuthenticated) {
+      alert('Please login to like dates');
+      return;
+    }
 
-  const saveMutation = useMutation({
-    mutationFn: () => (isSaved ? unsaveDateIdea(id) : saveDateIdea(id)),
-    onSuccess: () => {
-      setIsSaved(!isSaved);
-      queryClient.invalidateQueries(['savedDates']);
-      queryClient.invalidateQueries(['feedDateIdeas']);
-      queryClient.invalidateQueries(['dateIdeas']);
-      queryClient.invalidateQueries(['dateIdea', id]);
-      queryClient.invalidateQueries(['allDateIdeas']);
-    },
-    onError: (error) => {
-      console.error('Error saving date:', error);
-      if (error.response?.status === 403) {
-        alert('Please login to save dates');
-      }
-    },
-  });
+    // Capture the previous isLiked value
+    const wasLiked = isLiked;
 
-  const commentMutation = useMutation({
-    mutationFn: (content) => addComment(id, content),
-    onSuccess: () => {
-      queryClient.invalidateQueries(['comments', id]);
-      setComment('');
-    },
-    onError: (error) => {
-      console.error('Error adding comment:', error);
-    },
-  });
+    // Optimistically update the like count and isLiked state
+    if (wasLiked) {
+      setLikesCount((prev) => Number(prev) - 1);
+    } else {
+      setLikesCount((prev) => Number(prev) + 1);
+    }
+    setIsLiked(!wasLiked);
+
+    // Send the request to the backend, but don't wait for the response
+    if (wasLiked) {
+      // User is unliking
+      unlikeDateIdea(id).catch((error) => {
+        console.error('Error unliking date idea:', error);
+        // Revert state if there's an error
+        setLikesCount((prev) => Number(prev) + 1);
+        setIsLiked(true);
+      });
+    } else {
+      // User is liking
+      likeDateIdea(id).catch((error) => {
+        console.error('Error liking date idea:', error);
+        // Revert state if there's an error
+        setLikesCount((prev) => Number(prev) - 1);
+        setIsLiked(false);
+      });
+    }
+  };
+
+  const handleSave = (e) => {
+    e.stopPropagation();
+    if (!isAuthenticated) {
+      alert('Please login to save dates');
+      return;
+    }
+
+    const wasSaved = isSaved;
+    setIsSaved(!wasSaved);
+
+    if (wasSaved) {
+      unsaveDateIdea(id).catch((error) => {
+        console.error('Error unsaving date idea:', error);
+        setIsSaved(true);
+      });
+    } else {
+      saveDateIdea(id).catch((error) => {
+        console.error('Error saving date idea:', error);
+        setIsSaved(false);
+      });
+    }
+  };
 
   const handleSubmitComment = (e) => {
     e.preventDefault();
     if (comment.trim()) {
-      commentMutation.mutateAsync(comment);
+      addComment(id, comment)
+        .then(() => {
+          setComment('');
+          // Since we're using useQuery, we need to invalidate the comments query to fetch the new comments
+          queryClient.invalidateQueries(['comments', id]);
+        })
+        .catch((error) => {
+          console.error('Error adding comment:', error);
+        });
     }
   };
 
@@ -114,33 +145,14 @@ const DateDetail = () => {
 
   const handleShare = (e) => {
     e.stopPropagation();
-    navigator.clipboard.writeText(window.location.origin + `/dates/${date.id}`)
+    navigator.clipboard
+      .writeText(window.location.origin + `/dates/${id}`)
       .then(() => {
         alert('Date link copied to clipboard!');
       })
       .catch(() => {
         alert('Failed to copy the link.');
       });
-  };
-
-  const handleSave = (e) => {
-    e.stopPropagation();
-    if (!isAuthenticated) {
-      alert('Please login to save dates');
-      return;
-    }
-    saveMutation.mutate();
-  };
-
-  const handleLike = (e) => {
-    e.stopPropagation();
-    if (!isAuthenticated) {
-      alert('Please login to like dates');
-      return;
-    }
-    if (!likeMutation.isLoading) {
-      likeMutation.mutate();
-    }
   };
 
   if (isLoading) {
@@ -165,16 +177,13 @@ const DateDetail = () => {
         <div className="date-detail-container">
           <div className="date-detail-header">
             <div className="image-container">
-              <button 
-                onClick={handleBack} 
-                className="back-button"
-              >
+              <button onClick={handleBack} className="back-button">
                 <ArrowLeft className="w-5 h-5" />
               </button>
-              <img 
-                src={date.image_url} 
-                alt={date.title} 
-                className="detail-image" 
+              <img
+                src={date.image_url}
+                alt={date.title}
+                className="detail-image"
                 id="detail-image"
                 onError={handleImageError}
                 loading="lazy"
@@ -193,49 +202,61 @@ const DateDetail = () => {
               <h3>About this Date</h3>
               <p>{date.description}</p>
             </section>
-            <section className="detail-section details-info-section" style={{
-              backgroundColor: '#4b5563 !important',
-              borderRadius: '0.75rem',
-              padding: '1.5rem',
-              margin: '1rem 0'
-            }}>
+            <section
+              className="detail-section details-info-section"
+              style={{
+                backgroundColor: '#4b5563 !important',
+                borderRadius: '0.75rem',
+                padding: '1.5rem',
+                margin: '1rem 0',
+              }}
+            >
               <h3>Details</h3>
-              <div className="detail-grid" style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                gap: '1rem'
-              }}>
+              <div
+                className="detail-grid"
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                  gap: '1rem',
+                }}
+              >
                 {[
                   { label: 'Location', value: date.location },
                   { label: 'Time of Day', value: date.time_of_day },
                   { label: 'Activity Level', value: date.activity_level },
-                  { label: 'Distance', value: date.distance }
+                  { label: 'Distance', value: date.distance },
                 ].map((item) => (
-                  <div 
-                    key={item.label} 
+                  <div
+                    key={item.label}
                     className="detail-item"
                     style={{
                       backgroundColor: 'white',
                       padding: '1.25rem',
                       borderRadius: '0.5rem',
                       boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
-                      border: '1px solid #f3f4f6'
+                      border: '1px solid #f3f4f6',
                     }}
                   >
-                    <span className="detail-label" style={{ 
-                      fontSize: '0.875rem',
-                      color: '#6b7280',
-                      display: 'block',
-                      marginBottom: '0.25rem',
-                      fontWeight: '500'
-                    }}>
+                    <span
+                      className="detail-label"
+                      style={{
+                        fontSize: '0.875rem',
+                        color: '#6b7280',
+                        display: 'block',
+                        marginBottom: '0.25rem',
+                        fontWeight: '500',
+                      }}
+                    >
                       {item.label}
                     </span>
-                    <span className="detail-value" style={{
-                      color: '#1f2937',
-                      fontWeight: '600',
-                      fontSize: '1rem'
-                    }}>
+                    <span
+                      className="detail-value"
+                      style={{
+                        color: '#1f2937',
+                        fontWeight: '600',
+                        fontSize: '1rem',
+                      }}
+                    >
                       {item.value}
                     </span>
                   </div>
@@ -247,23 +268,24 @@ const DateDetail = () => {
                 <button
                   className={`icon-button large ${isLiked ? 'liked' : ''}`}
                   onClick={handleLike}
-                  disabled={likeMutation.isLoading}
                 >
                   <Heart className={`w-5 h-5 ${isLiked ? 'fill-current text-red-500' : ''}`} />
-                  <span>{likesCount} {likesCount === 1 ? 'Like' : 'Likes'}</span>
+                  <span>
+                    {likesCount} {likesCount === 1 ? 'Like' : 'Likes'}
+                  </span>
                 </button>
                 <button
                   className={`icon-button large ${isSaved ? 'saved' : ''}`}
                   onClick={handleSave}
-                  disabled={saveMutation.isLoading}
                 >
-                  <Bookmark className={`w-5 h-5 transition-all duration-200 ${isSaved ? 'fill-current' : ''}`} />
+                  <Bookmark
+                    className={`w-5 h-5 transition-all duration-200 ${
+                      isSaved ? 'fill-current' : ''
+                    }`}
+                  />
                   <span>{isSaved ? 'Saved' : 'Save'}</span>
                 </button>
-                <button 
-                  className="icon-button large" 
-                  onClick={handleShare}
-                >
+                <button className="icon-button large" onClick={handleShare}>
                   <Share2 className="w-5 h-5" />
                   <span>Share</span>
                 </button>
@@ -271,10 +293,7 @@ const DateDetail = () => {
             </section>
             <section className="detail-section">
               <h3>Comments</h3>
-              <form 
-                onSubmit={handleSubmitComment} 
-                className="comment-form"
-              >
+              <form onSubmit={handleSubmitComment} className="comment-form">
                 <input
                   type="text"
                   value={comment}
