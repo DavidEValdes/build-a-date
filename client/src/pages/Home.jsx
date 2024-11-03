@@ -1,4 +1,3 @@
-// src/pages/Home.jsx
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import QuestionPipeline from '../components/QuestionPipeline';
@@ -6,6 +5,7 @@ import DateCard from '../components/DateCard';
 import SuggestionDisplay from '../components/SuggestionDisplay';
 import Spinner from '../components/Spinner';
 import { getDateIdeas, getAllDateIdeas, createDateIdea } from '../api';
+
 
 const Home = () => {
   const [stage, setStage] = useState('welcome');
@@ -73,7 +73,7 @@ const Home = () => {
         {/* Show welcome screen on welcome stage or after sharing to feed */}
         {(stage === 'welcome' || stage === 'feed') && (
           <div className="welcome-screen">
-            <h2>Find Your Perfect Date</h2>
+            <h2 style={{ color: '#000000' }}>Find Your Perfect Date</h2>
             <p style={{ fontSize: '1.125rem' }}>
               Let our <span style={{ fontWeight: 'bold' }}>AI-tailored matchmaker</span> find your perfect date.
             </p>
@@ -118,26 +118,78 @@ const Home = () => {
 
         {/* Feed section - always show */}
         <div className="feed-section">
-  <div className="feed-header">
-    <h2>Date Ideas Feed</h2>
-  </div>
-  
-  {isFeedLoading ? (
-    <div className="loading-spinner-container">
-      <Spinner size={50} />
-    </div>
-  ) : feedDates.length > 0 ? (
-    <div className="dates-grid">
-      {feedDates.map((date) => (
-        <DateCard key={date.id} date={date} />
-      ))}
-    </div>
-  ) : (
-    <div className="center mt-4">
-      <p>No dates found</p>
-    </div>
-  )}
-</div>
+          <div
+            className="feed-header-container"
+            style={{
+              marginTop: '1.5rem', 
+              marginBottom: '1rem',
+            }}
+          >
+           <h2
+            className="feed-title custom-feed-title"
+            style={{
+              fontSize: '1.75rem', // Slightly larger title size
+              marginBottom: '0.5rem',
+              fontWeight: 'bold',
+              textAlign: 'left', // Align title to the left
+              color: '#000000', // Ensure same black color as "Find Your Perfect Date"
+            }}
+          >
+            Date Ideas Feed
+          </h2>
+            <div
+              
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                height: '1.5rem',
+              }}
+            >
+              <span
+                className="divider-line"
+                style={{
+                  height: '1px',
+                  backgroundColor: '#ccc', // Adjust color as needed
+                  flex: 1,
+                }}
+              ></span>
+              <div
+                className="divider-dot"
+                style={{
+                  width: '6px',
+                  height: '6px',
+                  backgroundColor: '#4f46e5', // Purple color for the dot
+                  borderRadius: '50%',
+                }}
+              ></div>
+              <span
+                className="divider-line"
+                style={{
+                  height: '1px',
+                  backgroundColor: '#ccc',
+                  flex: 1,
+                }}
+              ></span>
+            </div>
+          </div>
+
+          {isFeedLoading ? (
+            <div className="loading-spinner-container">
+              <Spinner size={50} />
+            </div>
+          ) : feedDates.length > 0 ? (
+            <div className="dates-grid">
+              {feedDates.map((date) => (
+                <DateCard key={date.id} date={date} />
+              ))}
+            </div>
+          ) : (
+            <div className="center mt-4">
+              <p>No dates found</p>
+            </div>
+          )}
+        </div>
       </main>
     </div>
   );

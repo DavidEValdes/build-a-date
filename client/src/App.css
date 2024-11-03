@@ -440,6 +440,7 @@ body {
   font-size: 1.5rem;
   font-weight: 600;
   color: #1f2937;
+  
 }
 
 .dates-grid {
@@ -2005,6 +2006,9 @@ body {
   background-color: #e5e7eb;
 }
 
+
+
+
 .save-button {
   background-color: #4f46e5;
   color: white;
@@ -2078,8 +2082,8 @@ body {
 }
 
 .divider-dot {
-  width: 4px;
-  height: 4px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
   background-color: #4f46e5;
 }
