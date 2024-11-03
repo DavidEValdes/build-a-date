@@ -105,23 +105,54 @@ const DateCard = ({ date }) => {
                 <img src={date.image_url} alt={date.title} />
             </div>
             
-            <div className="date-card-content" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-                <div className="date-card-title">
-                    <div>
-                        <h2>{date.title}</h2>
-                        <p className="location">{date.location}</p>
-                    </div>
-                    <div className="cost-tag">
-                        <span className="tag">{getDollarSigns(date.cost_category)}</span>
-                    </div>
-                </div>
-                
-                <p className="description" style={{ flexGrow: 1 }}>{date.description}</p>
-                
-                <div className="duration" style={{ marginTop: 'auto', paddingTop: '0.75rem', borderTop: '1px solid #eee' }}>
-                    Duration: {date.duration}
-                </div>
-            </div>
+            <div className="date-card-content" style={{ 
+  display: 'flex', 
+  flexDirection: 'column', 
+  height: '100%', 
+  padding: '1.5rem' 
+}}>
+  <div className="date-card-title">
+    <div>
+      <h2>{date.title}</h2>
+      <p className="location">{date.location}</p>
+    </div>
+    <div className="cost-tag">
+      <span className="tag">{getDollarSigns(date.cost_category)}</span>
+    </div>
+  </div>
+  
+  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+  <p className="description" style={{ 
+    marginTop: '0.75rem', 
+    paddingTop: '0.75rem', 
+    paddingBottom: '0.75rem',
+    borderTop: '1px solid #eee',
+    flex: 1,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    textAlign: 'center',
+    fontWeight: '500'         // Makes text medium-bold
+    // or use fontWeight: '600' for even bolder
+    // or use fontWeight: 'bold' for maximum boldness
+  }}>
+    {date.description}
+  </p>
+  
+  <div className="duration" style={{ 
+    marginTop: 'auto', 
+    paddingTop: '0.75rem',
+    paddingBottom: '0.75rem',
+    borderTop: '1px solid #eee',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    textAlign: 'center'
+  }}>
+    Duration: {date.duration}
+  </div>
+</div>
+</div>
             
             <div className="date-card-footer">
                 <div className="interaction-buttons">

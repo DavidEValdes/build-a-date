@@ -233,6 +233,7 @@ body {
 }
 
 .description {
+  
   color: #4b5563;
   margin-bottom: 1rem;
   font-size: 0.875rem;
@@ -240,7 +241,7 @@ body {
 }
 
 .duration {
-  color: #6b7280;
+  color: #4d4e4f;
   font-size: 0.875rem;
   font-weight: 500;
   font-weight: bold;
