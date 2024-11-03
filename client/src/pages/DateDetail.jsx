@@ -6,6 +6,7 @@ import { Heart, Bookmark, Share2, ArrowLeft } from 'lucide-react';
 import { getDateIdea, likeDateIdea, addComment, getComments, saveDateIdea, unsaveDateIdea } from '../api';
 import { useAuth } from '../context/AuthContext';
 import Spinner from '../components/Spinner';
+import Footer from '../components/Footer';
 
 const DateDetail = () => {
   const { id } = useParams();
@@ -283,6 +284,7 @@ const DateDetail = () => {
           </div>
         </div>
       </main>
+      <Footer />
     </div>
   );
 };

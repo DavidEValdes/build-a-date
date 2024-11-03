@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { ArrowLeft, Edit2, User } from 'lucide-react';
 import EditProfileModal from '../components/EditProfileModal';
+import Footer from '../components/Footer';
 
 const Profile = () => {
   const { user, isAuthenticated, updateUser } = useAuth();
@@ -175,9 +176,11 @@ const Profile = () => {
               Edit Profile
             </button>
           </div>
+          
         </div>
+        
       </div>
-
+      
       {/* Edit Profile Modal */}
       {showEditModal && (
         <EditProfileModal
@@ -186,7 +189,9 @@ const Profile = () => {
           onUpdate={updateUser}
         />
       )}
+      
     </div>
+    
   );
 };
 

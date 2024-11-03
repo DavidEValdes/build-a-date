@@ -7,6 +7,7 @@ import SuggestionDisplay from '../components/SuggestionDisplay';
 import Spinner from '../components/Spinner';
 import { getDateIdeas, getAllDateIdeas, createDateIdea } from '../api';
 import { ArrowRight, SlidersHorizontal } from 'lucide-react';
+import Footer from '../components/Footer';
 
 const Home = () => {
   const [stage, setStage] = useState('welcome');
@@ -368,6 +369,7 @@ const Home = () => {
           }
         `}
       </style>
+      <Footer />
     </div>
   );
 };

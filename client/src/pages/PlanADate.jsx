@@ -1,4 +1,5 @@
 import React from 'react';
+import Footer from '../components/Footer';
 
 const PlanADate = () => {
   // Function to handle button clicks
@@ -176,7 +177,9 @@ const PlanADate = () => {
             </button>
           </div>
         ))}
+        
       </div>
+      <Footer />
     </div>
   );
 };

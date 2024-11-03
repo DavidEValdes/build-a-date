@@ -6,6 +6,7 @@ import Spinner from '../components/Spinner'; // Import Spinner
 import { ArrowLeft } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { getSavedDates } from '../api';
+import Footer from '../components/Footer';
 
 const SavedDates = () => {
   const { isAuthenticated } = useAuth();
@@ -64,7 +65,9 @@ const SavedDates = () => {
             ))}
           </div>
         )}
+        
       </main>
+      <Footer />
     </div>
   );
 };
