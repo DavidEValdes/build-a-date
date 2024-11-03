@@ -90,7 +90,6 @@ const Home = () => {
   return (
     <div className="app-container" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <main className="main-content" style={{ flex: '1', paddingBottom: '2rem' }}>
-        
         {(stage === 'welcome' || stage === 'feed') && (
           <div className="welcome-screen">
             <h2 style={{ color: '#000000' }}>Find Your Perfect Date</h2>
@@ -290,33 +289,45 @@ const Home = () => {
             </div>
           </div>
 
-          {isFeedLoading ? (
-            <div className="loading-spinner-container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' }}>
-              <Spinner size={50} />
-            </div>
-          ) : feedDates.length > 0 ? (
-            <div 
-              className="feed-container"
-              style={{ 
-                height: '1100px',
-                overflow: 'auto',
-                padding: '1rem',
-                borderRadius: '8px',
-                backgroundColor: '#f8f9fa',
-                marginBottom: '2rem',
-              }}
-            >
+          <div 
+            className="feed-container"
+            style={{ 
+              height: '1100px',
+              overflow: 'auto',
+              padding: '1rem',
+              borderRadius: '8px',
+              backgroundColor: '#f8f9fa',
+              marginBottom: '2rem',
+              position: 'relative',
+            }}
+          >
+            {isFeedLoading ? (
+              <div style={{ 
+                position: 'absolute',
+                top: '30%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                width: '100%',
+                height: '100%',
+                backgroundColor: 'rgba(248, 249, 250, 0.8)',
+              }}>
+                <Spinner size={50} />
+              </div>
+            ) : feedDates.length > 0 ? (
               <div className="dates-grid">
                 {getSortedDates(feedDates).map((date) => (
                   <DateCard key={date.id} date={date} />
                 ))}
               </div>
-            </div>
-          ) : (
-            <div className="center mt-4">
-              <p>No dates found</p>
-            </div>
-          )}
+            ) : (
+              <div className="center mt-4">
+                <p>No dates found</p>
+              </div>
+            )}
+          </div>
         </div>
       </main>
 

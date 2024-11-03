@@ -165,7 +165,7 @@ const DateDetail = () => {
           <div className="date-detail-header">
             <div className="image-container">
               <button 
-                onClick={handleBack} 
+                onClick={() => navigate(-1)} 
                 className="back-button"
               >
                 <ArrowLeft className="w-5 h-5" />
@@ -175,7 +175,9 @@ const DateDetail = () => {
                 alt={date.title} 
                 className="detail-image" 
                 id="detail-image"
-                onError={handleImageError}
+                onError={(e) => {
+                  e.target.src = 'https://via.placeholder.com/400x300?text=No+Image+Available';
+                }}
                 loading="lazy"
               />
             </div>
@@ -183,7 +185,6 @@ const DateDetail = () => {
             <div className="detail-info">
               <h2>{date.title}</h2>
               <div className="detail-tags">
-                {/* 3. Replace cost_category text with dollar signs */}
                 <span className="cost-tag">{getDollarSigns(date.cost_category)}</span>
                 <span className="duration-tag">{date.duration}</span>
               </div>
@@ -196,56 +197,98 @@ const DateDetail = () => {
               <p>{date.description}</p>
             </section>
 
-            <section className="detail-section">
+            <section className="detail-section details-info-section" style={{
+              backgroundColor: '#4b5563 !important', // Darker grey background
+              borderRadius: '0.75rem',
+              padding: '1.5rem',
+              margin: '1rem 0'
+            }}>
               <h3>Details</h3>
-              <div className="detail-grid">
-                <div className="detail-item">
-                  <span className="detail-label">Location</span>
-                  <span className="detail-value">{date.location}</span>
-                </div>
-                <div className="detail-item">
-                  <span className="detail-label">Time of Day</span>
-                  <span className="detail-value">{date.time_of_day}</span>
-                </div>
-                <div className="detail-item">
-                  <span className="detail-label">Activity Level</span>
-                  <span className="detail-value">{date.activity_level}</span>
-                </div>
-                <div className="detail-item">
-                  <span className="detail-label">Distance</span>
-                  <span className="detail-value">{date.distance}</span>
-                </div>
+              <div className="detail-grid" style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                gap: '1rem'
+              }}>
+                {[
+                  { label: 'Location', value: date.location },
+                  { label: 'Time of Day', value: date.time_of_day },
+                  { label: 'Activity Level', value: date.activity_level },
+                  { label: 'Distance', value: date.distance }
+                ].map((item) => (
+                  <div 
+                    key={item.label} 
+                    className="detail-item"
+                    style={{
+                      backgroundColor: 'white',
+                      padding: '1.25rem',
+                      borderRadius: '0.5rem',
+                      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
+                      border: '1px solid #f3f4f6'
+                    }}
+                  >
+                    <span className="detail-label" style={{ 
+                      fontSize: '0.875rem',
+                      color: '#6b7280',
+                      display: 'block',
+                      marginBottom: '0.25rem',
+                      fontWeight: '500'
+                    }}>
+                      {item.label}
+                    </span>
+                    <span className="detail-value" style={{
+                      color: '#1f2937',
+                      fontWeight: '600',
+                      fontSize: '1rem'
+                    }}>
+                      {item.value}
+                    </span>
+                  </div>
+                ))}
               </div>
             </section>
 
             <section className="detail-section">
               <div className="interaction-buttons detail-actions">
                 <button
-                  className={`icon-button large ${likeMutation.isSuccess ? 'liked' : ''}`}
-                  onClick={handleLike}
-                  disabled={likeMutation.isLoading}
-                  aria-label={`Like this date idea (${date.likes_count || 0} likes)`}
+                  className={`icon-button large ${date.is_liked ? 'liked' : ''}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (!isAuthenticated) {
+                      alert('Please login to like dates');
+                      return;
+                    }
+                    likeDateIdea(id);
+                  }}
                 >
-                  <Heart className={`w-5 h-5 ${likeMutation.isLoading ? 'opacity-50' : ''}`} />
+                  <Heart className="w-5 h-5" />
                   <span>{date.likes_count || 0} Likes</span>
                 </button>
 
                 <button
                   className={`icon-button large ${isSaved ? 'saved' : ''}`}
-                  onClick={handleSave}
-                  disabled={saveMutation.isLoading}
-                  aria-label={isSaved ? 'Remove from saved' : 'Save this date idea'}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (!isAuthenticated) {
+                      alert('Please login to save dates');
+                      return;
+                    }
+                    saveMutation.mutate(id);
+                  }}
                 >
-                  <Bookmark 
-                    className={`w-5 h-5 transition-all duration-200 ${
-                      isSaved ? 'fill-current' : ''
-                    }`}
-                  />
+                  <Bookmark className={`w-5 h-5 transition-all duration-200 ${isSaved ? 'fill-current' : ''}`} />
                   <span>{isSaved ? 'Saved' : 'Save'}</span>
                 </button>
 
-                <button className="icon-button large" onClick={handleShare}>
-                  <Share2 />
+                <button 
+                  className="icon-button large" 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigator.clipboard.writeText(window.location.origin + `/dates/${date.id}`)
+                      .then(() => alert('Date link copied to clipboard!'))
+                      .catch(() => alert('Failed to copy the link.'));
+                  }}
+                >
+                  <Share2 className="w-5 h-5" />
                   <span>Share</span>
                 </button>
               </div>
@@ -253,7 +296,18 @@ const DateDetail = () => {
 
             <section className="detail-section">
               <h3>Comments</h3>
-              <form onSubmit={handleSubmitComment} className="comment-form">
+              <form 
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (comment.trim()) {
+                    addComment(id, comment).then(() => {
+                      queryClient.invalidateQueries(['comments', id]);
+                      setComment('');
+                    });
+                  }
+                }} 
+                className="comment-form"
+              >
                 <input
                   type="text"
                   value={comment}
@@ -261,11 +315,7 @@ const DateDetail = () => {
                   placeholder="Add a comment..."
                   className="comment-input"
                 />
-                <button 
-                  type="submit" 
-                  className="primary-button"
-                  disabled={commentMutation.isLoading}
-                >
+                <button type="submit" className="primary-button">
                   Post
                 </button>
               </form>
