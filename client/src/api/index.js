@@ -162,13 +162,13 @@ export const addComment = async (id, content) => {
 
 export const getComments = async (id) => {
     try {
-        const response = await api.get(`/dates/${id}/comments`);
-        return response.data;
+      const response = await api.get(`/dates/${id}/comments`);
+      return response.data; // This will include the username now
     } catch (error) {
-        console.error('Error getting comments:', error);
-        return [];
+      console.error('Error getting comments:', error);
+      return [];
     }
-};
+  };
 
 export const updateUserProfile = async (userData) => {
     try {

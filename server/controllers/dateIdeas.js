@@ -331,47 +331,49 @@ const DateIdeasController = {
         }
     },
 
-    // Get Comments for a Date Idea
     getComments: async (req, res) => {
         try {
-            const { id } = req.params;
-            console.log('Getting comments for date idea:', id); // Debug log
-
-            const results = await pool.query(
-                'SELECT * FROM comments WHERE date_idea_id = $1 ORDER BY created_at DESC',
-                [id]
-            );
-
-            res.json(results.rows);
+          const { id } = req.params;
+          const result = await pool.query(
+            `SELECT comments.*, users.username
+             FROM comments
+             JOIN users ON comments.user_id = users.id
+             WHERE comments.date_idea_id = $1
+             ORDER BY comments.created_at DESC`,
+            [id]
+          );
+          res.json(result.rows);
         } catch (error) {
-            console.error('Error getting comments:', error);
-            res.status(500).json({ error: error.message });
+          console.error('Error getting comments:', error);
+          res.status(500).json({ error: 'Internal Server Error' });
         }
-    },
+      },
+
 
     // Add Comment to a Date Idea
     addComment: async (req, res) => {
         try {
-            const { id } = req.params;
-            const { content } = req.body;
-
-            console.log('Adding comment to date idea:', id, 'Content:', content); // Debug log
-
-            if (!content) {
-                return res.status(400).json({ error: 'Comment content is required' });
-            }
-
-            const results = await pool.query(
-                'INSERT INTO comments (date_idea_id, content) VALUES ($1, $2) RETURNING *',
-                [id, content]
-            );
-
-            res.status(201).json(results.rows[0]);
+          if (!req.user || !req.user.id) {
+            return res.status(401).json({ error: 'Unauthorized' });
+          }
+      
+          const { id } = req.params;
+          const { content } = req.body;
+          const userId = req.user.id;
+      
+          const result = await pool.query(
+            `INSERT INTO comments (date_idea_id, user_id, content)
+             VALUES ($1, $2, $3)
+             RETURNING *`,
+            [id, userId, content]
+          );
+      
+          res.status(201).json(result.rows[0]);
         } catch (error) {
-            console.error('Error adding comment:', error);
-            res.status(500).json({ error: error.message });
+          console.error('Error adding comment:', error);
+          res.status(500).json({ error: 'Internal Server Error' });
         }
-    }
+      }
 }
 
 export default DateIdeasController;

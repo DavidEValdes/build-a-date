@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query'; // Add this import
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Heart, Bookmark, Share2, ArrowLeft } from 'lucide-react';
 import {
   getDateIdea,
@@ -25,6 +25,7 @@ const DateDetail = () => {
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(0);
   const { isAuthenticated } = useAuth();
+  const queryClient = useQueryClient();
 
   const COST_CATEGORY_MAP = {
     free: 'Free',
@@ -38,23 +39,25 @@ const DateDetail = () => {
     return COST_CATEGORY_MAP[category.toLowerCase()] || '$';
   };
 
+  // Fetch date idea details
   const { data: date, isLoading } = useQuery({
     queryKey: ['dateIdea', id],
     queryFn: () => getDateIdea(id),
+  });
+
+  // Fetch comments
+  const { data: comments = [] } = useQuery({
+    queryKey: ['comments', id],
+    queryFn: () => getComments(id),
   });
 
   useEffect(() => {
     if (date) {
       setIsSaved(date.is_saved || false);
       setIsLiked(date.is_liked || false);
-      setLikesCount(Number(date.likes_count) || 0); // Ensure likesCount is a number
+      setLikesCount(Number(date.likes_count) || 0);
     }
   }, [date]);
-
-  const { data: comments = [] } = useQuery({
-    queryKey: ['comments', id],
-    queryFn: () => getComments(id),
-  });
 
   const handleLike = (e) => {
     e.stopPropagation();
@@ -63,10 +66,8 @@ const DateDetail = () => {
       return;
     }
 
-    // Capture the previous isLiked value
     const wasLiked = isLiked;
 
-    // Optimistically update the like count and isLiked state
     if (wasLiked) {
       setLikesCount((prev) => Number(prev) - 1);
     } else {
@@ -74,12 +75,10 @@ const DateDetail = () => {
     }
     setIsLiked(!wasLiked);
 
-    // Send the request to the backend, but don't wait for the response
     if (wasLiked) {
       // User is unliking
       unlikeDateIdea(id).catch((error) => {
         console.error('Error unliking date idea:', error);
-        // Revert state if there's an error
         setLikesCount((prev) => Number(prev) + 1);
         setIsLiked(true);
       });
@@ -87,7 +86,6 @@ const DateDetail = () => {
       // User is liking
       likeDateIdea(id).catch((error) => {
         console.error('Error liking date idea:', error);
-        // Revert state if there's an error
         setLikesCount((prev) => Number(prev) - 1);
         setIsLiked(false);
       });
@@ -119,11 +117,15 @@ const DateDetail = () => {
 
   const handleSubmitComment = (e) => {
     e.preventDefault();
+    if (!isAuthenticated) {
+      alert('Please login to add comments');
+      return;
+    }
+
     if (comment.trim()) {
       addComment(id, comment)
         .then(() => {
           setComment('');
-          // Since we're using useQuery, we need to invalidate the comments query to fetch the new comments
           queryClient.invalidateQueries(['comments', id]);
         })
         .catch((error) => {
@@ -293,6 +295,7 @@ const DateDetail = () => {
             </section>
             <section className="detail-section">
               <h3>Comments</h3>
+              {/* Comment form is always displayed */}
               <form onSubmit={handleSubmitComment} className="comment-form">
                 <input
                   type="text"
@@ -308,7 +311,9 @@ const DateDetail = () => {
               <div className="comments-list">
                 {comments.map((comment) => (
                   <div key={comment.id} className="comment-item">
-                    <p className="comment-content">{comment.content}</p>
+                    <p className="comment-content">
+                      <strong>{comment.username}:</strong> {comment.content}
+                    </p>
                     <span className="comment-date">
                       {new Date(comment.created_at).toLocaleDateString()}
                     </span>
