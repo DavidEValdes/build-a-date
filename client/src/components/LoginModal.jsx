@@ -15,6 +15,7 @@ const LoginModal = ({ onClose }) => {
       const result = await login(email, password);
       if (result.success) {
         onClose();
+        window.location.reload(); 
       } else {
         setError(result.error || 'Login failed');
       }

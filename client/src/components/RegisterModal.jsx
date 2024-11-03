@@ -15,6 +15,7 @@ const RegisterModal = ({ onClose }) => {
     const result = await register(username, email, password);
     if (result.success) {
       onClose();
+      window.location.reload(); 
     } else {
       setError(result.error);
     }
