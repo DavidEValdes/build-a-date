@@ -11,7 +11,7 @@ const PlanADate = () => {
     <div style={{ minHeight: '100vh', background: 'white', padding: '16px', color: '#333' }}>
       {/* Header */}
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-        <h1 style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#4b6cb7' }}>Plan A Date Dashboard</h1>
+        <h1 style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#4b6cb7' }}>Plan A Date</h1>
       </header>
 
       {/* Main Dashboard Section */}

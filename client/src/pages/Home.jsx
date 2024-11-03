@@ -6,7 +6,6 @@ import SuggestionDisplay from '../components/SuggestionDisplay';
 import Spinner from '../components/Spinner';
 import { getDateIdeas, getAllDateIdeas, createDateIdea } from '../api';
 
-
 const Home = () => {
   const [stage, setStage] = useState('welcome');
   const [currentSuggestion, setCurrentSuggestion] = useState(null);
@@ -87,6 +86,23 @@ const Home = () => {
             >
               Start Building
             </button>
+            <a 
+              href="/plan-a-date" 
+              className="secondary-cta"
+              style={{
+                display: 'block',
+                marginTop: '1rem',
+                color: '#6b7280',
+                fontSize: '0.875rem',
+                textDecoration: 'none',
+                transition: 'color 0.2s ease',
+                textAlign: 'center'
+              }}
+              onMouseOver={(e) => e.target.style.color = '#4f46e5'}
+              onMouseLeave={(e) => e.target.style.color = '#6b7280'}
+            >
+              Already have a date idea? Plan it here →
+            </a>
           </div>
         )}
 
@@ -125,20 +141,19 @@ const Home = () => {
               marginBottom: '1rem',
             }}
           >
-           <h2
-            className="feed-title custom-feed-title"
-            style={{
-              fontSize: '1.75rem', // Slightly larger title size
-              marginBottom: '0.5rem',
-              fontWeight: 'bold',
-              textAlign: 'left', // Align title to the left
-              color: '#000000', // Ensure same black color as "Find Your Perfect Date"
-            }}
-          >
-            Date Ideas Feed
-          </h2>
+            <h2
+              className="feed-title custom-feed-title"
+              style={{
+                fontSize: '1.75rem',
+                marginBottom: '0.5rem',
+                fontWeight: 'bold',
+                textAlign: 'left',
+                color: '#000000',
+              }}
+            >
+              Date Ideas Feed
+            </h2>
             <div
-              
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -150,7 +165,7 @@ const Home = () => {
                 className="divider-line"
                 style={{
                   height: '1px',
-                  backgroundColor: '#ccc', // Adjust color as needed
+                  backgroundColor: '#ccc',
                   flex: 1,
                 }}
               ></span>
@@ -159,7 +174,7 @@ const Home = () => {
                 style={{
                   width: '6px',
                   height: '6px',
-                  backgroundColor: '#4f46e5', // Purple color for the dot
+                  backgroundColor: '#4f46e5',
                   borderRadius: '50%',
                 }}
               ></div>
