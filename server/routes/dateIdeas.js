@@ -22,5 +22,11 @@ router.get('/:id/comments', DateIdeasController.getComments);
 router.post('/:id/comment', authenticateToken, DateIdeasController.addComment);  
 router.delete('/comments/:commentId', authenticateToken, DateIdeasController.deleteComment);
 
+// Update comment route
+router.put('/:commentId', authenticateToken, DateIdeasController.updateComment);
+
+// Delete comment route
+router.delete('/:commentId', authenticateToken, DateIdeasController.deleteComment);
+
 
 export default router;

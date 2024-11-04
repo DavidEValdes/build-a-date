@@ -255,6 +255,37 @@ const DateIdeasController = {
         }
     },
 
+    // Update Comment Function
+  updateComment: async (req, res) => {
+    try {
+      const userId = req.user.id; // From authenticateToken middleware
+      const { commentId } = req.params;
+      const { content } = req.body;
+
+      if (!content || content.trim() === '') {
+        return res.status(400).json({ error: 'Content cannot be empty' });
+      }
+
+      // Check if the comment exists and belongs to the user
+      const commentResult = await pool.query(
+        'SELECT * FROM comments WHERE id = $1 AND user_id = $2',
+        [commentId, userId]
+      );
+
+      if (commentResult.rows.length === 0) {
+        return res.status(403).json({ error: 'You are not authorized to edit this comment' });
+      }
+
+      // Update the comment
+      await pool.query('UPDATE comments SET content = $1 WHERE id = $2', [content, commentId]);
+
+      res.status(200).json({ message: 'Comment updated successfully' });
+    } catch (error) {
+      console.error('Error updating comment:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  },
+
     // Like a Date Idea
     likeDateIdea: async (req, res) => {
         try {

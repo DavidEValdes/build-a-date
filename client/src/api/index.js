@@ -244,4 +244,17 @@ export const deleteComment = async (commentId) => {
       throw error;
     }
   };
+
+
+  export const updateComment = async (commentId, content) => {
+    try {
+      const response = await api.put(`/comments/${commentId}`, { content });
+      return response.data;
+    } catch (error) {
+      console.error('Error updating comment:', error);
+      throw error;
+    }
+  };
+
+  
 export default api;

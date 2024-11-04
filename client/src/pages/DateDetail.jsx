@@ -12,7 +12,8 @@ import {
   getComments,
   saveDateIdea,
   unsaveDateIdea,
-  deleteComment, // Import deleteComment
+  deleteComment,
+  updateComment, // Import updateComment
 } from '../api';
 import { useAuth } from '../context/AuthContext';
 import Spinner from '../components/Spinner';
@@ -27,6 +28,10 @@ const DateDetail = () => {
   const [likesCount, setLikesCount] = useState(0);
   const { isAuthenticated, user } = useAuth(); // Get user info
   const queryClient = useQueryClient();
+
+  // State for editing comments
+  const [editingCommentId, setEditingCommentId] = useState(null);
+  const [editedContent, setEditedContent] = useState('');
 
   const COST_CATEGORY_MAP = {
     free: 'Free',
@@ -153,6 +158,33 @@ const DateDetail = () => {
     }
   };
 
+  const handleEditComment = (comment) => {
+    console.log('Editing comment:', comment.id); // Debugging line
+    setEditingCommentId(comment.id);
+    setEditedContent(comment.content);
+  };
+
+  const handleUpdateComment = (e, commentId) => {
+    e.preventDefault();
+    if (!isAuthenticated) {
+      alert('Please login to edit comments');
+      return;
+    }
+
+    if (editedContent.trim()) {
+      updateComment(commentId, editedContent)
+        .then(() => {
+          setEditingCommentId(null);
+          setEditedContent('');
+          queryClient.invalidateQueries(['comments', id]);
+        })
+        .catch((error) => {
+          console.error('Error updating comment:', error);
+          alert('Failed to update comment.');
+        });
+    }
+  };
+
   const handleImageError = () => {
     const img = document.getElementById('detail-image');
     if (img) {
@@ -191,6 +223,7 @@ const DateDetail = () => {
   if (!date) {
     return <div className="error-message">Date idea not found</div>;
   }
+
   // Format the date added
   const dateObj = new Date(date.created_at);
   const formattedDate = `${dateObj.getMonth() + 1}/${dateObj.getDate()}/${dateObj.getFullYear()}`;
@@ -314,11 +347,11 @@ const DateDetail = () => {
                   <span>Share</span>
                 </button>
               </div>
-              <div style={{ color: '#666666',  marginLeft: '1rem' }}>
+              <div style={{ color: '#666666', marginLeft: '1rem' }}>
                 Posted: {formattedDate}
               </div>
             </section>
-            
+
             <section className="detail-section">
               <h3>Comments</h3>
               <form onSubmit={handleSubmitComment} className="comment-form">
@@ -336,30 +369,74 @@ const DateDetail = () => {
               <div className="comments-list">
                 {comments.map((comment) => (
                   <div key={comment.id} className="comment-item" style={{ position: 'relative' }}>
-                    <p className="comment-content">
-                      <strong>{comment.username}:</strong> {comment.content}
-                    </p>
-                    <span className="comment-date">
-                      @ {new Date(comment.created_at).toLocaleDateString()}
-                    </span>
-                    {isAuthenticated && user && comment.user_id === user.id && (
-                      <button
-                        className="delete-comment-button"
-                        onClick={() => handleDeleteComment(comment.id)}
-                        aria-label="Delete Comment"
-                        style={{
-                          position: 'absolute',
-                          top: '2px',
-                          right: '5px',
-                          background: 'none',
-                          border: 'none',
-                          cursor: 'pointer',
-                          color: '#ff0000',
-                          fontSize: '1.2em',
-                        }}
-                      >
-                        &times;
-                      </button>
+                    {editingCommentId === comment.id ? (
+                      // Editing mode
+                      <form onSubmit={(e) => handleUpdateComment(e, comment.id)}>
+                        <input
+                          type="text"
+                          value={editedContent}
+                          onChange={(e) => setEditedContent(e.target.value)}
+                          className="comment-input"
+                          style={{ width: '100%' }}
+                        />
+                        <div style={{ marginTop: '5px' }}>
+                          <button type="submit" className="primary-button" style={{ marginRight: '5px' }}>
+                            Save
+                          </button>
+                          <button
+                            type="button"
+                            className="secondary-button"
+                            onClick={() => setEditingCommentId(null)}
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </form>
+                    ) : (
+                      // Display mode
+                      <>
+                        <p className="comment-content">
+                          <strong>{comment.username}:</strong> {comment.content}
+                        </p>
+                        <span className="comment-date">
+                          @ {new Date(comment.created_at).toLocaleDateString()}
+                        </span>
+
+                        {/* Edit and Delete buttons */}
+                        {isAuthenticated && user && comment.user_id === user.id && (
+                          <div style={{ position: 'absolute', top: '5px', right: '5px' }}>
+                            <button
+                              className="edit-comment-button"
+                              onClick={() => handleEditComment(comment)}
+                              aria-label="Edit Comment"
+                              style={{
+                                background: 'none',
+                                border: 'none',
+                                cursor: 'pointer',
+                                color: '#007bff',
+                                marginRight: '10px',
+                                fontSize: '1.25rem'
+                              }}
+                            >
+                              ✎
+                            </button>
+                            <button
+                              className="delete-comment-button"
+                              onClick={() => handleDeleteComment(comment.id)}
+                              aria-label="Delete Comment"
+                              style={{
+                                background: 'none',
+                                border: 'none',
+                                cursor: 'pointer',
+                                color: '#ff0000',
+                                fontSize: '1.5rem' // Increased font size
+                              }}
+                            >
+                              &times;
+                            </button>
+                          </div>
+                        )}
+                      </>
                     )}
                   </div>
                 ))}

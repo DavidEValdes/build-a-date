@@ -4,6 +4,7 @@ import cors from 'cors'
 import './config/dotenv.js'
 import dateIdeasRouter from './routes/dateIdeas.js'
 import usersRouter from './routes/users.js' // Add this line
+import commentsRouter from './routes/comments.js'; // Import the new comments router
 
 const app = express()
 
@@ -22,6 +23,8 @@ app.get('/', (req, res) => {
 // Routes
 app.use('/api/dates', dateIdeasRouter)
 app.use('/api/users', usersRouter) // Add this line
+app.use('/api/comments', commentsRouter); // Mount the comments router
+
 
 // Placeholder image route
 app.get('/api/placeholder/:width/:height', (req, res) => {
