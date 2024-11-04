@@ -340,7 +340,7 @@ const DateDetail = () => {
                       <strong>{comment.username}:</strong> {comment.content}
                     </p>
                     <span className="comment-date">
-                      {new Date(comment.created_at).toLocaleDateString()}
+                      @ {new Date(comment.created_at).toLocaleDateString()}
                     </span>
                     {isAuthenticated && user && comment.user_id === user.id && (
                       <button
