@@ -16,5 +16,6 @@ router.post('/change-password', authenticateToken, UsersController.changePasswor
 router.get('/saved-dates', authenticateToken, UsersController.getSavedDates);
 router.post('/dates/:id/save', authenticateToken, UsersController.saveDateIdea);
 router.delete('/dates/:id/save', authenticateToken, UsersController.unsaveDateIdea);
+router.patch('/profile', authenticateToken, UsersController.updateProfile);
 
 export default router;

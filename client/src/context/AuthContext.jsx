@@ -1,7 +1,7 @@
 // src/context/AuthContext.jsx
 
 import { createContext, useContext, useState, useCallback } from 'react';
-import { loginUser, registerUser } from '../api';
+import { loginUser, registerUser, updateUserProfile } from '../api';
 
 const AuthContext = createContext(null);
 
@@ -55,9 +55,14 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   }, []);
 
-  const updateUser = useCallback((userData) => {
-    setUser(userData);
-    localStorage.setItem('user', JSON.stringify(userData));
+  const updateUser = useCallback(async ({ username, email, currentPassword }) => {
+    try {
+      const updatedUser = await updateUserProfile(username, email, currentPassword);
+      setUser(updatedUser);
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+    } catch (error) {
+      throw error;
+    }
   }, []);
 
   const value = {

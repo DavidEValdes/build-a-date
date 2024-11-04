@@ -87,6 +87,51 @@ const UsersController = {
           res.status(500).json({ error: 'Internal Server Error' });
         }
       },
+
+      updateProfile: async (req, res) => {
+        try {
+          const { username, email, currentPassword } = req.body;
+          const userId = req.user.id;
+      
+          // First verify the current password
+          const userResult = await pool.query(
+            'SELECT password_hash FROM users WHERE id = $1',
+            [userId]
+          );
+      
+          if (!userResult.rows.length) {
+            return res.status(404).json({ error: 'User not found' });
+          }
+      
+          const validPassword = await bcrypt.compare(
+            currentPassword,
+            userResult.rows[0].password_hash
+          );
+      
+          if (!validPassword) {
+            return res.status(401).json({ error: 'Current password is incorrect' });
+          }
+      
+          // Update the user profile
+          const result = await pool.query(
+            `UPDATE users 
+            SET username = COALESCE($1, username),
+                email = COALESCE($2, email)
+            WHERE id = $3
+            RETURNING id, username, email`,
+            [username, email, userId]
+          );
+      
+          res.json(result.rows[0]);
+        } catch (error) {
+          console.error('Error updating profile:', error);
+          if (error.code === '23505') { // Unique violation
+            res.status(400).json({ error: 'Username or email already exists' });
+          } else {
+            res.status(500).json({ error: error.message });
+          }
+        }
+      },
     
 
     getUserProfile: async (req, res) => {

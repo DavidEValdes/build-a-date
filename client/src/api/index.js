@@ -73,16 +73,20 @@ export const getUserProfile = async () => {
   }
 };
 
-// Update user profile
-export const updateUserProfile = async (userData) => {
-  try {
-    const response = await api.patch('/users/profile', userData);
-    return response.data;
-  } catch (error) {
-    console.error('Error updating profile:', error);
-    throw error;
-  }
-};
+export const updateUserProfile = async (username, email, currentPassword) => {
+    const token = localStorage.getItem('token');
+    try {
+      const response = await api.patch(
+        '/users/profile',
+        { username, email, currentPassword },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      throw error.response?.data || { error: 'Failed to update profile' };
+    }
+  };
 
 // Change user password
 export const changePassword = async (currentPassword, newPassword) => {
