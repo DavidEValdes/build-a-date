@@ -20,6 +20,7 @@ router.post('/:id/unlike', authenticateToken, DateIdeasController.unlikeDateIdea
 // Comment routes
 router.get('/:id/comments', DateIdeasController.getComments);
 router.post('/:id/comment', authenticateToken, DateIdeasController.addComment);  
+router.delete('/comments/:commentId', authenticateToken, DateIdeasController.deleteComment);
 
 
 export default router;

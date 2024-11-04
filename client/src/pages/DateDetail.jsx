@@ -12,6 +12,7 @@ import {
   getComments,
   saveDateIdea,
   unsaveDateIdea,
+  deleteComment, // Import deleteComment
 } from '../api';
 import { useAuth } from '../context/AuthContext';
 import Spinner from '../components/Spinner';
@@ -24,7 +25,7 @@ const DateDetail = () => {
   const [isSaved, setIsSaved] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(0);
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth(); // Get user info
   const queryClient = useQueryClient();
 
   const COST_CATEGORY_MAP = {
@@ -130,6 +131,24 @@ const DateDetail = () => {
         })
         .catch((error) => {
           console.error('Error adding comment:', error);
+        });
+    }
+  };
+
+  const handleDeleteComment = (commentId) => {
+    if (!isAuthenticated) {
+      alert('Please login to delete comments');
+      return;
+    }
+
+    if (window.confirm('Are you sure you want to delete this comment?')) {
+      deleteComment(commentId)
+        .then(() => {
+          queryClient.invalidateQueries(['comments', id]);
+        })
+        .catch((error) => {
+          console.error('Error deleting comment:', error);
+          alert('Failed to delete comment.');
         });
     }
   };
@@ -295,7 +314,6 @@ const DateDetail = () => {
             </section>
             <section className="detail-section">
               <h3>Comments</h3>
-              {/* Comment form is always displayed */}
               <form onSubmit={handleSubmitComment} className="comment-form">
                 <input
                   type="text"
@@ -310,13 +328,32 @@ const DateDetail = () => {
               </form>
               <div className="comments-list">
                 {comments.map((comment) => (
-                  <div key={comment.id} className="comment-item">
+                  <div key={comment.id} className="comment-item" style={{ position: 'relative' }}>
                     <p className="comment-content">
                       <strong>{comment.username}:</strong> {comment.content}
                     </p>
                     <span className="comment-date">
                       {new Date(comment.created_at).toLocaleDateString()}
                     </span>
+                    {isAuthenticated && user && comment.user_id === user.id && (
+                      <button
+                        className="delete-comment-button"
+                        onClick={() => handleDeleteComment(comment.id)}
+                        aria-label="Delete Comment"
+                        style={{
+                          position: 'absolute',
+                          top: '2px',
+                          right: '5px',
+                          background: 'none',
+                          border: 'none',
+                          cursor: 'pointer',
+                          color: '#ff0000',
+                          fontSize: '1.2em',
+                        }}
+                      >
+                        &times;
+                      </button>
+                    )}
                   </div>
                 ))}
               </div>

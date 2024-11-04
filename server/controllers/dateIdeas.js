@@ -373,6 +373,30 @@ const DateIdeasController = {
           console.error('Error adding comment:', error);
           res.status(500).json({ error: 'Internal Server Error' });
         }
+      },
+      deleteComment: async (req, res) => {
+        try {
+          const userId = req.user.id; // From authenticateToken middleware
+          const { commentId } = req.params;
+    
+          // Check if the comment exists and belongs to the user
+          const commentResult = await pool.query(
+            'SELECT * FROM comments WHERE id = $1 AND user_id = $2',
+            [commentId, userId]
+          );
+    
+          if (commentResult.rows.length === 0) {
+            return res.status(403).json({ error: 'You are not authorized to delete this comment' });
+          }
+    
+          // Delete the comment
+          await pool.query('DELETE FROM comments WHERE id = $1', [commentId]);
+    
+          res.status(200).json({ message: 'Comment deleted successfully' });
+        } catch (error) {
+          console.error('Error deleting comment:', error);
+          res.status(500).json({ error: 'Internal Server Error' });
+        }
       }
 }
 
