@@ -41,26 +41,26 @@ api.interceptors.response.use(
 //
 
 // Login user
-export const loginUser = async (email, password) => {
-  try {
-    const response = await api.post('/users/login', { email, password });
-    return response.data;
-  } catch (error) {
-    console.error('Error logging in:', error);
-    throw error;
-  }
-};
+export const loginUser = async (identifier, password) => {
+    try {
+      const response = await api.post('/users/login', { identifier, password });
+      return response.data;
+    } catch (error) {
+      console.error('Error logging in:', error);
+      throw error;
+    }
+  };
 
 // Register user
 export const registerUser = async (username, email, password) => {
-  try {
-    const response = await api.post('/users/register', { username, email, password });
-    return response.data;
-  } catch (error) {
-    console.error('Error registering:', error);
-    throw error;
-  }
-};
+    try {
+      const response = await api.post('/users/register', { username, email, password });
+      return response.data;
+    } catch (error) {
+      console.error('Error registering:', error);
+      throw error;
+    }
+  };
 
 // Get user profile
 export const getUserProfile = async () => {

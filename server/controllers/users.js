@@ -40,44 +40,54 @@ const UsersController = {
     },
 
     loginUser: async (req, res) => {
+        const { identifier, password } = req.body;
+    
         try {
-            const { email, password } = req.body;
-
-            const results = await pool.query(
-                'SELECT * FROM users WHERE email = $1',
-                [email]
-            );
-
-            if (results.rows.length === 0) {
-                return res.status(401).json({ error: 'Invalid credentials' });
-            }
-
-            const user = results.rows[0];
-            const validPassword = await bcrypt.compare(password, user.password_hash);
-
-            if (!validPassword) {
-                return res.status(401).json({ error: 'Invalid credentials' });
-            }
-
-            const token = jwt.sign(
-                { id: user.id },
-                process.env.JWT_SECRET || 'your-secret-key',
-                { expiresIn: '24h' }
-            );
-
-            res.json({
-                user: {
-                    id: user.id,
-                    username: user.username,
-                    email: user.email
-                },
-                token
-            });
+          // Check if identifier is an email
+          const isEmail = /\S+@\S+\.\S+/.test(identifier);
+          let userQuery, userParams;
+    
+          if (isEmail) {
+            userQuery = 'SELECT * FROM users WHERE email = $1';
+            userParams = [identifier];
+          } else {
+            userQuery = 'SELECT * FROM users WHERE username = $1';
+            userParams = [identifier];
+          }
+    
+          const result = await pool.query(userQuery, userParams);
+    
+          if (result.rows.length === 0) {
+            return res.status(401).json({ error: 'Invalid credentials' });
+          }
+    
+          const user = result.rows[0];
+          const validPassword = await bcrypt.compare(password, user.password_hash);
+    
+          if (!validPassword) {
+            return res.status(401).json({ error: 'Invalid credentials' });
+          }
+    
+          const token = jwt.sign(
+            { id: user.id },
+            process.env.JWT_SECRET || 'your-secret-key',
+            { expiresIn: '24h' }
+          );
+    
+          res.json({
+            user: {
+              id: user.id,
+              username: user.username,
+              email: user.email,
+            },
+            token,
+          });
         } catch (error) {
-            console.error('Login error:', error);
-            res.status(500).json({ error: error.message });
+          console.error('Login error:', error);
+          res.status(500).json({ error: 'Internal Server Error' });
         }
-    },
+      },
+    
 
     getUserProfile: async (req, res) => {
         try {

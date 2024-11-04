@@ -1,10 +1,11 @@
 // src/components/LoginModal.jsx
+
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import PropTypes from 'prop-types';
 
 const LoginModal = ({ onClose }) => {
-  const [email, setEmail] = useState('');
+  const [identifier, setIdentifier] = useState(''); // Changed from email to identifier
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const { login } = useAuth();
@@ -12,10 +13,10 @@ const LoginModal = ({ onClose }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const result = await login(email, password);
+      const result = await login(identifier, password);
       if (result.success) {
         onClose();
-        window.location.reload(); 
+        window.location.reload();
       } else {
         setError(result.error || 'Login failed');
       }
@@ -34,11 +35,11 @@ const LoginModal = ({ onClose }) => {
         {error && <div className="text-red-500 mb-4">{error}</div>}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">Email</label>
+            <label className="block text-sm font-medium text-gray-700">Email or Username</label>
             <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              type="text" // Changed from 'email' to 'text'
+              value={identifier}
+              onChange={(e) => setIdentifier(e.target.value)}
               className="modal-input"
               required
             />
@@ -54,11 +55,7 @@ const LoginModal = ({ onClose }) => {
             />
           </div>
           <div className="flex justify-end space-x-2">
-            
-            <button
-              type="submit"
-              className="save-button"
-            >
+            <button type="submit" className="save-button">
               Login
             </button>
           </div>

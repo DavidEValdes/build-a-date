@@ -1,4 +1,5 @@
 // src/context/AuthContext.jsx
+
 import { createContext, useContext, useState, useCallback } from 'react';
 import { loginUser, registerUser } from '../api';
 
@@ -10,21 +11,21 @@ export const AuthProvider = ({ children }) => {
     return savedUser ? JSON.parse(savedUser) : null;
   });
 
-  const login = useCallback(async (email, password) => {
+  const login = useCallback(async (identifier, password) => {
     try {
-      const response = await loginUser(email, password);
+      const response = await loginUser(identifier, password);
       const { user: userData, token } = response;
-      
+
       localStorage.setItem('user', JSON.stringify(userData));
       localStorage.setItem('token', token);
       setUser(userData);
-      
+
       return { success: true };
     } catch (error) {
       console.error('Login error:', error);
       return {
         success: false,
-        error: error.response?.data?.error || 'Failed to login'
+        error: error.response?.data?.error || 'Failed to login',
       };
     }
   }, []);
@@ -33,17 +34,17 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await registerUser(username, email, password);
       const { user: userData, token } = response;
-      
+
       localStorage.setItem('user', JSON.stringify(userData));
       localStorage.setItem('token', token);
       setUser(userData);
-      
+
       return { success: true };
     } catch (error) {
       console.error('Register error:', error);
       return {
         success: false,
-        error: error.response?.data?.error || 'Failed to register'
+        error: error.response?.data?.error || 'Failed to register',
       };
     }
   }, []);
@@ -65,7 +66,7 @@ export const AuthProvider = ({ children }) => {
     register,
     logout,
     updateUser,
-    isAuthenticated: !!user
+    isAuthenticated: !!user,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
