@@ -21,6 +21,10 @@ const DateCard = ({ date }) => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
 
+  // Format the date
+  const dateObj = new Date(date.created_at);
+  const formattedDate = `${dateObj.getMonth() + 1}/${dateObj.getDate()}/${dateObj.getFullYear()}`;
+
   const handleLike = (e) => {
     e.stopPropagation();
     if (!isAuthenticated) {
@@ -120,6 +124,7 @@ const DateCard = ({ date }) => {
           flexDirection: 'column',
           height: '100%',
           padding: '1.5rem',
+          position: 'relative', // Added to position the time-added text
         }}
       >
         <div className="date-card-title">
@@ -161,7 +166,6 @@ const DateCard = ({ date }) => {
           <div
             className="duration"
             style={{
-              marginTop: 'auto',
               paddingTop: '0.75rem',
               paddingBottom: '0.75rem',
               borderTop: '1px solid #eee',
@@ -174,6 +178,25 @@ const DateCard = ({ date }) => {
             Duration: {date.duration}
           </div>
         </div>
+
+        {/* Time Added */}
+        <div
+  className="time-added"
+  style={{
+    fontSize: '0.6rem',         // Reduced from 0.7rem
+    color: '#6b7280',
+    position: 'absolute',
+    bottom: '0.8rem',          // Reduced from 1rem
+    left: '1.2rem',            // Reduced from 1.5rem
+    backgroundColor: '#f3f4f6',
+    borderRadius:'4px'
+        // Reduced from 1px 6px
+   
+    
+  }}
+>
+  @ {formattedDate}
+</div>
       </div>
 
       <div className="date-card-footer">

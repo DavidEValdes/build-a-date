@@ -245,6 +245,7 @@ body {
   font-size: 0.875rem;
   font-weight: 500;
   font-weight: bold;
+  margin-bottom: .45rem;
 }
 
 .date-card-footer {
@@ -2163,4 +2164,24 @@ body {
 .icon-button.liked .heart-icon {
   fill: red;
   color: red;
+}
+
+/* Date Added in DateDetail */
+.detail-info .date-added {
+  font-size: 0.875rem; /* Equivalent to text-sm */
+  color: #6b7280; /* Gray-500 */
+  margin-top: 0.5rem; /* Space above the text */
+}
+
+/* Add this to your CSS file */
+.date-card-content .time-added {
+  font-size: 0.7rem !important;
+  color: #6b7280 !important;
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  padding: 0.5rem  !important;
+  margin: 0 !important;
+  font-style:italic;
+  
 }

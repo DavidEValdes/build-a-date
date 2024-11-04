@@ -191,6 +191,9 @@ const DateDetail = () => {
   if (!date) {
     return <div className="error-message">Date idea not found</div>;
   }
+  // Format the date added
+  const dateObj = new Date(date.created_at);
+  const formattedDate = `${dateObj.getMonth() + 1}/${dateObj.getDate()}/${dateObj.getFullYear()}`;
 
   return (
     <div className="app-container">
@@ -311,7 +314,11 @@ const DateDetail = () => {
                   <span>Share</span>
                 </button>
               </div>
+              <div style={{ color: '#666666',  marginLeft: '1rem' }}>
+                Posted: {formattedDate}
+              </div>
             </section>
+            
             <section className="detail-section">
               <h3>Comments</h3>
               <form onSubmit={handleSubmitComment} className="comment-form">
