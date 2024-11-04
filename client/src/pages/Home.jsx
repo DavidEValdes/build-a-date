@@ -35,11 +35,15 @@ const Home = () => {
   const { data: feedDates = [], isLoading: isFeedLoading } = useQuery({
     queryKey: ['feedDateIdeas'],
     queryFn: getDateIdeas,
+    refetchOnMount: "always", // Add this line
+    staleTime: 0 // Add this line
   });
 
   const { data: allDates = [], isLoading: isAllDatesLoading } = useQuery({
     queryKey: ['allDateIdeas'],
     queryFn: getAllDateIdeas,
+    refetchOnMount: "always", // Add this line
+    staleTime: 0 // Add this line
   });
 
   const createDateMutation = useMutation({

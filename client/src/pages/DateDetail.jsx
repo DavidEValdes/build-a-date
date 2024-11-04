@@ -49,12 +49,16 @@ const DateDetail = () => {
   const { data: date, isLoading } = useQuery({
     queryKey: ['dateIdea', id],
     queryFn: () => getDateIdea(id),
+    refetchOnMount: "always", 
+    staleTime: 0 
   });
 
   // Fetch comments
   const { data: comments = [] } = useQuery({
     queryKey: ['comments', id],
     queryFn: () => getComments(id),
+    refetchOnMount: "always", 
+    staleTime: 0 
   });
 
   useEffect(() => {

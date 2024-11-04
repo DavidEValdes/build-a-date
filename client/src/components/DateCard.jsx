@@ -1,10 +1,9 @@
-// src/components/DateCard.jsx
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Heart, MessageCircle, Bookmark, Share2 } from 'lucide-react';
 import { likeDateIdea, unlikeDateIdea, saveDateIdea, unsaveDateIdea } from '../api';
 import { useAuth } from '../context/AuthContext';
+import { useQueryClient } from '@tanstack/react-query';
 
 const COST_CATEGORY_MAP = {
   free: 'Free',
@@ -17,53 +16,50 @@ const COST_CATEGORY_MAP = {
 const DateCard = ({ date }) => {
   const [isSaved, setIsSaved] = useState(date.is_saved || false);
   const [isLiked, setIsLiked] = useState(date.is_liked || false);
-  const [likesCount, setLikesCount] = useState(Number(date.likes_count) || 0); // Ensure it's a number
+  const [likesCount, setLikesCount] = useState(Number(date.likes_count) || 0);
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
+  const queryClient = useQueryClient();
 
-  // Format the date
+  // Update local state when prop changes
+  useEffect(() => {
+    setIsSaved(date.is_saved || false);
+    setIsLiked(date.is_liked || false);
+    setLikesCount(Number(date.likes_count) || 0);
+  }, [date]);
+
   const dateObj = new Date(date.created_at);
   const formattedDate = `${dateObj.getMonth() + 1}/${dateObj.getDate()}/${dateObj.getFullYear()}`;
 
-  const handleLike = (e) => {
+  const handleLike = async (e) => {
     e.stopPropagation();
     if (!isAuthenticated) {
       alert('Please login to like dates');
       return;
     }
 
-    // Capture the previous isLiked value
     const wasLiked = isLiked;
-
-    // Optimistically update the like count and isLiked state
-    if (wasLiked) {
-      setLikesCount((prev) => Number(prev) - 1);
-    } else {
-      setLikesCount((prev) => Number(prev) + 1);
-    }
     setIsLiked(!wasLiked);
+    setLikesCount(prev => wasLiked ? prev - 1 : prev + 1);
 
-    // Send the request to the backend, but don't wait for the response
-    if (wasLiked) {
-      // User is unliking
-      unlikeDateIdea(date.id).catch((error) => {
-        console.error('Error unliking date idea:', error);
-        // Revert state if there's an error
-        setLikesCount((prev) => Number(prev) + 1);
-        setIsLiked(true);
-      });
-    } else {
-      // User is liking
-      likeDateIdea(date.id).catch((error) => {
-        console.error('Error liking date idea:', error);
-        // Revert state if there's an error
-        setLikesCount((prev) => Number(prev) - 1);
-        setIsLiked(false);
-      });
+    try {
+      if (wasLiked) {
+        await unlikeDateIdea(date.id);
+      } else {
+        await likeDateIdea(date.id);
+      }
+      // Force refresh all queries
+      queryClient.invalidateQueries(['feedDateIdeas']);
+      queryClient.invalidateQueries(['dateIdea', date.id]);
+      queryClient.invalidateQueries(['allDateIdeas']);
+    } catch (error) {
+      console.error('Error updating like:', error);
+      setIsLiked(wasLiked);
+      setLikesCount(prev => wasLiked ? prev + 1 : prev - 1);
     }
   };
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.stopPropagation();
     if (!isAuthenticated) {
       alert('Please login to save dates');
@@ -73,16 +69,19 @@ const DateCard = ({ date }) => {
     const wasSaved = isSaved;
     setIsSaved(!wasSaved);
 
-    if (wasSaved) {
-      unsaveDateIdea(date.id).catch((error) => {
-        console.error('Error unsaving date idea:', error);
-        setIsSaved(true);
-      });
-    } else {
-      saveDateIdea(date.id).catch((error) => {
-        console.error('Error saving date idea:', error);
-        setIsSaved(false);
-      });
+    try {
+      if (wasSaved) {
+        await unsaveDateIdea(date.id);
+      } else {
+        await saveDateIdea(date.id);
+      }
+      // Force refresh all queries
+      queryClient.invalidateQueries(['feedDateIdeas']);
+      queryClient.invalidateQueries(['dateIdea', date.id]);
+      queryClient.invalidateQueries(['allDateIdeas']);
+    } catch (error) {
+      console.error('Error updating save:', error);
+      setIsSaved(wasSaved);
     }
   };
 
@@ -124,7 +123,7 @@ const DateCard = ({ date }) => {
           flexDirection: 'column',
           height: '100%',
           padding: '1.5rem',
-          position: 'relative', // Added to position the time-added text
+          position: 'relative',
         }}
       >
         <div className="date-card-title">
@@ -179,24 +178,20 @@ const DateCard = ({ date }) => {
           </div>
         </div>
 
-        {/* Time Added */}
         <div
-  className="time-added"
-  style={{
-    fontSize: '0.6rem',         // Reduced from 0.7rem
-    color: '#6b7280',
-    position: 'absolute',
-    bottom: '0.8rem',          // Reduced from 1rem
-    left: '1.2rem',            // Reduced from 1.5rem
-    backgroundColor: '#f3f4f6',
-    borderRadius:'4px'
-        // Reduced from 1px 6px
-   
-    
-  }}
->
-  @ {formattedDate}
-</div>
+          className="time-added"
+          style={{
+            fontSize: '0.6rem',
+            color: '#6b7280',
+            position: 'absolute',
+            bottom: '0.8rem',
+            left: '1.2rem',
+            backgroundColor: '#f3f4f6',
+            borderRadius: '4px'
+          }}
+        >
+          @ {formattedDate}
+        </div>
       </div>
 
       <div className="date-card-footer">
