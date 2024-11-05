@@ -256,7 +256,7 @@ const Home = () => {
   }, []);
 
   return (
-    <div className="app-container" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <div className="app-container" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column',  }}>
       <main className="main-content" style={{ flex: '1', paddingBottom: '2rem' }}>
         {/* Welcome Screen */}
         {(stage === 'welcome' || stage === 'feed') && (

@@ -106,12 +106,13 @@ const PlanADate = () => {
     <div
       style={{
         minHeight: '100vh',
-        background: '#f8f9fa',
-        padding: '32px',
-        color: '#333',
+        background: '#ffffff', // Changed to white for a cleaner look
+        padding: '40px 20px', // Increased padding for better spacing
+        color: '#333333',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
+        fontFamily: `'Helvetica Neue', Helvetica, Arial, sans-serif`, // Apple-like font
       }}
     >
       {/* Header */}
@@ -121,14 +122,14 @@ const PlanADate = () => {
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          marginBottom: '40px',
+          marginBottom: '60px',
         }}
       >
         <h1
           style={{
-            fontSize: '3rem',
-            fontWeight: 'bold',
-            color: '#3b82f6',
+            fontSize: '2.5rem',
+            fontWeight: '700',
+            color: '#1e90ff', // Softer blue accent
           }}
         >
           Plan A Date
@@ -140,11 +141,11 @@ const PlanADate = () => {
         style={{
           display: 'flex',
           flexDirection: 'column',
-          gap: '24px',
-          padding: '16px',
-          maxWidth: '1200px',
+          gap: '32px', // Increased gap for better separation
+          padding: '0 20px',
+          maxWidth: '1000px', // Adjusted maxWidth for better fit on large screens
           width: '100%',
-          marginBottom: '48px',
+          marginBottom: '60px',
         }}
       >
         {[
@@ -292,33 +293,31 @@ const PlanADate = () => {
           <div
             key={index}
             style={{
-              backgroundColor: '#ffffff',
-              padding: '24px',
-              borderRadius: '16px',
-              minWidth: '320px',
-              minHeight: '260px',
+              backgroundColor: '#f9f9f9', // Light gray background for subtle contrast
+              padding: '32px',
+              borderRadius: '20px', // Increased border radius for a softer look
+              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', // Softer shadow
+              transition: 'transform 0.3s ease, box-shadow 0.3s ease',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
-              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-              transition: 'transform 0.3s, box-shadow 0.3s',
             }}
             onMouseOver={(e) => {
-              e.currentTarget.style.transform = 'scale(1.05)';
-              e.currentTarget.style.boxShadow = '0 12px 24px rgba(0, 0, 0, 0.15)';
+              e.currentTarget.style.transform = 'translateY(-5px)'; // Subtle lift effect
+              e.currentTarget.style.boxShadow = '0 10px 20px rgba(0, 0, 0, 0.15)';
             }}
             onMouseOut={(e) => {
-              e.currentTarget.style.transform = 'scale(1)';
-              e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
             }}
           >
             <div>
               <h2
                 style={{
-                  fontSize: '1.5rem',
-                  fontWeight: '600',
-                  color: '#1f2937',
-                  marginBottom: '12px',
+                  fontSize: '1.75rem',
+                  fontWeight: '700',
+                  color: '#333333',
+                  marginBottom: '16px',
                 }}
               >
                 {card.title}
@@ -326,8 +325,9 @@ const PlanADate = () => {
               <p
                 style={{
                   fontSize: '1rem',
-                  color: '#6b7280',
-                  marginBottom: '16px',
+                  color: '#555555',
+                  marginBottom: '24px',
+                  lineHeight: '1.6',
                 }}
               >
                 {card.description}
@@ -336,34 +336,36 @@ const PlanADate = () => {
               <div
                 style={{
                   display: 'grid',
-                  gap: '8px',
-                  gridTemplateColumns: 'repeat(2, 1fr)',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))',
+                  gap: '16px',
                 }}
               >
                 {Object.entries(sampleData[card.dataKey] || {}).map(([key, value], idx) => (
                   <div
                     key={idx}
                     style={{
-                      backgroundColor: '#f1f5f9',
-                      padding: '8px',
-                      borderRadius: '8px',
+                      backgroundColor: '#ffffff',
+                      padding: '12px',
+                      borderRadius: '12px',
+                      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
                       display: 'flex',
                       flexDirection: 'column',
+                      alignItems: 'flex-start',
                     }}
                   >
                     <span
                       style={{
-                        fontSize: '0.875rem',
-                        color: '#4b5563',
-                        fontWeight: '500',
+                        fontSize: '0.85rem',
+                        color: '#888888',
+                        marginBottom: '4px',
                       }}
                     >
-                      {key}:
+                      {key}
                     </span>
                     <span
                       style={{
                         fontSize: '1rem',
-                        color: '#1f2937',
+                        color: '#333333',
                         fontWeight: '600',
                       }}
                     >
@@ -376,24 +378,25 @@ const PlanADate = () => {
             <button
               onClick={() => handleButtonClick(card.apiUrl)}
               style={{
-                backgroundColor: '#3b82f6',
-                color: 'white',
-                padding: '12px 20px',
-                border: 'none',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                fontWeight: '600',
-                fontSize: '1rem',
-                transition: 'background-color 0.2s, transform 0.2s',
                 marginTop: '24px',
+                alignSelf: 'flex-end',
+                backgroundColor: '#1e90ff', // Softer blue accent
+                color: '#ffffff',
+                padding: '12px 24px',
+                border: 'none',
+                borderRadius: '12px',
+                fontSize: '1rem',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'background-color 0.3s ease, transform 0.2s ease',
               }}
               onMouseOver={(e) => {
-                e.currentTarget.style.backgroundColor = '#2563eb';
-                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.backgroundColor = '#1c86ee'; // Slightly darker on hover
+                e.currentTarget.style.transform = 'scale(1.05)';
               }}
               onMouseOut={(e) => {
-                e.currentTarget.style.backgroundColor = '#3b82f6';
-                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.backgroundColor = '#1e90ff';
+                e.currentTarget.style.transform = 'scale(1)';
               }}
             >
               {card.buttonText}

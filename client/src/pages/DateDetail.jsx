@@ -13,7 +13,7 @@ import {
   saveDateIdea,
   unsaveDateIdea,
   deleteComment,
-  updateComment, // Import updateComment
+  updateComment,
 } from '../api';
 import { useAuth } from '../context/AuthContext';
 import Spinner from '../components/Spinner';
@@ -26,7 +26,7 @@ const DateDetail = () => {
   const [isSaved, setIsSaved] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(0);
-  const { isAuthenticated, user } = useAuth(); // Get user info
+  const { isAuthenticated, user } = useAuth();
   const queryClient = useQueryClient();
 
   // State for editing comments
@@ -49,16 +49,16 @@ const DateDetail = () => {
   const { data: date, isLoading } = useQuery({
     queryKey: ['dateIdea', id],
     queryFn: () => getDateIdea(id),
-    refetchOnMount: "always", 
-    staleTime: 0 
+    refetchOnMount: 'always',
+    staleTime: 0,
   });
 
   // Fetch comments
   const { data: comments = [] } = useQuery({
     queryKey: ['comments', id],
     queryFn: () => getComments(id),
-    refetchOnMount: "always", 
-    staleTime: 0 
+    refetchOnMount: 'always',
+    staleTime: 0,
   });
 
   useEffect(() => {
@@ -163,7 +163,6 @@ const DateDetail = () => {
   };
 
   const handleEditComment = (comment) => {
-    console.log('Editing comment:', comment.id); // Debugging line
     setEditingCommentId(comment.id);
     setEditedContent(comment.content);
   };
@@ -214,18 +213,14 @@ const DateDetail = () => {
 
   if (isLoading) {
     return (
-      <div className="app-container">
-        <main className="main-content">
-          <div className="loading-spinner-container">
-            <Spinner size={50} />
-          </div>
-        </main>
+      <div style={styles.loadingContainer}>
+        <Spinner size={50} />
       </div>
     );
   }
 
   if (!date) {
-    return <div className="error-message">Date idea not found</div>;
+    return <div style={styles.errorMessage}>Date idea not found</div>;
   }
 
   // Format the date added
@@ -233,163 +228,152 @@ const DateDetail = () => {
   const formattedDate = `${dateObj.getMonth() + 1}/${dateObj.getDate()}/${dateObj.getFullYear()}`;
 
   return (
-    <div className="app-container">
-      <main className="main-content">
-        <div className="date-detail-container">
-          <div className="date-detail-header">
-            <div className="image-container">
-              <button onClick={handleBack} className="back-button">
-                <ArrowLeft className="w-5 h-5" />
+    <div style={styles.container}>
+      <main style={styles.mainContent}>
+        <div style={styles.dateDetailContainer}>
+          {/* Header Section */}
+          <div style={styles.headerSection}>
+            <div style={styles.imageContainer}>
+              <button onClick={handleBack} style={styles.backButton} aria-label="Go Back">
+                <ArrowLeft size={20} />
               </button>
               <img
                 src={date.image_url}
                 alt={date.title}
-                className="detail-image"
+                style={styles.detailImage}
                 id="detail-image"
                 onError={handleImageError}
                 loading="lazy"
               />
             </div>
-            <div className="detail-info">
-              <h2>{date.title}</h2>
-              <div className="detail-tags">
-                <span className="cost-tag">{getDollarSigns(date.cost_category)}</span>
-                <span className="duration-tag">{date.duration}</span>
+            <div style={styles.detailInfo}>
+              <h2 style={styles.title}>{date.title}</h2>
+              <div style={styles.tagsContainer}>
+                {/* Cost Tag */}
+                <span style={{ ...styles.tag, backgroundColor: 'rgba(76, 175, 80, 0.2)', color: 'black' }}>
+                  {getDollarSigns(date.cost_category)}
+                </span>
+                {/* Duration Tag */}
+                <span style={{ ...styles.tag, backgroundColor: 'rgba(255, 255, 0, 0.2)', color: 'black' }}>
+                  {date.duration}
+                </span>
               </div>
             </div>
           </div>
-          <div className="detail-content">
-            <section className="detail-section">
-              <h3>About this Date</h3>
-              <p>{date.description}</p>
+
+          {/* Content Section */}
+          <div style={styles.contentSection}>
+            {/* About This Date */}
+            <section style={styles.section}>
+              <h3 style={styles.sectionTitle}>About this Date</h3>
+              <p style={styles.sectionContent}>{date.description}</p>
             </section>
-            <section
-              className="detail-section details-info-section"
-              style={{
-                backgroundColor: '#4b5563 !important',
-                borderRadius: '0.75rem',
-                padding: '1.5rem',
-                margin: '1rem 0',
-              }}
-            >
-              <h3>Details</h3>
-              <div
-                className="detail-grid"
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                  gap: '1rem',
-                }}
-              >
+
+            {/* Details */}
+            <section style={styles.section}>
+              <h3 style={styles.sectionTitle}>Details</h3>
+              <div style={styles.detailsGrid}>
                 {[
                   { label: 'Location', value: date.location },
                   { label: 'Time of Day', value: date.time_of_day },
                   { label: 'Activity Level', value: date.activity_level },
                   { label: 'Distance', value: date.distance },
                 ].map((item) => (
-                  <div
-                    key={item.label}
-                    className="detail-item"
-                    style={{
-                      backgroundColor: 'white',
-                      padding: '1.25rem',
-                      borderRadius: '0.5rem',
-                      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
-                      border: '1px solid #f3f4f6',
-                    }}
-                  >
-                    <span
-                      className="detail-label"
-                      style={{
-                        fontSize: '0.875rem',
-                        color: '#6b7280',
-                        display: 'block',
-                        marginBottom: '0.25rem',
-                        fontWeight: '500',
-                      }}
-                    >
-                      {item.label}
-                    </span>
-                    <span
-                      className="detail-value"
-                      style={{
-                        color: '#1f2937',
-                        fontWeight: '600',
-                        fontSize: '1rem',
-                      }}
-                    >
-                      {item.value}
-                    </span>
+                  <div key={item.label} style={styles.detailItem}>
+                    <span style={styles.detailLabel}>{item.label}</span>
+                    <span style={styles.detailValue}>{item.value}</span>
                   </div>
                 ))}
               </div>
             </section>
-            <section className="detail-section">
-              <div className="interaction-buttons detail-actions">
+
+            {/* Interaction Buttons */}
+            <section style={styles.section}>
+              <div style={styles.interactionButtons}>
                 <button
-                  className={`icon-button large ${isLiked ? 'liked' : ''}`}
+                  style={{
+                    ...styles.iconButton,
+                    ...(isLiked ? styles.likedButton : {}),
+                  }}
                   onClick={handleLike}
+                  aria-label="Like Date Idea"
                 >
-                  <Heart className={`w-5 h-5 ${isLiked ? 'fill-current text-red-500' : ''}`} />
+                  <Heart
+                    size={20}
+                    style={{
+                      marginRight: '6px',
+                      ...(isLiked ? { color: '#e0245e' } : { color: '#555555' }),
+                    }}
+                  />
                   <span>
                     {likesCount} {likesCount === 1 ? 'Like' : 'Likes'}
                   </span>
                 </button>
                 <button
-                  className={`icon-button large ${isSaved ? 'saved' : ''}`}
+                  style={{
+                    ...styles.iconButton,
+                    ...(isSaved ? styles.savedButton : {}),
+                  }}
                   onClick={handleSave}
+                  aria-label="Save Date Idea"
                 >
                   <Bookmark
-                    className={`w-5 h-5 transition-all duration-200 ${
-                      isSaved ? 'fill-current' : ''
-                    }`}
+                    size={20}
+                    style={{
+                      marginRight: '6px',
+                      ...(isSaved ? { color: '#1da1f2' } : { color: '#555555' }),
+                    }}
                   />
                   <span>{isSaved ? 'Saved' : 'Save'}</span>
                 </button>
-                <button className="icon-button large" onClick={handleShare}>
-                  <Share2 className="w-5 h-5" />
+                <button
+                  style={styles.iconButton}
+                  onClick={handleShare}
+                  aria-label="Share Date Idea"
+                >
+                  <Share2 size={20} style={{ marginRight: '6px', color: '#555555' }} />
                   <span>Share</span>
                 </button>
               </div>
-              <div style={{ color: '#666666', marginLeft: '1rem' }}>
-                Posted: {formattedDate}
-              </div>
+              <div style={styles.postedDate}>Posted: {formattedDate}</div>
             </section>
 
-            <section className="detail-section">
-              <h3>Comments</h3>
-              <form onSubmit={handleSubmitComment} className="comment-form">
+            {/* Comments Section */}
+            <section style={styles.section}>
+              <h3 style={styles.sectionTitle}>Comments</h3>
+              <form onSubmit={handleSubmitComment} style={styles.commentForm}>
                 <input
                   type="text"
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
                   placeholder="Add a comment..."
-                  className="comment-input"
+                  style={styles.commentInput}
+                  aria-label="Add a comment"
                 />
-                <button type="submit" className="primary-button">
+                <button type="submit" style={styles.postButton}>
                   Post
                 </button>
               </form>
-              <div className="comments-list">
+              <div style={styles.commentsList}>
                 {comments.map((comment) => (
-                  <div key={comment.id} className="comment-item" style={{ position: 'relative' }}>
+                  <div key={comment.id} style={styles.commentItem}>
                     {editingCommentId === comment.id ? (
                       // Editing mode
-                      <form onSubmit={(e) => handleUpdateComment(e, comment.id)}>
+                      <form onSubmit={(e) => handleUpdateComment(e, comment.id)} style={styles.editForm}>
                         <input
                           type="text"
                           value={editedContent}
                           onChange={(e) => setEditedContent(e.target.value)}
-                          className="comment-input"
-                          style={{ width: '100%' }}
+                          style={styles.editInput}
+                          aria-label="Edit comment"
                         />
-                        <div style={{ marginTop: '5px' }}>
-                          <button type="submit" className="primary-button" style={{ marginRight: '5px' }}>
+                        <div style={styles.editButtons}>
+                          <button type="submit" style={styles.saveButton}>
                             Save
                           </button>
                           <button
                             type="button"
-                            className="secondary-button"
+                            style={styles.cancelButton}
                             onClick={() => setEditingCommentId(null)}
                           >
                             Cancel
@@ -399,47 +383,34 @@ const DateDetail = () => {
                     ) : (
                       // Display mode
                       <>
-                        <p className="comment-content">
-                          <strong>{comment.username}:</strong> {comment.content}
-                        </p>
-                        <span className="comment-date">
-                          @ {new Date(comment.created_at).toLocaleDateString()}
-                        </span>
-
-                        {/* Edit and Delete buttons */}
-                        {isAuthenticated && user && comment.user_id === user.id && (
-                          <div style={{ position: 'absolute', top: '5px', right: '5px' }}>
-                            <button
-                              className="edit-comment-button"
-                              onClick={() => handleEditComment(comment)}
-                              aria-label="Edit Comment"
-                              style={{
-                                background: 'none',
-                                border: 'none',
-                                cursor: 'pointer',
-                                color: '#007bff',
-                                marginRight: '10px',
-                                fontSize: '1.25rem'
-                              }}
-                            >
-                              ✎
-                            </button>
-                            <button
-                              className="delete-comment-button"
-                              onClick={() => handleDeleteComment(comment.id)}
-                              aria-label="Delete Comment"
-                              style={{
-                                background: 'none',
-                                border: 'none',
-                                cursor: 'pointer',
-                                color: '#ff0000',
-                                fontSize: '1.5rem' // Increased font size
-                              }}
-                            >
-                              &times;
-                            </button>
-                          </div>
-                        )}
+                        <div style={styles.commentHeader}>
+                          <strong style={styles.commentUsername}>{comment.username}</strong>
+                          {/* Edit and Delete buttons */}
+                          {isAuthenticated && user && comment.user_id === user.id && (
+                            <div style={styles.commentActions}>
+                              <button
+                                onClick={() => handleEditComment(comment)}
+                                style={styles.actionButton}
+                                aria-label="Edit Comment"
+                              >
+                                ✎
+                              </button>
+                              <button
+                                onClick={() => handleDeleteComment(comment.id)}
+                                style={styles.actionButton}
+                                aria-label="Delete Comment"
+                              >
+                                &times;
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                        <p style={styles.commentContent}>{comment.content}</p>
+                        <div style={styles.commentDateContainer}>
+                          <span style={styles.commentDate}>
+                            @ {new Date(comment.created_at).toLocaleDateString()}
+                          </span>
+                        </div>
                       </>
                     )}
                   </div>
@@ -455,3 +426,321 @@ const DateDetail = () => {
 };
 
 export default DateDetail;
+
+// Inline Styles Object
+const styles = {
+  /* Reset and Base Styles */
+  container: {
+    minHeight: '100vh',
+    background: '#f8fafc',
+    padding: '20px',
+    color: '#333333',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    fontFamily: `'Helvetica Neue', Helvetica, Arial, sans-serif`,
+  },
+  
+  mainContent: {
+    width: '100%',
+    maxWidth: '800px', // Reduced maxWidth for a more compact layout
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+  },
+  dateDetailContainer: {
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '24px', // Reduced gap for tighter spacing
+  },
+  /* Header Section */
+  headerSection: {
+    display: 'flex',
+    flexDirection: 'row',
+    gap: '16px', // Reduced gap for a more compact header
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    position: 'relative',
+  },
+  imageContainer: {
+    position: 'relative',
+    width: '300px', // Reduced image width
+    height: '225px', // Adjusted height to maintain aspect ratio
+    flexShrink: 0,
+    borderRadius: '15px', // Slightly reduced border radius
+    overflow: 'hidden',
+    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)', // Softer shadow
+  },
+  backButton: {
+    position: 'absolute',
+    top: '12px',
+    left: '12px',
+    background: 'rgba(255, 255, 255, 0.9)', // Slightly more opaque
+    border: 'none',
+    borderRadius: '50%',
+    padding: '6px',
+    cursor: 'pointer',
+    zIndex: 1,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    transition: 'background 0.3s ease, transform 0.2s ease',
+  },
+  detailImage: {
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover',
+    transition: 'transform 0.3s ease',
+  },
+  detailInfo: {
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '8px', // Reduced gap for tighter spacing
+  },
+  title: {
+    fontSize: '1.75rem', // Slightly reduced font size
+    fontWeight: '700',
+    color: '#1e90ff',
+    margin: 0,
+  },
+  tagsContainer: {
+    display: 'flex',
+    gap: '8px',
+    flexWrap: 'wrap',
+  },
+  tag: {
+    padding: '4px 10px', // Reduced padding for smaller tags
+    borderRadius: '10px',
+    fontSize: '0.8rem', // Slightly reduced font size
+    fontWeight: '500',
+  },
+  /* Content Sections */
+  contentSection: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '24px', // Reduced gap for tighter content sections
+    width: '100%',
+  },
+  section: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '12px',
+  },
+  sectionTitle: {
+    fontSize: '1.25rem', // Reduced font size
+    fontWeight: '700',
+    color: '#333333',
+    margin: 0,
+  },
+  sectionContent: {
+    fontSize: '0.95rem', // Slightly reduced font size
+    color: '#555555',
+    lineHeight: '1.5',
+  },
+  detailsGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', // Adjusted minWidth for grid items
+    gap: '16px',
+  },
+  detailItem: {
+    backgroundColor: '#e2e8f0',
+    padding: '12px',
+    borderRadius: '10px',
+    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  detailLabel: {
+    fontSize: '0.8rem',
+    color: '#888888',
+    marginBottom: '3px',
+  },
+  detailValue: {
+    fontSize: '0.95rem',
+    color: '#333333',
+    fontWeight: '600',
+  },
+  /* Interaction Section */
+  interactionButtons: {
+    display: 'flex',
+    gap: '12px', // Reduced gap for tighter button spacing
+    marginBottom: '6px',
+  },
+  iconButton: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+    backgroundColor: '#e2e8f0',
+    color: '#555555',
+    padding: '0.75rem 1.5rem',
+    borderRadius: '0.375rem',
+    fontWeight: '600',
+    fontSize: '1rem',
+    cursor: 'pointer',
+    transition: 'color 0.3s ease, transform 0.2s ease',
+    boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
+    border: 'none',
+  },
+  likedButton: {
+    color: '#e0245e',
+    backgroundColor: '#fee2e2',
+  },
+  savedButton: {
+    color: '#1da1f2',
+    backgroundColor: '#dbeafe',
+  },
+  postedDate: {
+    fontSize: '0.8rem', // Reduced font size
+    color: '#888888',
+    marginLeft: '6px',
+  },
+  /* Comments Section */
+  commentsSection: {
+    paddingTop: '1rem',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '1.5rem',
+  },
+  commentForm: {
+    display: 'flex',
+    gap: '12px',
+    marginBottom: '20px',
+  },
+  commentInput: {
+    flex: 1,
+    padding: '10px 14px', // Reduced padding
+    borderRadius: '8px',
+    border: '1px solid #dddddd',
+    fontSize: '0.95rem',
+    outline: 'none',
+    transition: 'border-color 0.3s ease',
+    backgroundColor: '#f9fafb',
+  },
+  postButton: {
+    backgroundColor: '#1e90ff',
+    color: '#ffffff',
+    padding: '10px 20px', // Reduced padding
+    border: 'none',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    fontSize: '0.95rem',
+    fontWeight: '600',
+    transition: 'background-color 0.3s ease, transform 0.2s ease',
+  },
+  commentsList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '1rem',
+    marginBottom: '2rem',
+  },
+  commentItem: {
+    backgroundColor: '#e2e8f0',
+    padding: '14px',
+    borderRadius: '10px',
+    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
+    position: 'relative',
+    display: 'flex',
+    flexDirection: 'column',
+    marginBottom: '2px'
+  },
+  commentHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '6px',
+  },
+  commentUsername: {
+    fontWeight: '700',
+    color: '#333333',
+    fontSize: '0.9rem',
+  },
+  commentDateContainer: {
+    marginTop: '8px',
+  },
+  commentDate: {
+    fontSize: '0.75rem',
+    color: 'black', // Changed from #ffffff to black
+    backgroundColor: 'rgba(211, 211, 211, 0.3)', // Light grey with transparency
+    padding: '2px 6px',
+    borderRadius: '4px',
+    display: 'inline-block',
+  },
+  commentContent: {
+    fontSize: '0.95rem',
+    color: '#555555',
+    margin: 0,
+  },
+  commentActions: {
+    display: 'flex',
+    gap: '6px',
+  },
+  actionButton: {
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+    color: '#1e90ff',
+    fontSize: '1rem',
+    padding: 0,
+    lineHeight: 1,
+    transition: 'color 0.2s ease',
+  },
+  /* Editing Mode */
+  editForm: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '8px',
+  },
+  editInput: {
+    padding: '10px 14px',
+    borderRadius: '8px',
+    border: '1px solid #dddddd',
+    fontSize: '0.95rem',
+    outline: 'none',
+    transition: 'border-color 0.3s ease',
+    backgroundColor: '#f9fafb',
+  },
+  editButtons: {
+    display: 'flex',
+    gap: '8px',
+    justifyContent: 'flex-end',
+  },
+  saveButton: {
+    backgroundColor: '#1e90ff',
+    color: '#ffffff',
+    padding: '8px 16px',
+    border: 'none',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    fontSize: '0.85rem',
+    fontWeight: '600',
+    transition: 'background-color 0.3s ease, transform 0.2s ease',
+  },
+  cancelButton: {
+    backgroundColor: '#cccccc',
+    color: '#ffffff',
+    padding: '8px 16px',
+    border: 'none',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    fontSize: '0.85rem',
+    fontWeight: '600',
+    transition: 'background-color 0.3s ease, transform 0.2s ease',
+  },
+  /* Loading and Error Styles */
+  loadingContainer: {
+    minHeight: '100vh',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    background: '#ffffff',
+  },
+  errorMessage: {
+    color: '#ff0000',
+    fontSize: '1.1rem',
+    textAlign: 'center',
+    marginTop: '30px',
+  },
+};
+
