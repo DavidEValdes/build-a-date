@@ -661,8 +661,8 @@ const styles = {
   },
   commentDate: {
     fontSize: '0.75rem',
-    color: 'black', // Changed from #ffffff to black
-    backgroundColor: 'rgba(211, 211, 211, 0.3)', // Light grey with transparency
+    color: 'black', 
+    backgroundColor: 'rgba(169, 169, 169, 0.3)',
     padding: '2px 6px',
     borderRadius: '4px',
     display: 'inline-block',
