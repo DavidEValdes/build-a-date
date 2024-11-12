@@ -1,2 +1,4 @@
+# dev environment related files/folders
 .aider*
 .env
+.helix/
