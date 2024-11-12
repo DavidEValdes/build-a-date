@@ -1,5 +1,5 @@
 import React from 'react';
-import '../app.css'; // Ensure this path is correct based on your project structure
+import '../App.css'; // Ensure this path is correct based on your project structure
 
 const SuggestionDisplay = ({ date }) => {
   // Helper function to format the cost category
