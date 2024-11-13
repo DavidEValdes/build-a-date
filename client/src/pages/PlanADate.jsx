@@ -1,5 +1,6 @@
 import React from 'react';
 import Footer from '../components/Footer';
+import PlanADateCard from '../components/PlanADateCard';
 
 const PlanADate = () => {
   // Function to handle button clicks
@@ -154,254 +155,143 @@ const PlanADate = () => {
             description: 'Plan a date with the latest weather information.',
             buttonText: 'Check Weather',
             apiUrl: 'https://api.openweathermap.org/data/2.5/weather',
-            dataKey: 'weather',
+            data: sampleData['weather'],
           },
           {
             title: 'Nearby Restaurants',
             description: 'Discover nearby dining options for your date.',
             buttonText: 'Find Restaurants',
             apiUrl: 'https://developers.zomato.com/api/v2.1/search',
-            dataKey: 'restaurants',
+            data: sampleData['restaurants'],
           },
           {
             title: 'Movie Suggestions',
             description: 'Get movie recommendations for your date night.',
             buttonText: 'Browse Movies',
             apiUrl: 'https://api.themoviedb.org/3/discover/movie',
-            dataKey: 'movies',
+            data: sampleData['movies'],
           },
           {
             title: 'Event Finder',
             description: 'Find local events happening near you.',
             buttonText: 'Find Events',
             apiUrl: 'https://www.eventbriteapi.com/v3/events/search/',
-            dataKey: 'events',
+            data: sampleData['events'],
           },
           {
             title: 'Date Tips',
             description: 'Get tips to make your date even better.',
             buttonText: 'View Tips',
             apiUrl: 'https://api.adviceslip.com/advice',
-            dataKey: 'dateTips',
+            data: sampleData['dateTips'],
           },
           {
             title: 'Music Playlists',
             description: 'Find music playlists to set the mood for your date.',
             buttonText: 'Browse Playlists',
             apiUrl: 'https://api.spotify.com/v1/browse/featured-playlists',
-            dataKey: 'playlists',
+            data: sampleData['playlists'],
           },
           {
             title: 'Sunset/Sunrise Times',
             description: 'Shows the sunrise and sunset times for romantic dates.',
             buttonText: 'View Times',
             apiUrl: 'https://api.sunrise-sunset.org/json',
-            dataKey: 'sunriseSunset',
+            data: sampleData['sunriseSunset'],
           },
           {
             title: 'Air Quality',
             description: 'Check air quality for planning outdoor activities.',
             buttonText: 'Check Air Quality',
             apiUrl: 'https://api.openweathermap.org/data/2.5/air_pollution',
-            dataKey: 'airQuality',
+            data: sampleData['airQuality'],
           },
           {
             title: 'Timezone',
             description: "Shows times in users' local timezones for coordination.",
             buttonText: 'View Local Time',
             apiUrl: 'http://worldtimeapi.org/api/timezone',
-            dataKey: 'timezone',
+            data: sampleData['timezone'],
           },
           {
             title: 'AI Quote',
             description: 'Get random conversation starters for your date.',
             buttonText: 'Get Quote',
             apiUrl: 'https://api.quotable.io/random',
-            dataKey: 'aiQuote',
+            data: sampleData['aiQuote'],
           },
           {
             title: 'Moon Phase',
             description: 'Shows the current moon phase for stargazing dates.',
             buttonText: 'View Moon Phase',
             apiUrl: 'https://api.farmsense.net/v1/moonphases/',
-            dataKey: 'moonPhase',
+            data: sampleData['moonPhase'],
           },
           {
             title: 'UV Index',
             description: 'Check UV levels to plan safe outdoor activities.',
             buttonText: 'Check UV Index',
             apiUrl: 'https://api.openweathermap.org/data/2.5/uvi',
-            dataKey: 'uvIndex',
+            data: sampleData['uvIndex'],
           },
           {
             title: 'Fog & Visibility',
             description: 'Check fog and visibility for clear views on your date.',
             buttonText: 'Check Visibility',
             apiUrl: 'https://api.openweathermap.org/data/2.5/weather',
-            dataKey: 'fogVisibility',
+            data: sampleData['fogVisibility'],
           },
           {
             title: 'Pollen Count',
             description: 'Check pollen levels to plan an allergy-free date.',
             buttonText: 'Check Pollen Count',
             apiUrl: 'https://api.ambeedata.com/latest/pollen',
-            dataKey: 'pollenCount',
+            data: sampleData['pollenCount'],
           },
           {
             title: 'Crowd Prediction',
             description: 'Find the best times to avoid crowds for your date.',
             buttonText: 'Check Crowds',
             apiUrl: 'https://api.predicthq.com/v1/events',
-            dataKey: 'crowdPrediction',
+            data: sampleData['crowdPrediction'],
           },
           {
             title: 'Noise Level',
             description: 'Find quiet spots for a peaceful date experience.',
             buttonText: 'Check Noise Level',
             apiUrl: 'https://api.soundsnap.com/v1/noise-levels',
-            dataKey: 'noiseLevel',
+            data: sampleData['noiseLevel'],
           },
           {
             title: 'Light Pollution',
             description: 'Find dark skies for stargazing on your date.',
             buttonText: 'Check Light Pollution',
             apiUrl: 'https://api.lightpollutionmap.info/v1/overlays',
-            dataKey: 'lightPollution',
+            data: sampleData['lightPollution'],
           },
           {
             title: 'Marine Conditions',
             description: 'Check marine conditions for waterfront activities.',
             buttonText: 'Check Marine Conditions',
             apiUrl: 'https://api.stormglass.io/v2/weather/point',
-            dataKey: 'marineConditions',
+            data: sampleData['marineConditions'],
           },
           {
             title: 'Cloud Coverage',
             description: 'Check cloud coverage for outdoor date planning.',
             buttonText: 'Check Cloud Coverage',
             apiUrl: 'https://api.openweathermap.org/data/2.5/weather',
-            dataKey: 'cloudCoverage',
+            data: sampleData['cloudCoverage'],
           },
           {
             title: 'Allergy',
             description: 'Check local allergens to avoid allergy triggers.',
             buttonText: 'Check Allergies',
             apiUrl: 'https://api.ambeedata.com/latest/pollen',
-            dataKey: 'allergy',
+            data: sampleData['allergy'],
           },
         ].map((card, index) => (
-          <div
-            key={index}
-            style={{
-              backgroundColor: '#f9f9f9', // Light gray background for subtle contrast
-              padding: '32px',
-              borderRadius: '20px', // Increased border radius for a softer look
-              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', // Softer shadow
-              transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between',
-            }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.transform = 'translateY(-5px)'; // Subtle lift effect
-              e.currentTarget.style.boxShadow = '0 10px 20px rgba(0, 0, 0, 0.15)';
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
-            }}
-          >
-            <div>
-              <h2
-                style={{
-                  fontSize: '1.75rem',
-                  fontWeight: '700',
-                  color: '#333333',
-                  marginBottom: '16px',
-                }}
-              >
-                {card.title}
-              </h2>
-              <p
-                style={{
-                  fontSize: '1rem',
-                  color: '#555555',
-                  marginBottom: '24px',
-                  lineHeight: '1.6',
-                }}
-              >
-                {card.description}
-              </p>
-              {/* Mini Dashboard Sections */}
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))',
-                  gap: '16px',
-                }}
-              >
-                {Object.entries(sampleData[card.dataKey] || {}).map(([key, value], idx) => (
-                  <div
-                    key={idx}
-                    style={{
-                      backgroundColor: '#ffffff',
-                      padding: '12px',
-                      borderRadius: '12px',
-                      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'flex-start',
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontSize: '0.85rem',
-                        color: '#888888',
-                        marginBottom: '4px',
-                      }}
-                    >
-                      {key}
-                    </span>
-                    <span
-                      style={{
-                        fontSize: '1rem',
-                        color: '#333333',
-                        fontWeight: '600',
-                      }}
-                    >
-                      {value}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <button
-              onClick={() => handleButtonClick(card.apiUrl)}
-              style={{
-                marginTop: '24px',
-                alignSelf: 'flex-end',
-                backgroundColor: '#1e90ff', // Softer blue accent
-                color: '#ffffff',
-                padding: '12px 24px',
-                border: 'none',
-                borderRadius: '12px',
-                fontSize: '1rem',
-                fontWeight: '600',
-                cursor: 'pointer',
-                transition: 'background-color 0.3s ease, transform 0.2s ease',
-              }}
-              onMouseOver={(e) => {
-                e.currentTarget.style.backgroundColor = '#1c86ee'; // Slightly darker on hover
-                e.currentTarget.style.transform = 'scale(1.05)';
-              }}
-              onMouseOut={(e) => {
-                e.currentTarget.style.backgroundColor = '#1e90ff';
-                e.currentTarget.style.transform = 'scale(1)';
-              }}
-            >
-              {card.buttonText}
-            </button>
-          </div>
+          <PlanADateCard key={index} {...card} />
         ))}
       </div>
 
