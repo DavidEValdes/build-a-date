@@ -1,7 +1,7 @@
 import React from "react";
 
 const PlanADateCard = (props) => {
-  const { title, description, buttonText, apiUrl, data} = props;
+  const { title, description, buttonText, apiUrl, data, onClick} = props;
 
   return (
     <div
@@ -91,7 +91,7 @@ const PlanADateCard = (props) => {
         </div>
       </div>
       <button
-        onClick={() => handleButtonClick(apiUrl)}
+        onClick={() => onClick(apiUrl)}
         style={{
           marginTop: "24px",
           alignSelf: "flex-end",
