@@ -1,8 +1,10 @@
+const API_URL = "https://developers.zomato.com/api/v2.1/search";
+
 export const restaurantsData = {
   title: "Nearby Restaurants",
   description: "Discover nearby dining options for your date.",
   buttonText: "Find Restaurants",
-  apiUrl: "https://developers.zomato.com/api/v2.1/search",
+  fetchData: () => alert(`Fetching data from: ${API_URL}`),
   data: {
     "Top Restaurant": "La Bella",
     Cuisine: "Italian",

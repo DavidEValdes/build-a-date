@@ -4,12 +4,6 @@ import PlanADateCard from '../components/PlanADateCard';
 import { planADateCards } from '../services/plan-a-date';
 
 const PlanADate = () => {
-  // Function to handle button clicks
-  const handleButtonClick = (apiUrl) => {
-    // Replace with actual API call logic
-    alert(`Fetching data from: ${apiUrl}`);
-  };
-
   return (
     <div
       style={{
@@ -57,7 +51,7 @@ const PlanADate = () => {
         }}
       >
         {planADateCards.map((card, index) => (
-          <PlanADateCard key={index} {...card} onClick={handleButtonClick} />
+          <PlanADateCard key={index} {...card}/>
         ))}
       </div>
 
