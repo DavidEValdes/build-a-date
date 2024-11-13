@@ -1,8 +1,15 @@
-import React from "react";
+import React, { useState } from "react";
 
 const PlanADateCard = (props) => {
-  // TODO: once fetchData actually fetches data, we should set data locally within the component to the result of the fetch
-  const { title, description, buttonText, fetchData, data } = props;
+  const { title, description, buttonText, fetchData } = props;
+
+  const [data, setData] = useState({});
+
+  const onFetchData = async () => {
+    const fetchedData = await fetchData();
+    setData(fetchedData);
+    isDataFetched = true;
+  };
 
   return (
     <div
@@ -89,32 +96,36 @@ const PlanADateCard = (props) => {
           ))}
         </div>
       </div>
-      <button
-        onClick={fetchData}
-        style={{
-          marginTop: "24px",
-          alignSelf: "flex-end",
-          backgroundColor: "#1e90ff", // Softer blue accent
-          color: "#ffffff",
-          padding: "12px 24px",
-          border: "none",
-          borderRadius: "12px",
-          fontSize: "1rem",
-          fontWeight: "600",
-          cursor: "pointer",
-          transition: "background-color 0.3s ease, transform 0.2s ease",
-        }}
-        onMouseOver={(e) => {
-          e.currentTarget.style.backgroundColor = "#1c86ee"; // Slightly darker on hover
-          e.currentTarget.style.transform = "scale(1.05)";
-        }}
-        onMouseOut={(e) => {
-          e.currentTarget.style.backgroundColor = "#1e90ff";
-          e.currentTarget.style.transform = "scale(1)";
-        }}
-      >
-        {buttonText}
-      </button>
+      {/* Show button to fetch data if not already fetched */}
+      {Object.keys(data).length === 0 && (
+        // TODO: add some visual feedback when data is loading
+        <button
+          onClick={onFetchData}
+          style={{
+            marginTop: "24px",
+            alignSelf: "flex-end",
+            backgroundColor: "#1e90ff", // Softer blue accent
+            color: "#ffffff",
+            padding: "12px 24px",
+            border: "none",
+            borderRadius: "12px",
+            fontSize: "1rem",
+            fontWeight: "600",
+            cursor: "pointer",
+            transition: "background-color 0.3s ease, transform 0.2s ease",
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.backgroundColor = "#1c86ee"; // Slightly darker on hover
+            e.currentTarget.style.transform = "scale(1.05)";
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.backgroundColor = "#1e90ff";
+            e.currentTarget.style.transform = "scale(1)";
+          }}
+        >
+          {buttonText}
+        </button>
+      )}
     </div>
   );
 };
