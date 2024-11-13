@@ -1,8 +1,8 @@
 // /server/helpers/pexels.js
-import axios from 'axios';
+import axios from "axios";
 
 const PEXELS_API_KEY = process.env.PEXELS_API_KEY;
-const PEXELS_BASE_URL = 'https://api.pexels.com/v1/search';
+const PEXELS_BASE_URL = "https://api.pexels.com/v1/search";
 
 /**
  * Fetches a relevant image URL from Pexels based on the date idea title.
@@ -16,9 +16,9 @@ export const fetchImageUrl = async (title) => {
         Authorization: PEXELS_API_KEY,
       },
       params: {
-        query: title,        // Use the title directly as the search query
-        per_page: 15,        // Fetch more to increase randomness
-        orientation: 'landscape',
+        query: title, // Use the title directly as the search query
+        per_page: 15, // Fetch more to increase randomness
+        orientation: "landscape",
       },
     });
 
@@ -35,7 +35,7 @@ export const fetchImageUrl = async (title) => {
 
     return selectedPhoto.src.large2x; // Choose the desired size
   } catch (error) {
-    console.error('Error fetching image from Pexels:', error.message);
+    console.error("Error fetching image from Pexels:", error.message);
     return null;
   }
 };

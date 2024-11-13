@@ -1,10 +1,10 @@
-import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { UserCircle } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
-import LoginModal from './LoginModal';
-import RegisterModal from './RegisterModal';
-import Spinner from './Spinner';
+import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { UserCircle } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
+import LoginModal from "./LoginModal";
+import RegisterModal from "./RegisterModal";
+import Spinner from "./Spinner";
 
 const UserMenu = () => {
   const [showMenu, setShowMenu] = useState(false);
@@ -24,10 +24,10 @@ const UserMenu = () => {
     }, 500); // Delay to show spinner briefly
   };
 
-  const handleHomeClick = () => handleNavigation('/');
-  const handleProfileClick = () => handleNavigation('/profile');
-  const handleSavedDatesClick = () => handleNavigation('/saved-dates');
-  const handlePlanADateClick = () => handleNavigation('/plan-a-date');
+  const handleHomeClick = () => handleNavigation("/");
+  const handleProfileClick = () => handleNavigation("/profile");
+  const handleSavedDatesClick = () => handleNavigation("/saved-dates");
+  const handlePlanADateClick = () => handleNavigation("/plan-a-date");
 
   const handleLoginClick = () => {
     setShowLoginModal(true);
@@ -53,23 +53,23 @@ const UserMenu = () => {
 
   // Close menu on Escape key press
   const handleKeyDown = (e) => {
-    if (e.key === 'Escape') {
+    if (e.key === "Escape") {
       setShowMenu(false);
     }
   };
 
   useEffect(() => {
     if (showMenu) {
-      document.addEventListener('mousedown', handleClickOutside);
-      document.addEventListener('keydown', handleKeyDown);
+      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("keydown", handleKeyDown);
     } else {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
     }
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
     };
   }, [showMenu]);
 
@@ -85,7 +85,9 @@ const UserMenu = () => {
         {loading ? (
           <Spinner size={24} color="#4f46e5" /> // Spinner replaces UserCircle
         ) : (
-          <UserCircle className={`w-6 h-6 text-gray-600 transition-transform duration-300 ${showMenu ? 'transform rotate-90' : ''}`} />
+          <UserCircle
+            className={`w-6 h-6 text-gray-600 transition-transform duration-300 ${showMenu ? "transform rotate-90" : ""}`}
+          />
         )}
       </button>
 
@@ -96,14 +98,14 @@ const UserMenu = () => {
               <div
                 className="px-4 py-2 text-sm"
                 style={{
-                  fontWeight: 'bold',
-                  textAlign: 'center',
-                  backgroundColor: '#507acf',
-                  color: 'white',
-                  padding: '8px 16px',
-                  borderRadius: '25px',
-                  margin: '8px',
-                  boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  backgroundColor: "#507acf",
+                  color: "white",
+                  padding: "8px 16px",
+                  borderRadius: "25px",
+                  margin: "8px",
+                  boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
                 }}
               >
                 {user.username}
@@ -130,7 +132,7 @@ const UserMenu = () => {
               <button
                 onClick={handlePlanADateClick}
                 className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 transition-colors"
-                style={{ color: '#507acf', fontWeight: 'bold' }}
+                style={{ color: "#507acf", fontWeight: "bold" }}
               >
                 Plan a Date
               </button>
@@ -171,7 +173,7 @@ const UserMenu = () => {
               <button
                 onClick={handlePlanADateClick}
                 className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 transition-colors"
-                style={{ color: '#507acf', fontWeight: 'bold' }}
+                style={{ color: "#507acf", fontWeight: "bold" }}
               >
                 Plan a Date
               </button>
@@ -180,8 +182,12 @@ const UserMenu = () => {
         </div>
       )}
 
-      {showLoginModal && <LoginModal onClose={() => setShowLoginModal(false)} />}
-      {showRegisterModal && <RegisterModal onClose={() => setShowRegisterModal(false)} />}
+      {showLoginModal && (
+        <LoginModal onClose={() => setShowLoginModal(false)} />
+      )}
+      {showRegisterModal && (
+        <RegisterModal onClose={() => setShowRegisterModal(false)} />
+      )}
     </div>
   );
 };

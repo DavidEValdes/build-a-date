@@ -1,16 +1,21 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Heart, MessageCircle, Bookmark, Share2 } from 'lucide-react';
-import { likeDateIdea, unlikeDateIdea, saveDateIdea, unsaveDateIdea } from '../api';
-import { useAuth } from '../context/AuthContext';
-import { useQueryClient } from '@tanstack/react-query';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Heart, MessageCircle, Bookmark, Share2 } from "lucide-react";
+import {
+  likeDateIdea,
+  unlikeDateIdea,
+  saveDateIdea,
+  unsaveDateIdea,
+} from "../api";
+import { useAuth } from "../context/AuthContext";
+import { useQueryClient } from "@tanstack/react-query";
 
 const COST_CATEGORY_MAP = {
-  free: 'Free',
-  economy: '$',
-  standard: '$$',
-  premium: '$$$',
-  luxury: '$$$$',
+  free: "Free",
+  economy: "$",
+  standard: "$$",
+  premium: "$$$",
+  luxury: "$$$$",
 };
 
 const DateCard = ({ date }) => {
@@ -34,13 +39,13 @@ const DateCard = ({ date }) => {
   const handleLike = async (e) => {
     e.stopPropagation();
     if (!isAuthenticated) {
-      alert('Please login to like dates');
+      alert("Please login to like dates");
       return;
     }
 
     const wasLiked = isLiked;
     setIsLiked(!wasLiked);
-    setLikesCount(prev => wasLiked ? prev - 1 : prev + 1);
+    setLikesCount((prev) => (wasLiked ? prev - 1 : prev + 1));
 
     try {
       if (wasLiked) {
@@ -49,20 +54,20 @@ const DateCard = ({ date }) => {
         await likeDateIdea(date.id);
       }
       // Force refresh all queries
-      queryClient.invalidateQueries(['feedDateIdeas']);
-      queryClient.invalidateQueries(['dateIdea', date.id]);
-      queryClient.invalidateQueries(['allDateIdeas']);
+      queryClient.invalidateQueries(["feedDateIdeas"]);
+      queryClient.invalidateQueries(["dateIdea", date.id]);
+      queryClient.invalidateQueries(["allDateIdeas"]);
     } catch (error) {
-      console.error('Error updating like:', error);
+      console.error("Error updating like:", error);
       setIsLiked(wasLiked);
-      setLikesCount(prev => wasLiked ? prev + 1 : prev - 1);
+      setLikesCount((prev) => (wasLiked ? prev + 1 : prev - 1));
     }
   };
 
   const handleSave = async (e) => {
     e.stopPropagation();
     if (!isAuthenticated) {
-      alert('Please login to save dates');
+      alert("Please login to save dates");
       return;
     }
 
@@ -76,11 +81,11 @@ const DateCard = ({ date }) => {
         await saveDateIdea(date.id);
       }
       // Force refresh all queries
-      queryClient.invalidateQueries(['feedDateIdeas']);
-      queryClient.invalidateQueries(['dateIdea', date.id]);
-      queryClient.invalidateQueries(['allDateIdeas']);
+      queryClient.invalidateQueries(["feedDateIdeas"]);
+      queryClient.invalidateQueries(["dateIdea", date.id]);
+      queryClient.invalidateQueries(["allDateIdeas"]);
     } catch (error) {
-      console.error('Error updating save:', error);
+      console.error("Error updating save:", error);
       setIsSaved(wasSaved);
     }
   };
@@ -90,10 +95,10 @@ const DateCard = ({ date }) => {
     navigator.clipboard
       .writeText(window.location.origin + `/dates/${date.id}`)
       .then(() => {
-        alert('Date link copied to clipboard!');
+        alert("Date link copied to clipboard!");
       })
       .catch(() => {
-        alert('Failed to copy the link.');
+        alert("Failed to copy the link.");
       });
   };
 
@@ -107,11 +112,15 @@ const DateCard = ({ date }) => {
   };
 
   const getDollarSigns = (category) => {
-    return COST_CATEGORY_MAP[category.toLowerCase()] || '$';
+    return COST_CATEGORY_MAP[category.toLowerCase()] || "$";
   };
 
   return (
-    <div className="date-card" onClick={handleCardClick} style={{ cursor: 'pointer' }}>
+    <div
+      className="date-card"
+      onClick={handleCardClick}
+      style={{ cursor: "pointer" }}
+    >
       <div className="date-card-header">
         <img src={date.image_url} alt={date.title} />
       </div>
@@ -119,11 +128,11 @@ const DateCard = ({ date }) => {
       <div
         className="date-card-content"
         style={{
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%',
-          padding: '1.5rem',
-          position: 'relative',
+          display: "flex",
+          flexDirection: "column",
+          height: "100%",
+          padding: "1.5rem",
+          position: "relative",
         }}
       >
         <div className="date-card-title">
@@ -139,24 +148,24 @@ const DateCard = ({ date }) => {
         <div
           style={{
             flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
           }}
         >
           <p
             className="description"
             style={{
-              marginTop: '0.75rem',
-              paddingTop: '0.75rem',
-              paddingBottom: '0.75rem',
-              borderTop: '1px solid #eee',
+              marginTop: "0.75rem",
+              paddingTop: "0.75rem",
+              paddingBottom: "0.75rem",
+              borderTop: "1px solid #eee",
               flex: 1,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              textAlign: 'center',
-              fontWeight: '500',
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              textAlign: "center",
+              fontWeight: "500",
             }}
           >
             {date.description}
@@ -165,13 +174,13 @@ const DateCard = ({ date }) => {
           <div
             className="duration"
             style={{
-              paddingTop: '0.75rem',
-              paddingBottom: '0.75rem',
-              borderTop: '1px solid #eee',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              textAlign: 'center',
+              paddingTop: "0.75rem",
+              paddingBottom: "0.75rem",
+              borderTop: "1px solid #eee",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              textAlign: "center",
             }}
           >
             Duration: {date.duration}
@@ -181,13 +190,13 @@ const DateCard = ({ date }) => {
         <div
           className="time-added"
           style={{
-            fontSize: '0.6rem',
-            color: '#6b7280',
-            position: 'absolute',
-            bottom: '0.8rem',
-            left: '1.2rem',
-            backgroundColor: '#f3f4f6',
-            borderRadius: '4px'
+            fontSize: "0.6rem",
+            color: "#6b7280",
+            position: "absolute",
+            bottom: "0.8rem",
+            left: "1.2rem",
+            backgroundColor: "#f3f4f6",
+            borderRadius: "4px",
           }}
         >
           @ {formattedDate}
@@ -197,13 +206,13 @@ const DateCard = ({ date }) => {
       <div className="date-card-footer">
         <div className="interaction-buttons">
           <button
-            className={`icon-button ${isLiked ? 'liked' : ''}`}
+            className={`icon-button ${isLiked ? "liked" : ""}`}
             onClick={handleLike}
             aria-label={`Like this date idea (${likesCount} likes)`}
           >
             <Heart
               className={`w-5 h-5 transition-all duration-200 ${
-                isLiked ? 'fill-current text-red-500' : ''
+                isLiked ? "fill-current text-red-500" : ""
               }`}
             />
             <span className="ml-1">{likesCount}</span>
@@ -221,16 +230,20 @@ const DateCard = ({ date }) => {
 
         <div className="action-buttons">
           <button
-            className={`icon-button ${isSaved ? 'saved' : ''}`}
+            className={`icon-button ${isSaved ? "saved" : ""}`}
             onClick={handleSave}
-            aria-label={isSaved ? 'Remove from saved' : 'Save this date idea'}
+            aria-label={isSaved ? "Remove from saved" : "Save this date idea"}
           >
             <Bookmark
-              className={`w-5 h-5 transition-all duration-200 ${isSaved ? 'fill-current' : ''}`}
+              className={`w-5 h-5 transition-all duration-200 ${isSaved ? "fill-current" : ""}`}
             />
           </button>
 
-          <button className="icon-button" onClick={handleShare} aria-label="Share this date idea">
+          <button
+            className="icon-button"
+            onClick={handleShare}
+            aria-label="Share this date idea"
+          >
             <Share2 className="w-5 h-5" />
           </button>
         </div>

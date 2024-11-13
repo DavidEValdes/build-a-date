@@ -1,28 +1,33 @@
 // src/pages/SavedDates.jsx
 
-import { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import DateCard from '../components/DateCard';
-import Spinner from '../components/Spinner'; // Import Spinner
-import { ArrowLeft, SlidersHorizontal, ChevronDown, ChevronUp } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
-import { getSavedDates } from '../api';
-import Footer from '../components/Footer';
+import { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import DateCard from "../components/DateCard";
+import Spinner from "../components/Spinner"; // Import Spinner
+import {
+  ArrowLeft,
+  SlidersHorizontal,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { getSavedDates } from "../api";
+import Footer from "../components/Footer";
 
 // Sort Options Array (Same as Home Page)
 const sortOptions = [
-  { value: 'newest', label: 'Newest First' },
-  { value: 'priceLowToHigh', label: 'Price: Low to High' },
-  { value: 'priceHighToLow', label: 'Price: High to Low' },
-  { value: 'durationShortToLong', label: 'Duration: Short to Long' },
-  { value: 'durationLongToShort', label: 'Duration: Long to Short' },
-  { value: 'indoors', label: 'Indoor Activities' },
-  { value: 'outdoors', label: 'Outdoor Activities' },
-  { value: 'mostLiked', label: 'Most Liked' },
-  { value: 'leastLiked', label: 'Least Liked' },
-  { value: 'mostCommented', label: 'Most Commented' },
-  { value: 'alphabetical', label: 'A-Z' },
+  { value: "newest", label: "Newest First" },
+  { value: "priceLowToHigh", label: "Price: Low to High" },
+  { value: "priceHighToLow", label: "Price: High to Low" },
+  { value: "durationShortToLong", label: "Duration: Short to Long" },
+  { value: "durationLongToShort", label: "Duration: Long to Short" },
+  { value: "indoors", label: "Indoor Activities" },
+  { value: "outdoors", label: "Outdoor Activities" },
+  { value: "mostLiked", label: "Most Liked" },
+  { value: "leastLiked", label: "Least Liked" },
+  { value: "mostCommented", label: "Most Commented" },
+  { value: "alphabetical", label: "A-Z" },
 ];
 
 const SavedDates = () => {
@@ -31,12 +36,17 @@ const SavedDates = () => {
   const dropdownRef = useRef(null);
 
   // Sorting States
-  const [sortBy, setSortBy] = useState('newest');
+  const [sortBy, setSortBy] = useState("newest");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   // Fetch Saved Dates
-  const { data: savedDates = [], isLoading, isError, error } = useQuery({
-    queryKey: ['savedDates'],
+  const {
+    data: savedDates = [],
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ["savedDates"],
     queryFn: getSavedDates,
     enabled: isAuthenticated,
   });
@@ -44,7 +54,7 @@ const SavedDates = () => {
   // Redirect to Home if not authenticated
   useEffect(() => {
     if (!isAuthenticated) {
-      navigate('/');
+      navigate("/");
     }
   }, [isAuthenticated, navigate]);
 
@@ -55,9 +65,9 @@ const SavedDates = () => {
         setIsDropdownOpen(false);
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
@@ -98,27 +108,31 @@ const SavedDates = () => {
     // Sorting Logic
     return [...dates].sort((a, b) => {
       switch (sortBy) {
-        case 'newest':
+        case "newest":
           return new Date(b.created_at) - new Date(a.created_at);
-        case 'priceLowToHigh':
-          return (costMap[a.cost_category] || 0) - (costMap[b.cost_category] || 0);
-        case 'priceHighToLow':
-          return (costMap[b.cost_category] || 0) - (costMap[a.cost_category] || 0);
-        case 'durationShortToLong':
+        case "priceLowToHigh":
+          return (
+            (costMap[a.cost_category] || 0) - (costMap[b.cost_category] || 0)
+          );
+        case "priceHighToLow":
+          return (
+            (costMap[b.cost_category] || 0) - (costMap[a.cost_category] || 0)
+          );
+        case "durationShortToLong":
           return parseDuration(a.duration) - parseDuration(b.duration);
-        case 'durationLongToShort':
+        case "durationLongToShort":
           return parseDuration(b.duration) - parseDuration(a.duration);
-        case 'indoors':
-          return a.location === 'indoor' ? -1 : 1;
-        case 'outdoors':
-          return a.location === 'outdoor' ? -1 : 1;
-        case 'mostLiked':
+        case "indoors":
+          return a.location === "indoor" ? -1 : 1;
+        case "outdoors":
+          return a.location === "outdoor" ? -1 : 1;
+        case "mostLiked":
           return (b.likes_count || 0) - (a.likes_count || 0);
-        case 'leastLiked':
+        case "leastLiked":
           return (a.likes_count || 0) - (b.likes_count || 0);
-        case 'mostCommented':
+        case "mostCommented":
           return (b.comments_count || 0) - (a.comments_count || 0);
-        case 'alphabetical':
+        case "alphabetical":
           return a.title.localeCompare(b.title);
         default:
           return 0;
@@ -130,39 +144,49 @@ const SavedDates = () => {
   const sortedSavedDates = getSortedDates(savedDates);
 
   return (
-    <div className="app-container" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <main className="main-content" style={{ flex: '1', padding: '2rem' }}>
+    <div
+      className="app-container"
+      style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}
+    >
+      <main className="main-content" style={{ flex: "1", padding: "2rem" }}>
         {/* Back Button */}
         <button
           onClick={handleBack}
           className="back-button"
           style={{
-            display: 'flex',
-            alignItems: 'center',
-            padding: '0.5rem 1rem',
-            backgroundColor: '#f3f4f6',
-            border: 'none',
-            borderRadius: '0.375rem',
-            cursor: 'pointer',
-            marginBottom: '1.5rem',
-            transition: 'background-color 0.2s ease',
+            display: "flex",
+            alignItems: "center",
+            padding: "0.5rem 1rem",
+            backgroundColor: "#f3f4f6",
+            border: "none",
+            borderRadius: "0.375rem",
+            cursor: "pointer",
+            marginBottom: "1.5rem",
+            transition: "background-color 0.2s ease",
           }}
-          onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#e5e7eb')}
-          onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#f3f4f6')}
+          onMouseOver={(e) =>
+            (e.currentTarget.style.backgroundColor = "#e5e7eb")
+          }
+          onMouseOut={(e) =>
+            (e.currentTarget.style.backgroundColor = "#f3f4f6")
+          }
         >
           <ArrowLeft size={20} className="mr-2" />
           <span>Back</span>
         </button>
 
         {/* Header with Divider */}
-        <div className="saved-dates-header" style={{ marginBottom: '1rem' }}>
-          <div className="header-with-divider" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <div className="saved-dates-header" style={{ marginBottom: "1rem" }}>
+          <div
+            className="header-with-divider"
+            style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
+          >
             <h1
               className="saved-dates-title"
               style={{
-                fontSize: '2rem',
-                fontWeight: 'bold',
-                color: '#000000',
+                fontSize: "2rem",
+                fontWeight: "bold",
+                color: "#000000",
               }}
             >
               Saved Dates
@@ -173,7 +197,12 @@ const SavedDates = () => {
         {/* Sorting Menu (Placed Above the Divider) */}
         <div
           className="sort-container"
-          style={{ position: 'relative', display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}
+          style={{
+            position: "relative",
+            display: "flex",
+            justifyContent: "flex-end",
+            marginBottom: "1rem",
+          }}
           ref={dropdownRef}
         >
           <button
@@ -181,45 +210,52 @@ const SavedDates = () => {
             onClick={() => setIsDropdownOpen((prev) => !prev)}
             className="sort-toggle-button"
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              padding: '0.5rem 1rem',
-              borderRadius: '0.375rem',
-              border: '1px solid #e5e7eb',
-              backgroundColor: '#ffffff',
-              color: '#374151',
-              fontSize: '0.875rem',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-              minWidth: '150px',
+              display: "flex",
+              alignItems: "center",
+              gap: "0.5rem",
+              padding: "0.5rem 1rem",
+              borderRadius: "0.375rem",
+              border: "1px solid #e5e7eb",
+              backgroundColor: "#ffffff",
+              color: "#374151",
+              fontSize: "0.875rem",
+              cursor: "pointer",
+              transition: "all 0.2s ease",
+              minWidth: "150px",
             }}
             aria-haspopup="listbox"
             aria-expanded={isDropdownOpen}
           >
             <SlidersHorizontal size={16} />
-            <span>{sortOptions.find((opt) => opt.value === sortBy)?.label || 'Sort By'}</span>
-            {isDropdownOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            <span>
+              {sortOptions.find((opt) => opt.value === sortBy)?.label ||
+                "Sort By"}
+            </span>
+            {isDropdownOpen ? (
+              <ChevronUp size={16} />
+            ) : (
+              <ChevronDown size={16} />
+            )}
           </button>
 
           {isDropdownOpen && (
             <ul
               className="sort-dropdown"
               style={{
-                position: 'absolute',
-                top: '110%',
+                position: "absolute",
+                top: "110%",
                 right: 0,
-                width: '100%',
-                backgroundColor: '#ffffff',
-                border: '1px solid #e5e7eb',
-                borderRadius: '0.375rem',
-                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                width: "100%",
+                backgroundColor: "#ffffff",
+                border: "1px solid #e5e7eb",
+                borderRadius: "0.375rem",
+                boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
                 zIndex: 10,
-                maxHeight: '200px',
-                overflowY: 'auto',
-                marginTop: '0.5rem',
-                listStyle: 'none',
-                padding: '0.5rem 0',
+                maxHeight: "200px",
+                overflowY: "auto",
+                marginTop: "0.5rem",
+                listStyle: "none",
+                padding: "0.5rem 0",
               }}
               role="listbox"
             >
@@ -232,25 +268,28 @@ const SavedDates = () => {
                   }}
                   className="sort-option"
                   style={{
-                    padding: '0.5rem 1rem',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    transition: 'background-color 0.2s ease',
-                    backgroundColor: sortBy === option.value ? '#f3f4f6' : '#ffffff',
-                    fontSize: '0.875rem',
+                    padding: "0.5rem 1rem",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.5rem",
+                    transition: "background-color 0.2s ease",
+                    backgroundColor:
+                      sortBy === option.value ? "#f3f4f6" : "#ffffff",
+                    fontSize: "0.875rem",
                   }}
                   role="option"
                   aria-selected={sortBy === option.value}
-                  onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#f3f4f6')}
+                  onMouseOver={(e) =>
+                    (e.currentTarget.style.backgroundColor = "#f3f4f6")
+                  }
                   onMouseOut={(e) =>
                     (e.currentTarget.style.backgroundColor =
-                      sortBy === option.value ? '#f3f4f6' : '#ffffff')
+                      sortBy === option.value ? "#f3f4f6" : "#ffffff")
                   }
                 >
                   {sortBy === option.value && (
-                    <span style={{ color: '#4f46e5' }}>&#10003;</span> 
+                    <span style={{ color: "#4f46e5" }}>&#10003;</span>
                   )}
                   {option.label}
                 </li>
@@ -263,43 +302,54 @@ const SavedDates = () => {
         <div
           className="styled-divider"
           style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            height: '2px',
-            backgroundColor: '#ccc',
-            marginBottom: '1.5rem',
+            display: "flex",
+            alignItems: "center",
+            gap: "0.5rem",
+            height: "2px",
+            backgroundColor: "#ccc",
+            marginBottom: "1.5rem",
           }}
         >
-          <span className="divider-line" style={{ flex: 1, height: '2px', backgroundColor: '#ccc' }}></span>
+          <span
+            className="divider-line"
+            style={{ flex: 1, height: "2px", backgroundColor: "#ccc" }}
+          ></span>
           <div
             className="divider-dot"
             style={{
-              width: '8px',
-              height: '8px',
-              backgroundColor: '#4f46e5',
-              borderRadius: '50%',
+              width: "8px",
+              height: "8px",
+              backgroundColor: "#4f46e5",
+              borderRadius: "50%",
             }}
           ></div>
-          <span className="divider-line" style={{ flex: 1, height: '2px', backgroundColor: '#ccc' }}></span>
+          <span
+            className="divider-line"
+            style={{ flex: 1, height: "2px", backgroundColor: "#ccc" }}
+          ></span>
         </div>
 
         {/* Content */}
         {isLoading ? (
           <div
             className="loading-spinner-container"
-            style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              height: "50vh",
+            }}
           >
             <Spinner size={50} />
           </div>
         ) : isError ? (
-          <div style={{ textAlign: 'center', color: 'red', marginTop: '2rem' }}>
+          <div style={{ textAlign: "center", color: "red", marginTop: "2rem" }}>
             <p>Failed to load saved dates. Please try again later.</p>
           </div>
         ) : savedDates.length === 0 ? (
           <p
             className="text-gray-500 text-center py-4"
-            style={{ textAlign: 'center', color: '#6b7280', fontSize: '1rem' }}
+            style={{ textAlign: "center", color: "#6b7280", fontSize: "1rem" }}
           >
             You haven't saved any dates yet.
           </p>
@@ -307,9 +357,9 @@ const SavedDates = () => {
           <div
             className="dates-grid"
             style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-              gap: '1.5rem',
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
+              gap: "1.5rem",
             }}
           >
             {sortedSavedDates.map((date) => (

@@ -192,7 +192,7 @@ export default function MovieSuggestion() {
       try {
         const response = await axios.get(
           `${BASE_URL}/genre/movie/list?language=en`,
-          AUTH_HEADER
+          AUTH_HEADER,
         );
 
         console.log({ genreRes: response });
@@ -222,7 +222,7 @@ export default function MovieSuggestion() {
 
       if (searchParams.title) {
         url = `${BASE_URL}/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(
-          searchParams.title
+          searchParams.title,
         )}`;
       }
 

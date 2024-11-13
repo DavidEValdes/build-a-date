@@ -1,7 +1,7 @@
 import React from "react";
 
 const PlanADateCard = (props) => {
-  const { title, description, buttonText, fetchData, data} = props;
+  const { title, description, buttonText, fetchData, data } = props;
 
   return (
     <div
@@ -53,41 +53,39 @@ const PlanADateCard = (props) => {
             gap: "16px",
           }}
         >
-          {Object.entries(data || {}).map(
-            ([key, value], idx) => (
-              <div
-                key={idx}
+          {Object.entries(data || {}).map(([key, value], idx) => (
+            <div
+              key={idx}
+              style={{
+                backgroundColor: "#ffffff",
+                padding: "12px",
+                borderRadius: "12px",
+                boxShadow: "0 2px 4px rgba(0, 0, 0, 0.05)",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "flex-start",
+              }}
+            >
+              <span
                 style={{
-                  backgroundColor: "#ffffff",
-                  padding: "12px",
-                  borderRadius: "12px",
-                  boxShadow: "0 2px 4px rgba(0, 0, 0, 0.05)",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "flex-start",
+                  fontSize: "0.85rem",
+                  color: "#888888",
+                  marginBottom: "4px",
                 }}
               >
-                <span
-                  style={{
-                    fontSize: "0.85rem",
-                    color: "#888888",
-                    marginBottom: "4px",
-                  }}
-                >
-                  {key}
-                </span>
-                <span
-                  style={{
-                    fontSize: "1rem",
-                    color: "#333333",
-                    fontWeight: "600",
-                  }}
-                >
-                  {value}
-                </span>
-              </div>
-            ),
-          )}
+                {key}
+              </span>
+              <span
+                style={{
+                  fontSize: "1rem",
+                  color: "#333333",
+                  fontWeight: "600",
+                }}
+              >
+                {value}
+              </span>
+            </div>
+          ))}
         </div>
       </div>
       <button

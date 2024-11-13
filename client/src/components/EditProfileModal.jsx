@@ -1,12 +1,12 @@
 // src/components/EditProfileModal.jsx
 
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
 const EditProfileModal = ({ user, onClose, onUpdate }) => {
   const [username, setUsername] = useState(user.username);
   const [email, setEmail] = useState(user.email);
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [error, setError] = useState('');
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [error, setError] = useState("");
 
   const handleUpdate = async (e) => {
     e.preventDefault();
@@ -14,14 +14,16 @@ const EditProfileModal = ({ user, onClose, onUpdate }) => {
       await onUpdate({ username, email, currentPassword });
       onClose();
     } catch (err) {
-      setError(err.error || 'Failed to update profile');
+      setError(err.error || "Failed to update profile");
     }
   };
 
   return (
     <div className="modal-overlay">
       <div className="modal-content">
-        <button onClick={onClose} className="modal-close">✕</button>
+        <button onClick={onClose} className="modal-close">
+          ✕
+        </button>
         <h2 className="modal-title">Edit Profile</h2>
         {error && <div className="text-red-500 mb-4">{error}</div>}
         <form onSubmit={handleUpdate}>
@@ -54,8 +56,12 @@ const EditProfileModal = ({ user, onClose, onUpdate }) => {
             />
           </label>
           <div className="modal-buttons">
-            <button type="button" onClick={onClose} className="modal-button">Cancel</button>
-            <button type="submit" className="modal-button save-button">Save Changes</button>
+            <button type="button" onClick={onClose} className="modal-button">
+              Cancel
+            </button>
+            <button type="submit" className="modal-button save-button">
+              Save Changes
+            </button>
           </div>
         </form>
       </div>
