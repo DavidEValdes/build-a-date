@@ -1,13 +1,20 @@
-import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { AuthProvider } from './context/AuthContext';
-import Home from './pages/Home';
-import DateDetail from './pages/DateDetail';
-import Profile from './pages/Profile';
-import SavedDates from './pages/SavedDates';
-import UserMenu from './components/UserMenu';
-import PlanADate from './pages/PlanADate';
-import './App.css';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Link,
+  useNavigate,
+} from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { AuthProvider } from "./context/AuthContext";
+import Home from "./pages/Home";
+import DateDetail from "./pages/DateDetail";
+import Profile from "./pages/Profile";
+import SavedDates from "./pages/SavedDates";
+import UserMenu from "./components/UserMenu";
+import PlanADate from "./pages/PlanADate";
+import "./App.css";
+import MovieSuggestion from "./pages/MovieSuggestion";
 
 // Create a client
 const queryClient = new QueryClient({
@@ -27,7 +34,7 @@ const Header = () => {
 
   const handleLogoClick = (e) => {
     e.preventDefault();
-    navigate('/');
+    navigate("/");
     setTimeout(() => {
       window.location.reload();
     }, 500);
@@ -36,11 +43,7 @@ const Header = () => {
   return (
     <header className="app-header">
       <div className="header-content">
-        <a 
-          href="/" 
-          onClick={handleLogoClick}
-          className="header-logo"
-        >
+        <a href="/" onClick={handleLogoClick} className="header-logo">
           <h1>Build a Date</h1>
         </a>
         <div className="header-actions">
@@ -64,6 +67,7 @@ function App() {
               <Route path="/profile" element={<Profile />} />
               <Route path="/saved-dates" element={<SavedDates />} />
               <Route path="/plan-a-date" element={<PlanADate />} />
+              <Route path="/movie-suggestions" element={<MovieSuggestion />} />
             </Routes>
           </div>
         </Router>
