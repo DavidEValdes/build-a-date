@@ -1,6 +1,7 @@
 import React from "react";
 
 const PlanADateCard = (props) => {
+  // TODO: once fetchData actually fetches data, we should set data locally within the component to the result of the fetch
   const { title, description, buttonText, fetchData, data } = props;
 
   return (
