@@ -5,7 +5,7 @@ import QuestionPipeline from "../components/QuestionPipeline";
 import DateCard from "../components/DateCard";
 import SuggestionDisplay from "../components/SuggestionDisplay";
 import Spinner from "../components/Spinner";
-import { getDateIdeas, getAllDateIdeas, createDateIdea } from "../api";
+import { getDateIdeas, getAllDateIdeas, createDateIdea, fetchImageForDate } from "../api";
 import {
   ArrowRight,
   SlidersHorizontal,
@@ -28,6 +28,65 @@ const sortOptions = [
   { value: "mostCommented", label: "Most Commented" },
   { value: "alphabetical", label: "A-Z" },
 ];
+const PEXELS_API_KEY = import.meta.env.VITE_PEXELS_API_KEY;
+
+const fetchImageFromPexels = async (searchTerm) => {
+  try {
+    const response = await fetch(
+      `https://api.pexels.com/v1/search?query=${encodeURIComponent(
+        searchTerm
+      )}&per_page=1&orientation=landscape`,
+      {
+        headers: {
+          Authorization: PEXELS_API_KEY,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch image');
+    }
+
+    const data = await response.json();
+    if (data.photos && data.photos.length > 0) {
+      return data.photos[0].src.large2x;
+    }
+    
+    // If no results with original search, try simplified search
+    const simplifiedSearch = searchTerm
+      .toLowerCase()
+      .replace(/a |the |and |or |at |in |on |to /g, ' ')
+      .trim();
+      
+    if (simplifiedSearch !== searchTerm) {
+      const simplifiedResponse = await fetch(
+        `https://api.pexels.com/v1/search?query=${encodeURIComponent(
+          simplifiedSearch
+        )}&per_page=1&orientation=landscape`,
+        {
+          headers: {
+            Authorization: PEXELS_API_KEY,
+          },
+        }
+      );
+      
+      if (simplifiedResponse.ok) {
+        const simplifiedData = await simplifiedResponse.json();
+        if (simplifiedData.photos && simplifiedData.photos.length > 0) {
+          return simplifiedData.photos[0].src.large2x;
+        }
+      }
+    }
+
+    return "/api/placeholder/400/300";
+  } catch (error) {
+    console.error("Error fetching image from Pexels:", error);
+    return "/api/placeholder/400/300";
+  }
+};
+
+
+
 
 const Home = () => {
   const [stage, setStage] = useState("welcome");
@@ -58,7 +117,7 @@ const Home = () => {
     },
   });
 
-  const handleQuestionnaireComplete = (answers) => {
+  const handleQuestionnaireComplete = async (answers) => {
     const scoredDates = allDates.map((date) => {
       let score = 0;
 
@@ -78,18 +137,38 @@ const Home = () => {
     });
 
     const sortedDates = scoredDates.sort((a, b) => b.score - a.score);
-    const bestMatch = sortedDates[0];
+    let bestMatch = sortedDates[0];
+
+    // Fetch image through backend proxy
+    if (!bestMatch.image_url || bestMatch.image_url.includes("/api/placeholder")) {
+      const searchTerms = [
+        bestMatch.title,
+        `${bestMatch.activity_type} ${bestMatch.location}`,
+        bestMatch.description.split('.')[0] // First sentence of description
+      ];
+
+      const imageUrl = await fetchImageForDate(searchTerms);
+      if (imageUrl && !imageUrl.includes("/api/placeholder")) {
+        bestMatch = { ...bestMatch, image_url: imageUrl };
+      }
+    }
 
     setCurrentSuggestion(bestMatch);
     setStage("suggestion");
   };
 
+
   const handleShareToFeed = async () => {
     if (currentSuggestion) {
-      await createDateMutation.mutateAsync(currentSuggestion);
+      // Ensure we include the fetched image URL when sharing to feed
+      await createDateMutation.mutateAsync({
+        ...currentSuggestion,
+        image_url: currentSuggestion.image_url
+      });
       setStage("feed");
     }
   };
+
 
   const handleStartOver = () => {
     setStage("questions");

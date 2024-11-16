@@ -66,6 +66,7 @@ export const registerUser = async (username, email, password) => {
   }
 };
 
+
 // Get user profile
 export const getUserProfile = async () => {
   try {
@@ -256,6 +257,32 @@ export const updateComment = async (commentId, content) => {
   } catch (error) {
     console.error("Error updating comment:", error);
     throw error;
+  }
+};
+
+
+
+
+
+export const fetchImageForDate = async (searchTerms) => {
+  try {
+    const response = await fetch('/api/images/search', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ searchTerms })
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch image');
+    }
+    
+    const data = await response.json();
+    return data.imageUrl;
+  } catch (error) {
+    console.error('Error fetching image:', error);
+    return '/api/placeholder/400/300';
   }
 };
 
