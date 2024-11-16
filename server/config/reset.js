@@ -61,6 +61,17 @@ const resetDatabase = async () => {
     `);
     console.log("🎉 likes table created successfully");
 
+
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS image_cache (
+        search_term VARCHAR(255) PRIMARY KEY,
+        image_url TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        last_accessed TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    console.log("🎉 image_cache table created successfully");
+
     // Create comments table with user reference
     await pool.query(`
       CREATE TABLE comments (

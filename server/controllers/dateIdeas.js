@@ -60,64 +60,65 @@ const DateIdeasController = {
     try {
       const { id } = req.params;
       const userId = req.user?.id || null;
-
+  
       const dateQuery = await pool.query(
         `SELECT d.*, 
-                    COUNT(DISTINCT l.id) as likes_count,
-                    COUNT(DISTINCT c.id) as comments_count,
-                    u.username as creator_name,
-                    EXISTS (
-                        SELECT 1 FROM saved_dates sd 
-                        WHERE sd.date_idea_id = d.id 
-                        AND sd.user_id = $1
-                    ) as is_saved,
-                    EXISTS (
-                        SELECT 1 FROM likes l2
-                        WHERE l2.date_idea_id = d.id
-                        AND l2.user_id = $1
-                    ) as is_liked
-                FROM date_ideas d
-                LEFT JOIN likes l ON d.id = l.date_idea_id
-                LEFT JOIN comments c ON d.id = c.date_idea_id
-                LEFT JOIN users u ON d.creator_id = u.id
-                WHERE d.id = $2
-                GROUP BY d.id, u.username`,
+          COUNT(DISTINCT l.id) as likes_count,
+          COUNT(DISTINCT c.id) as comments_count,
+          u.username as creator_name,
+          EXISTS (
+            SELECT 1 FROM saved_dates sd 
+            WHERE sd.date_idea_id = d.id 
+            AND sd.user_id = $1
+          ) as is_saved,
+          EXISTS (
+            SELECT 1 FROM likes l2
+            WHERE l2.date_idea_id = d.id
+            AND l2.user_id = $1
+          ) as is_liked
+        FROM date_ideas d
+        LEFT JOIN likes l ON d.id = l.date_idea_id
+        LEFT JOIN comments c ON d.id = c.date_idea_id
+        LEFT JOIN users u ON d.creator_id = u.id
+        WHERE d.id = $2
+        GROUP BY d.id, u.username`,
         [userId, id],
       );
-
+  
       if (dateQuery.rows.length === 0) {
         return res.status(404).json({ error: "Date idea not found" });
       }
-
+  
       let dateIdea = dateQuery.rows[0];
-
-      // Check if image_url is a placeholder
-      if (
-        !dateIdea.image_url ||
-        dateIdea.image_url.startsWith("/api/placeholder")
-      ) {
-        // Define search query based on activity_type and mood
-        const searchQuery = `${dateIdea.activity_type} ${dateIdea.mood}`.trim();
-
-        // Fetch image URL from Pexels
-        const imageUrl = await fetchImageUrl(searchQuery);
-
-        if (imageUrl) {
-          // Update the database with the new image URL
-          await pool.query(
-            "UPDATE date_ideas SET image_url = $1 WHERE id = $2",
-            [imageUrl, dateIdea.id],
-          );
-
-          // Update the dateIdea object
-          dateIdea.image_url = imageUrl;
-        } else {
-          // If fetching from Pexels fails, retain the placeholder or set to a default image
-          dateIdea.image_url =
-            "https://via.placeholder.com/400x300?text=No+Image+Available";
+  
+      // Check if image_url is missing or is a placeholder
+      if (!dateIdea.image_url || 
+          dateIdea.image_url.startsWith("/api/placeholder") || 
+          dateIdea.image_url === "https://via.placeholder.com/400x300?text=No+Image+Available") {
+        try {
+          console.log("Fetching new image for:", dateIdea.title); // Debug log
+          const imageUrl = await fetchImageUrl(dateIdea.title);
+          console.log("Received image URL:", imageUrl); // Debug log
+  
+          if (imageUrl && imageUrl !== dateIdea.image_url) {
+            // Update the database with the new image URL
+            await pool.query(
+              "UPDATE date_ideas SET image_url = $1 WHERE id = $2",
+              [imageUrl, dateIdea.id]
+            );
+            dateIdea.image_url = imageUrl;
+          }
+        } catch (imageError) {
+          console.error("Error fetching image:", imageError);
+          dateIdea.image_url = "/api/placeholder/400/300";
         }
       }
-
+  
+      // Ensure we always have an image URL
+      if (!dateIdea.image_url) {
+        dateIdea.image_url = "/api/placeholder/400/300";
+      }
+  
       res.json(dateIdea);
     } catch (error) {
       console.error("Error getting date idea:", error);
@@ -140,16 +141,18 @@ const DateIdeasController = {
         distance,
         importance,
         activity_level,
-        image_url,
       } = req.body;
-
+  
+      // Fetch image URL before creating the date idea
+      const image_url = await fetchImageUrl(title);
+  
       const results = await pool.query(
         `INSERT INTO date_ideas 
-                (title, description, location, cost_category, duration, 
-                activity_type, mood, time_of_day, distance, importance, 
-                activity_level, image_url, is_shared, creator_id)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
-                RETURNING *`,
+          (title, description, location, cost_category, duration, 
+          activity_type, mood, time_of_day, distance, importance, 
+          activity_level, image_url, is_shared, creator_id)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+          RETURNING *`,
         [
           title,
           description,
@@ -163,11 +166,11 @@ const DateIdeasController = {
           importance,
           activity_level,
           image_url,
-          true, // Set is_shared to true when creating through the API
-          null, // You can add user ID here when authentication is implemented
-        ],
+          true,
+          null,
+        ]
       );
-
+  
       res.status(201).json(results.rows[0]);
     } catch (error) {
       res.status(500).json({ error: error.message });
