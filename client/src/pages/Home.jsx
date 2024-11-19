@@ -85,11 +85,11 @@ const fetchImageFromPexels = async (searchTerm) => {
   }
 };
 
+// Updated Weight Structure without Budget
 const weights = {
   timeOfDay: 1,
   mood: 2, 
   indoorOutdoor: 1,
-  budget: 4,
   activityLevel: 2, 
   distanceWilling: 1,
   importance: 1,
@@ -97,8 +97,6 @@ const weights = {
   groupSize: 2,
   season: 1,
 };
-
-
 
 const shuffleArray = (array) => {
   return array
@@ -118,15 +116,15 @@ const Home = () => {
   const { data: feedDates = [], isLoading: isFeedLoading } = useQuery({
     queryKey: ["feedDateIdeas"],
     queryFn: getDateIdeas,
-    refetchOnMount: "always", // Add this line
-    staleTime: 0, // Add this line
+    refetchOnMount: "always",
+    staleTime: 0,
   });
 
   const { data: allDates = [], isLoading: isAllDatesLoading } = useQuery({
     queryKey: ["allDateIdeas"],
     queryFn: getAllDateIdeas,
-    refetchOnMount: "always", // Add this line
-    staleTime: 0, // Add this line
+    refetchOnMount: "always",
+    staleTime: 0,
   });
 
   const createDateMutation = useMutation({
@@ -315,9 +313,6 @@ const Home = () => {
   
     setStage("suggestion");
   };
-  
-  
-
 
   const handleShareToFeed = async () => {
     if (currentSuggestion) {
@@ -329,7 +324,6 @@ const Home = () => {
       setStage("feed");
     }
   };
-
 
   const handleStartOver = () => {
     setStage("questions");
