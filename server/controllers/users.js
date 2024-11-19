@@ -250,6 +250,36 @@ const UsersController = {
       }
     }
   },
+  
+  getSavedDates: async (req, res) => {
+    try {
+      const userId = req.user.id;
+
+      const query = `
+        SELECT d.*, 
+          COUNT(DISTINCT l.id) as likes_count,
+          COUNT(DISTINCT c.id) as comments_count,
+          TRUE as is_saved,
+          EXISTS (
+            SELECT 1 FROM likes l2
+            WHERE l2.date_idea_id = d.id
+            AND l2.user_id = $1
+          ) as is_liked
+        FROM date_ideas d
+        INNER JOIN saved_dates sd ON d.id = sd.date_idea_id
+        LEFT JOIN likes l ON d.id = l.date_idea_id
+        LEFT JOIN comments c ON d.id = c.date_idea_id
+        WHERE sd.user_id = $1
+        GROUP BY d.id, sd.created_at
+        ORDER BY sd.created_at DESC`;
+
+      const results = await pool.query(query, [userId]);
+      res.json(results.rows);
+    } catch (error) {
+      console.error("Error fetching saved dates:", error);
+      res.status(500).json({ error: "Failed to fetch saved dates" });
+    }
+  },
 
   changePassword: async (req, res) => {
     try {

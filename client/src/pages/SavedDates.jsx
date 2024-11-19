@@ -44,11 +44,12 @@ const SavedDates = () => {
     data: savedDates = [],
     isLoading,
     isError,
-    error,
   } = useQuery({
     queryKey: ["savedDates"],
     queryFn: getSavedDates,
     enabled: isAuthenticated,
+    staleTime: 0,  // Add this to ensure fresh data
+    refetchOnMount: "always"  // Add this to ensure refetch on mount
   });
 
   // Redirect to Home if not authenticated

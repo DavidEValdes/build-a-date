@@ -44,23 +44,30 @@ const DateCard = ({ date }) => {
     }
 
     const wasLiked = isLiked;
-    setIsLiked(!wasLiked);
-    setLikesCount((prev) => (wasLiked ? prev - 1 : prev + 1));
+    const prevCount = likesCount;
 
     try {
+      setIsLiked(!wasLiked);
+      setLikesCount((prev) => (wasLiked ? prev - 1 : prev + 1));
+
       if (wasLiked) {
         await unlikeDateIdea(date.id);
       } else {
         await likeDateIdea(date.id);
       }
-      // Force refresh all queries
-      queryClient.invalidateQueries(["feedDateIdeas"]);
-      queryClient.invalidateQueries(["dateIdea", date.id]);
-      queryClient.invalidateQueries(["allDateIdeas"]);
+
+      // Invalidate and refetch all relevant queries
+      await Promise.all([
+        queryClient.invalidateQueries(["feedDateIdeas"]),
+        queryClient.invalidateQueries(["dateIdea", date.id]),
+        queryClient.invalidateQueries(["allDateIdeas"]),
+        queryClient.invalidateQueries(["savedDates"]),
+      ]);
     } catch (error) {
       console.error("Error updating like:", error);
+      // Revert on error
       setIsLiked(wasLiked);
-      setLikesCount((prev) => (wasLiked ? prev + 1 : prev - 1));
+      setLikesCount(prevCount);
     }
   };
 
@@ -72,18 +79,23 @@ const DateCard = ({ date }) => {
     }
 
     const wasSaved = isSaved;
-    setIsSaved(!wasSaved);
 
     try {
+      setIsSaved(!wasSaved);
+
       if (wasSaved) {
         await unsaveDateIdea(date.id);
       } else {
         await saveDateIdea(date.id);
       }
-      // Force refresh all queries
-      queryClient.invalidateQueries(["feedDateIdeas"]);
-      queryClient.invalidateQueries(["dateIdea", date.id]);
-      queryClient.invalidateQueries(["allDateIdeas"]);
+
+      // Invalidate and refetch all relevant queries
+      await Promise.all([
+        queryClient.invalidateQueries(["feedDateIdeas"]),
+        queryClient.invalidateQueries(["dateIdea", date.id]),
+        queryClient.invalidateQueries(["allDateIdeas"]),
+        queryClient.invalidateQueries(["savedDates"]),
+      ]);
     } catch (error) {
       console.error("Error updating save:", error);
       setIsSaved(wasSaved);
@@ -235,7 +247,9 @@ const DateCard = ({ date }) => {
             aria-label={isSaved ? "Remove from saved" : "Save this date idea"}
           >
             <Bookmark
-              className={`w-5 h-5 transition-all duration-200 ${isSaved ? "fill-current" : ""}`}
+              className={`w-5 h-5 transition-all duration-200 ${
+                isSaved ? "fill-current" : ""
+              }`}
             />
           </button>
 
