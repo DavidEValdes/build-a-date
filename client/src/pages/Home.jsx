@@ -87,17 +87,25 @@ const fetchImageFromPexels = async (searchTerm) => {
 
 const weights = {
   timeOfDay: 1,
-  mood: 2,
+  mood: 2, 
   indoorOutdoor: 1,
-  budget: 1,
-  activityLevel: 2,
+  budget: 4,
+  activityLevel: 2, 
   distanceWilling: 1,
   importance: 1,
-  interests: 2,
-  groupSize: 1,
+  interests: 2, 
+  groupSize: 2,
   season: 1,
 };
 
+
+
+const shuffleArray = (array) => {
+  return array
+    .map(value => ({ value, sort: Math.random() }))
+    .sort((a, b) => a.sort - b.sort)
+    .map(({ value }) => value);
+};
 
 const Home = () => {
   const [stage, setStage] = useState("welcome");
@@ -129,11 +137,15 @@ const Home = () => {
   });
 
   const handleQuestionnaireComplete = async (answers) => {
-    // Function to calculate similarity for multiple-choice questions
+    // Function to calculate Jaccard Similarity for multiple-choice questions
     const calculateSimilarity = (arr1 = [], arr2 = []) => {
+      if (arr1.length === 0 && arr2.length === 0) return 1;
       if (arr1.length === 0 || arr2.length === 0) return 0;
-      const intersection = arr1.filter((value) => arr2.includes(value));
-      return intersection.length / Math.max(arr1.length, arr2.length);
+      const set1 = new Set(arr1);
+      const set2 = new Set(arr2);
+      const intersection = [...set1].filter(x => set2.has(x)).length;
+      const union = new Set([...set1, ...set2]).size;
+      return intersection / union;
     };
   
     const scoredDates = allDates.map((date) => {
@@ -142,46 +154,46 @@ const Home = () => {
   
       // Time of Day
       totalWeight += weights.timeOfDay;
-      if (date.time_of_day === answers.timeOfDay) {
+      if (answers.timeOfDay && date.time_of_day === answers.timeOfDay) {
         score += weights.timeOfDay;
       }
   
       // Mood
       totalWeight += weights.mood;
-      if (date.mood === answers.mood) {
+      if (answers.mood && date.mood === answers.mood) {
         score += weights.mood;
       }
   
       // Indoor or Outdoor
       totalWeight += weights.indoorOutdoor;
       if (
-        date.location === answers.indoorOutdoor ||
-        answers.indoorOutdoor === "noPreference"
+        answers.indoorOutdoor !== "noPreference" &&
+        date.location === answers.indoorOutdoor
       ) {
         score += weights.indoorOutdoor;
       }
   
       // Budget
       totalWeight += weights.budget;
-      if (date.cost_category === answers.budget) {
+      if (answers.budget && date.cost_category === answers.budget) {
         score += weights.budget;
       }
   
       // Activity Level
       totalWeight += weights.activityLevel;
-      if (date.activity_level === answers.activityLevel) {
+      if (answers.activityLevel && date.activity_level === answers.activityLevel) {
         score += weights.activityLevel;
       }
   
       // Distance Willing to Travel
       totalWeight += weights.distanceWilling;
-      if (date.distance === answers.distanceWilling) {
+      if (answers.distanceWilling && date.distance === answers.distanceWilling) {
         score += weights.distanceWilling;
       }
   
       // Importance
       totalWeight += weights.importance;
-      if (date.importance === answers.importance) {
+      if (answers.importance && date.importance === answers.importance) {
         score += weights.importance;
       }
   
@@ -196,16 +208,15 @@ const Home = () => {
   
       // Group Size
       totalWeight += weights.groupSize;
-      if (date.group_size === answers.groupSize) {
+      if (answers.groupSize && date.group_size === answers.groupSize) {
         score += weights.groupSize;
       }
   
       // Season
       totalWeight += weights.season;
       if (
-        date.season === answers.season ||
-        date.season === "noPreference" ||
-        answers.season === "noPreference"
+        answers.season !== "noPreference" &&
+        date.season === answers.season
       ) {
         score += weights.season;
       }
@@ -216,9 +227,32 @@ const Home = () => {
       return { ...date, score: normalizedScore };
     });
   
-    // Sort dates by score in descending order
-    const sortedDates = scoredDates.sort((a, b) => b.score - a.score);
-    const bestMatch = sortedDates[0];
+    // Log scored dates for debugging
+    console.log("Scored Dates:", scoredDates.map(date => ({
+      id: date.id,
+      title: date.title,
+      score: date.score.toFixed(4),
+    })));
+  
+    // Sort dates by score in descending order without mutating scoredDates
+    const sortedDates = [...scoredDates].sort((a, b) => b.score - a.score);
+  
+    // Identify the highest score
+    const highestScore = sortedDates[0]?.score || 0;
+  
+    // Filter all dates with the highest score
+    const topScoringDates = sortedDates.filter(date => date.score === highestScore);
+  
+    // Shuffle top scoring dates to introduce randomness
+    const shuffledTopScoringDates = shuffleArray(topScoringDates);
+  
+    // Select the first date from the shuffled top scoring dates
+    const bestMatch = shuffledTopScoringDates[0] || null;
+  
+    if (!bestMatch) {
+      console.error("No matching date ideas found.");
+      return;
+    }
   
     try {
       // Fetch the full date idea from the server to get the image_url
