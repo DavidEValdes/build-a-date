@@ -8,8 +8,10 @@ const PlanADateCard = (props) => {
   const onFetchData = async () => {
     const fetchedData = await fetchData();
     setData(fetchedData);
-    isDataFetched = true;
+    // isDataFetched = true;
   };
+
+  console.log({ props: props.key });
 
   return (
     <div
@@ -22,6 +24,7 @@ const PlanADateCard = (props) => {
         display: "flex",
         flexDirection: "column",
         justifyContent: "space-between",
+        gridColumn: props.index == 2 ? "span 2" : "auto",
       }}
       onMouseOver={(e) => {
         e.currentTarget.style.transform = "translateY(-5px)"; // Subtle lift effect

@@ -14,7 +14,6 @@ import SavedDates from "./pages/SavedDates";
 import UserMenu from "./components/UserMenu";
 import PlanADate from "./pages/PlanADate";
 import "./App.css";
-import MovieSuggestion from "./pages/MovieSuggestion";
 
 // Create a client
 const queryClient = new QueryClient({
@@ -67,7 +66,6 @@ function App() {
               <Route path="/profile" element={<Profile />} />
               <Route path="/saved-dates" element={<SavedDates />} />
               <Route path="/plan-a-date" element={<PlanADate />} />
-              <Route path="/movie-suggestions" element={<MovieSuggestion />} />
             </Routes>
           </div>
         </Router>
