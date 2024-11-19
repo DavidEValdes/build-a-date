@@ -1,20 +1,21 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Footer from "../components/Footer";
 import PlanADateCard from "../components/PlanADateCard";
 import { planADateCards } from "../services/plan-a-date";
+import MovieCard from "../components/MovieCard";
 
 const PlanADate = () => {
   return (
     <div
       style={{
         minHeight: "100vh",
-        background: "#ffffff", // Changed to white for a cleaner look
-        padding: "40px 20px", // Increased padding for better spacing
+        background: "#ffffff",
+        padding: "40px 20px",
         color: "#333333",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        fontFamily: `'Helvetica Neue', Helvetica, Arial, sans-serif`, // Apple-like font
+        fontFamily: `'Helvetica Neue', Helvetica, Arial, sans-serif`,
       }}
     >
       {/* Header */}
@@ -31,27 +32,31 @@ const PlanADate = () => {
           style={{
             fontSize: "2.5rem",
             fontWeight: "700",
-            color: "#1e90ff", // Softer blue accent
+            color: "#1e90ff",
           }}
         >
           Plan A Date
         </h1>
       </header>
 
-      {/* Vertical Cards Container */}
+      {/* Grid Cards Container */}
       <div
         style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "32px", // Increased gap for better separation
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+          gap: "32px",
           padding: "0 20px",
-          maxWidth: "1000px", // Adjusted maxWidth for better fit on large screens
+          maxWidth: "1000px",
           width: "100%",
           marginBottom: "60px",
         }}
       >
-        {planADateCards.map((card, index) => (
-          <PlanADateCard key={index} {...card} />
+        {planADateCards.slice(0, 2).map((card, index) => (
+          <PlanADateCard key={index} index={index} {...card} />
+        ))}
+        <MovieCard />
+        {planADateCards.slice(2).map((card, index) => (
+          <PlanADateCard key={index + 2} index={index + 2} {...card} />
         ))}
       </div>
 
