@@ -79,7 +79,7 @@ Complete the checklist below detailing each baseline, custom, and stretch featur
 
 [👉🏾👉🏾👉🏾 your answer here]
 
-### 2. What were some challenges your group faced in this unit?
+### 2. What were some challenges your group faced in this unit? 
 
 [👉🏾👉🏾👉🏾 your answer here]
 

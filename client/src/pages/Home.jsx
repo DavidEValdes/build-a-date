@@ -5,7 +5,7 @@ import QuestionPipeline from "../components/QuestionPipeline";
 import DateCard from "../components/DateCard";
 import SuggestionDisplay from "../components/SuggestionDisplay";
 import Spinner from "../components/Spinner";
-import { getDateIdeas, getAllDateIdeas, createDateIdea, fetchImageForDate } from "../api";
+import api, { getDateIdeas, getAllDateIdeas, createDateIdea, fetchImageForDate } from "../api";
 import {
   ArrowRight,
   SlidersHorizontal,
@@ -85,7 +85,18 @@ const fetchImageFromPexels = async (searchTerm) => {
   }
 };
 
-
+const weights = {
+  timeOfDay: 1,
+  mood: 2,
+  indoorOutdoor: 1,
+  budget: 1,
+  activityLevel: 2,
+  distanceWilling: 1,
+  importance: 1,
+  interests: 2,
+  groupSize: 1,
+  season: 1,
+};
 
 
 const Home = () => {
@@ -118,44 +129,112 @@ const Home = () => {
   });
 
   const handleQuestionnaireComplete = async (answers) => {
+    // Function to calculate similarity for multiple-choice questions
+    const calculateSimilarity = (arr1 = [], arr2 = []) => {
+      if (arr1.length === 0 || arr2.length === 0) return 0;
+      const intersection = arr1.filter((value) => arr2.includes(value));
+      return intersection.length / Math.max(arr1.length, arr2.length);
+    };
+  
     const scoredDates = allDates.map((date) => {
       let score = 0;
-
-      if (date.mood === answers.mood) score += 2;
-      if (date.time_of_day === answers.timeOfDay) score += 1;
+      let totalWeight = 0;
+  
+      // Time of Day
+      totalWeight += weights.timeOfDay;
+      if (date.time_of_day === answers.timeOfDay) {
+        score += weights.timeOfDay;
+      }
+  
+      // Mood
+      totalWeight += weights.mood;
+      if (date.mood === answers.mood) {
+        score += weights.mood;
+      }
+  
+      // Indoor or Outdoor
+      totalWeight += weights.indoorOutdoor;
       if (
         date.location === answers.indoorOutdoor ||
         answers.indoorOutdoor === "noPreference"
-      )
-        score += 1;
-      if (date.cost_category === answers.budget) score += 1;
-      if (date.activity_level === answers.activityLevel) score += 2;
-      if (date.distance === answers.distanceWilling) score += 1;
-      if (date.importance === answers.importance) score += 1;
-
-      return { ...date, score };
-    });
-
-    const sortedDates = scoredDates.sort((a, b) => b.score - a.score);
-    let bestMatch = sortedDates[0];
-
-    // Fetch image through backend proxy
-    if (!bestMatch.image_url || bestMatch.image_url.includes("/api/placeholder")) {
-      const searchTerms = [
-        bestMatch.title,
-        `${bestMatch.activity_type} ${bestMatch.location}`,
-        bestMatch.description.split('.')[0] // First sentence of description
-      ];
-
-      const imageUrl = await fetchImageForDate(searchTerms);
-      if (imageUrl && !imageUrl.includes("/api/placeholder")) {
-        bestMatch = { ...bestMatch, image_url: imageUrl };
+      ) {
+        score += weights.indoorOutdoor;
       }
+  
+      // Budget
+      totalWeight += weights.budget;
+      if (date.cost_category === answers.budget) {
+        score += weights.budget;
+      }
+  
+      // Activity Level
+      totalWeight += weights.activityLevel;
+      if (date.activity_level === answers.activityLevel) {
+        score += weights.activityLevel;
+      }
+  
+      // Distance Willing to Travel
+      totalWeight += weights.distanceWilling;
+      if (date.distance === answers.distanceWilling) {
+        score += weights.distanceWilling;
+      }
+  
+      // Importance
+      totalWeight += weights.importance;
+      if (date.importance === answers.importance) {
+        score += weights.importance;
+      }
+  
+      // Interests (Multiple Choice)
+      totalWeight += weights.interests;
+      const dateInterests = Array.isArray(date.interests) ? date.interests : [];
+      const interestsSimilarity = calculateSimilarity(
+        dateInterests,
+        answers.interests
+      );
+      score += interestsSimilarity * weights.interests;
+  
+      // Group Size
+      totalWeight += weights.groupSize;
+      if (date.group_size === answers.groupSize) {
+        score += weights.groupSize;
+      }
+  
+      // Season
+      totalWeight += weights.season;
+      if (
+        date.season === answers.season ||
+        date.season === "noPreference" ||
+        answers.season === "noPreference"
+      ) {
+        score += weights.season;
+      }
+  
+      // Calculate normalized score (0 to 1)
+      const normalizedScore = score / totalWeight;
+  
+      return { ...date, score: normalizedScore };
+    });
+  
+    // Sort dates by score in descending order
+    const sortedDates = scoredDates.sort((a, b) => b.score - a.score);
+    const bestMatch = sortedDates[0];
+  
+    try {
+      // Fetch the full date idea from the server to get the image_url
+      const response = await api.get(`/dates/${bestMatch.id}`);
+      const fetchedDateIdea = response.data;
+      setCurrentSuggestion(fetchedDateIdea);
+    } catch (error) {
+      console.error("Error fetching date idea:", error);
+      // Fallback to the bestMatch without image_url if fetching fails
+      setCurrentSuggestion(bestMatch);
     }
-
-    setCurrentSuggestion(bestMatch);
+  
     setStage("suggestion");
   };
+  
+  
 
 
   const handleShareToFeed = async () => {
