@@ -137,6 +137,20 @@ const Home = () => {
   });
 
   const handleQuestionnaireComplete = async (answers) => {
+    // Ensure budget is selected
+    if (!answers.budget) {
+      console.error("Budget not selected.");
+      return;
+    }
+    
+    // Filter date ideas that match the selected budget
+    const filteredDates = allDates.filter(date => date.cost_category === answers.budget);
+    
+    if (filteredDates.length === 0) {
+      console.error("No date ideas found for the selected budget.");
+      return;
+    }
+    
     // Function to calculate Jaccard Similarity for multiple-choice questions
     const calculateSimilarity = (arr1 = [], arr2 = []) => {
       if (arr1.length === 0 && arr2.length === 0) return 1;
@@ -148,90 +162,124 @@ const Home = () => {
       return intersection / union;
     };
   
-    const scoredDates = allDates.map((date) => {
+    const scoredDates = filteredDates.map((date) => {
       let score = 0;
       let totalWeight = 0;
+      const contributions = {}; // To track individual contributions
   
       // Time of Day
-      totalWeight += weights.timeOfDay;
-      if (answers.timeOfDay && date.time_of_day === answers.timeOfDay) {
-        score += weights.timeOfDay;
+      if (answers.timeOfDay) {
+        totalWeight += weights.timeOfDay;
+        if (date.time_of_day === answers.timeOfDay) {
+          score += weights.timeOfDay;
+          contributions.timeOfDay = weights.timeOfDay;
+        } else {
+          contributions.timeOfDay = 0;
+        }
       }
   
       // Mood
-      totalWeight += weights.mood;
-      if (answers.mood && date.mood === answers.mood) {
-        score += weights.mood;
+      if (answers.mood) {
+        totalWeight += weights.mood;
+        if (date.mood === answers.mood) {
+          score += weights.mood;
+          contributions.mood = weights.mood;
+        } else {
+          contributions.mood = 0;
+        }
       }
   
       // Indoor or Outdoor
-      totalWeight += weights.indoorOutdoor;
-      if (
-        answers.indoorOutdoor !== "noPreference" &&
-        date.location === answers.indoorOutdoor
-      ) {
-        score += weights.indoorOutdoor;
-      }
-  
-      // Budget
-      totalWeight += weights.budget;
-      if (answers.budget && date.cost_category === answers.budget) {
-        score += weights.budget;
+      if (answers.indoorOutdoor && answers.indoorOutdoor !== "noPreference") {
+        totalWeight += weights.indoorOutdoor;
+        if (date.location === answers.indoorOutdoor) {
+          score += weights.indoorOutdoor;
+          contributions.indoorOutdoor = weights.indoorOutdoor;
+        } else {
+          contributions.indoorOutdoor = 0;
+        }
       }
   
       // Activity Level
-      totalWeight += weights.activityLevel;
-      if (answers.activityLevel && date.activity_level === answers.activityLevel) {
-        score += weights.activityLevel;
+      if (answers.activityLevel) {
+        totalWeight += weights.activityLevel;
+        if (date.activity_level === answers.activityLevel) {
+          score += weights.activityLevel;
+          contributions.activityLevel = weights.activityLevel;
+        } else {
+          contributions.activityLevel = 0;
+        }
       }
   
       // Distance Willing to Travel
-      totalWeight += weights.distanceWilling;
-      if (answers.distanceWilling && date.distance === answers.distanceWilling) {
-        score += weights.distanceWilling;
+      if (answers.distanceWilling) {
+        totalWeight += weights.distanceWilling;
+        if (date.distance === answers.distanceWilling) {
+          score += weights.distanceWilling;
+          contributions.distanceWilling = weights.distanceWilling;
+        } else {
+          contributions.distanceWilling = 0;
+        }
       }
   
       // Importance
-      totalWeight += weights.importance;
-      if (answers.importance && date.importance === answers.importance) {
-        score += weights.importance;
+      if (answers.importance) {
+        totalWeight += weights.importance;
+        if (date.importance === answers.importance) {
+          score += weights.importance;
+          contributions.importance = weights.importance;
+        } else {
+          contributions.importance = 0;
+        }
       }
   
       // Interests (Multiple Choice)
-      totalWeight += weights.interests;
-      const dateInterests = Array.isArray(date.interests) ? date.interests : [];
-      const interestsSimilarity = calculateSimilarity(
-        dateInterests,
-        answers.interests
-      );
-      score += interestsSimilarity * weights.interests;
+      if (answers.interests && answers.interests.length > 0) {
+        totalWeight += weights.interests;
+        const dateInterests = Array.isArray(date.interests) ? date.interests : [];
+        const interestsSimilarity = calculateSimilarity(
+          dateInterests,
+          answers.interests
+        );
+        const interestsScore = interestsSimilarity * weights.interests;
+        score += interestsScore;
+        contributions.interests = interestsScore;
+      }
   
       // Group Size
-      totalWeight += weights.groupSize;
-      if (answers.groupSize && date.group_size === answers.groupSize) {
-        score += weights.groupSize;
+      if (answers.groupSize) {
+        totalWeight += weights.groupSize;
+        if (date.group_size === answers.groupSize) {
+          score += weights.groupSize;
+          contributions.groupSize = weights.groupSize;
+        } else {
+          contributions.groupSize = 0;
+        }
       }
   
       // Season
-      totalWeight += weights.season;
-      if (
-        answers.season !== "noPreference" &&
-        date.season === answers.season
-      ) {
-        score += weights.season;
+      if (answers.season && answers.season !== "noPreference") {
+        totalWeight += weights.season;
+        if (date.season === answers.season) {
+          score += weights.season;
+          contributions.season = weights.season;
+        } else {
+          contributions.season = 0;
+        }
       }
   
       // Calculate normalized score (0 to 1)
       const normalizedScore = score / totalWeight;
   
-      return { ...date, score: normalizedScore };
+      return { ...date, score: normalizedScore, contributions };
     });
   
-    // Log scored dates for debugging
+    // Log scored dates with contributions for debugging
     console.log("Scored Dates:", scoredDates.map(date => ({
       id: date.id,
       title: date.title,
       score: date.score.toFixed(4),
+      contributions: date.contributions,
     })));
   
     // Sort dates by score in descending order without mutating scoredDates
