@@ -158,25 +158,7 @@ const sampleDateIdeas = [
     group_size: "couple",
     season: "noPreference",
   },
-  // 4
-  {
-    title: "Artisan Cooking Class",
-    description:
-      "Learn to cook gourmet dishes together with a professional chef.",
-    location: "indoor",
-    cost_category: "standard",
-    duration: "3 hours",
-    activity_type: "cooking",
-    mood: "creative",
-    time_of_day: "afternoon",
-    distance: "nearby",
-    importance: "experience",
-    activity_level: "moderate",
-    image_url: "/api/placeholder/400/300",
-    interests: ["food", "learning"],
-    group_size: "couple",
-    season: "noPreference",
-  },
+  
   // 5
   {
     title: "Stargazing Picnic",
@@ -291,24 +273,7 @@ const sampleDateIdeas = [
     group_size: "couple",
     season: "noPreference",
   },
-  // 11
-  {
-    title: "Pottery Workshop",
-    description: "Get creative together at a hands-on pottery class.",
-    location: "indoor",
-    cost_category: "standard",
-    duration: "2-3 hours",
-    activity_type: "pottery",
-    mood: "creative",
-    time_of_day: "afternoon",
-    distance: "local",
-    importance: "experience",
-    activity_level: "moderate",
-    image_url: "/api/placeholder/400/300",
-    interests: ["arts", "learning"],
-    group_size: "couple",
-    season: "noPreference",
-  },
+ 
   // 12
   {
     title: "Wine Tasting Tour",
@@ -326,24 +291,6 @@ const sampleDateIdeas = [
     interests: ["food"],
     group_size: "couple",
     season: "summer",
-  },
-  // 13
-  {
-    title: "Karaoke Night",
-    description: "Sing your hearts out at a lively karaoke bar.",
-    location: "indoor",
-    cost_category: "economy",
-    duration: "2-3 hours",
-    activity_type: "karaoke",
-    mood: "creative",
-    time_of_day: "night",
-    distance: "local",
-    importance: "experience",
-    activity_level: "moderate",
-    image_url: "/api/placeholder/400/300",
-    interests: ["music"],
-    group_size: "friends",
-    season: "noPreference",
   },
   // 14
   {
@@ -475,24 +422,7 @@ const sampleDateIdeas = [
     group_size: "couple",
     season: "summer",
   },
-  // 22
-  {
-    title: "Go to a Comedy Show",
-    description: "Laugh together at a stand-up comedy performance.",
-    location: "indoor",
-    cost_category: "standard",
-    duration: "2-3 hours",
-    activity_type: "comedyShow",
-    mood: "playful",
-    time_of_day: "night",
-    distance: "local",
-    importance: "fun",
-    activity_level: "low",
-    image_url: "/api/placeholder/400/300",
-    interests: ["music"],
-    group_size: "couple",
-    season: "noPreference",
-  },
+  
   // 23
   {
     title: "Painting and Wine Night",
@@ -529,24 +459,7 @@ const sampleDateIdeas = [
     group_size: "couple",
     season: "noPreference",
   },
-  // 25
-  {
-    title: "Salsa Dancing Class",
-    description: "Learn some new moves at a salsa dancing class.",
-    location: "indoor",
-    cost_category: "standard",
-    duration: "1-2 hours",
-    activity_type: "dancing",
-    mood: "romantic",
-    time_of_day: "evening",
-    distance: "local",
-    importance: "connection",
-    activity_level: "high",
-    image_url: "/api/placeholder/400/300",
-    interests: ["music", "arts"],
-    group_size: "couple",
-    season: "noPreference",
-  },
+  
   // 26
   {
     title: "Bookstore Date",
@@ -583,24 +496,7 @@ const sampleDateIdeas = [
     group_size: "friends",
     season: "noPreference",
   },
-  // 28
-  {
-    title: "Indoor Rock Climbing",
-    description: "Challenge yourselves at an indoor rock climbing gym.",
-    location: "indoor",
-    cost_category: "standard",
-    duration: "2-3 hours",
-    activity_type: "rockClimbing",
-    mood: "adventurous",
-    time_of_day: "afternoon",
-    distance: "local",
-    importance: "experience",
-    activity_level: "high",
-    image_url: "/api/placeholder/400/300",
-    interests: ["sports"],
-    group_size: "couple",
-    season: "noPreference",
-  },
+  
   // 29
   {
     title: "Volunteer Together",
@@ -872,24 +768,7 @@ const sampleDateIdeas = [
     group_size: "couple",
     season: "summer",
   },
-  // 44
-  {
-    title: "Attend a Theater Play",
-    description: "Enjoy a live performance at the theater.",
-    location: "indoor",
-    cost_category: "standard",
-    duration: "2-3 hours",
-    activity_type: "theater",
-    mood: "creative",
-    time_of_day: "evening",
-    distance: "local",
-    importance: "experience",
-    activity_level: "low",
-    image_url: "/api/placeholder/400/300",
-    interests: ["arts"],
-    group_size: "couple",
-    season: "noPreference",
-  },
+ 
   // 45
   {
     title: "Visit a Planetarium",
@@ -1196,24 +1075,7 @@ const sampleDateIdeas = [
     group_size: "couple",
     season: "noPreference",
   },
-  // 62
-  {
-    title: "Attend a Cooking Demonstration",
-    description: "Watch professional chefs cook and learn new recipes.",
-    location: "indoor",
-    cost_category: "standard",
-    duration: "1-2 hours",
-    activity_type: "cookingDemo",
-    mood: "creative",
-    time_of_day: "afternoon",
-    distance: "local",
-    importance: "experience",
-    activity_level: "low",
-    image_url: "/api/placeholder/400/300",
-    interests: ["food", "learning"],
-    group_size: "couple",
-    season: "noPreference",
-  },
+ 
   // 63
   {
     title: "Visit a Brewery or Distillery",
@@ -1250,24 +1112,7 @@ const sampleDateIdeas = [
     group_size: "couple",
     season: "summer",
   },
-  // 65
-  {
-    title: "Take a Dance Class Together",
-    description: "Learn a new dance style as a couple.",
-    location: "indoor",
-    cost_category: "standard",
-    duration: "1-2 hours",
-    activity_type: "danceClass",
-    mood: "romantic",
-    time_of_day: "evening",
-    distance: "local",
-    importance: "connection",
-    activity_level: "moderate",
-    image_url: "/api/placeholder/400/300",
-    interests: ["music", "arts"],
-    group_size: "couple",
-    season: "noPreference",
-  },
+  
   // 66
   {
     title: "Visit a Local Fair",
@@ -1522,25 +1367,6 @@ const sampleDateIdeas = [
     group_size: "couple",
     season: "noPreference",
   },
-  // 80
-  {
-    title: "Hot Air Balloon Ride",
-    description:
-      "Soar above the landscape in a hot air balloon for breathtaking views.",
-    location: "outdoor",
-    cost_category: "luxury",
-    duration: "1-2 hours",
-    activity_type: "balloonRide",
-    mood: "romantic",
-    time_of_day: "morning",
-    distance: "nearby",
-    importance: "experience",
-    activity_level: "low",
-    image_url: "/api/placeholder/400/300",
-    interests: ["sports"],
-    group_size: "couple",
-    season: "noPreference",
-  },
   // 81
   {
     title: "Live Jazz Concert",
@@ -1578,25 +1404,7 @@ const sampleDateIdeas = [
     group_size: "couple",
     season: "spring",
   },
-  // 83
-  {
-    title: "Cooking Dinner Together at Home",
-    description:
-      "Prepare a gourmet meal together in the comfort of your kitchen.",
-    location: "indoor",
-    cost_category: "economy",
-    duration: "3-4 hours",
-    activity_type: "cooking",
-    mood: "romantic",
-    time_of_day: "evening",
-    distance: "local",
-    importance: "connection",
-    activity_level: "low",
-    image_url: "/api/placeholder/400/300",
-    interests: ["food"],
-    group_size: "couple",
-    season: "noPreference",
-  },
+  
   // 84
   {
     title: "Attend a Stand-Up Comedy Show",
@@ -1615,25 +1423,7 @@ const sampleDateIdeas = [
     group_size: "friends",
     season: "noPreference",
   },
-  // 85
-  {
-    title: "Botanical Garden Tour",
-    description:
-      "Stroll through beautiful gardens and admire diverse plant species.",
-    location: "outdoor",
-    cost_category: "economy",
-    duration: "2-3 hours",
-    activity_type: "gardenVisit",
-    mood: "serene",
-    time_of_day: "afternoon",
-    distance: "nearby",
-    importance: "relaxation",
-    activity_level: "low",
-    image_url: "/api/placeholder/400/300",
-    interests: ["nature", "learning"],
-    group_size: "family",
-    season: "spring",
-  },
+ 
   // 86
   {
     title: "Karaoke Night",
@@ -1652,24 +1442,7 @@ const sampleDateIdeas = [
     group_size: "friends",
     season: "noPreference",
   },
-  // 87
-  {
-    title: "Escape Room Challenge",
-    description: "Solve puzzles together to escape within the time limit.",
-    location: "indoor",
-    cost_category: "standard",
-    duration: "1-2 hours",
-    activity_type: "escapeRoom",
-    mood: "adventurous",
-    time_of_day: "evening",
-    distance: "local",
-    importance: "experience",
-    activity_level: "moderate",
-    image_url: "/api/placeholder/400/300",
-    interests: ["technology", "learning"],
-    group_size: "friends",
-    season: "noPreference",
-  },
+
   // 88
   {
     title: "Indoor Rock Climbing",
@@ -1706,24 +1479,7 @@ const sampleDateIdeas = [
     group_size: "couple",
     season: "noPreference",
   },
-  // 90
-  {
-    title: "Hot Springs Relaxation",
-    description: "Soak in natural hot springs for ultimate relaxation.",
-    location: "outdoor",
-    cost_category: "premium",
-    duration: "3-4 hours",
-    activity_type: "hotSprings",
-    mood: "relaxed",
-    time_of_day: "morning",
-    distance: "far",
-    importance: "relaxation",
-    activity_level: "low",
-    image_url: "/api/placeholder/400/300",
-    interests: ["wellness"],
-    group_size: "couple",
-    season: "winter",
-  },
+ 
   // 91
   {
     title: "Attend a Science Lecture",
@@ -1797,25 +1553,7 @@ const sampleDateIdeas = [
     group_size: "couple",
     season: "noPreference",
   },
-  // 95
-  {
-    title: "Explore a Farmers Market",
-    description:
-      "Browse fresh produce and artisanal goods at the farmers market.",
-    location: "outdoor",
-    cost_category: "free",
-    duration: "1-2 hours",
-    activity_type: "farmersMarket",
-    mood: "relaxed",
-    time_of_day: "morning",
-    distance: "local",
-    importance: "comfort",
-    activity_level: "low",
-    image_url: "/api/placeholder/400/300",
-    interests: ["food", "nature"],
-    group_size: "couple",
-    season: "spring",
-  },
+ 
   // 96
   {
     title: "Trampoline Park Fun",
@@ -1834,24 +1572,7 @@ const sampleDateIdeas = [
     group_size: "friends",
     season: "noPreference",
   },
-  // 97
-  {
-    title: "Attend a Local Theater Production",
-    description: "Enjoy a live theater performance at a community theater.",
-    location: "indoor",
-    cost_category: "standard",
-    duration: "2-3 hours",
-    activity_type: "theater",
-    mood: "creative",
-    time_of_day: "evening",
-    distance: "local",
-    importance: "experience",
-    activity_level: "low",
-    image_url: "/api/placeholder/400/300",
-    interests: ["arts"],
-    group_size: "couple",
-    season: "noPreference",
-  },
+  
   // 98
   {
     title: "Gardening Workshop",
@@ -1889,24 +1610,7 @@ const sampleDateIdeas = [
     group_size: "couple",
     season: "noPreference",
   },
-  // 100
-  {
-    title: "Couples Pottery Class",
-    description: "Create pottery pieces together in a hands-on class.",
-    location: "indoor",
-    cost_category: "standard",
-    duration: "2-3 hours",
-    activity_type: "pottery",
-    mood: "creative",
-    time_of_day: "afternoon",
-    distance: "local",
-    importance: "experience",
-    activity_level: "low",
-    image_url: "/api/placeholder/400/300",
-    interests: ["arts", "learning"],
-    group_size: "couple",
-    season: "noPreference",
-  },
+ 
   // 101  
   {
     title: "Attend a Poetry Slam",
@@ -2095,24 +1799,7 @@ const sampleDateIdeas = [
     group_size: "friends",
     season: "spring",
   },
-  // 112
-  {
-    title: "Take a Glassmaking Class",
-    description: "Create beautiful glass art pieces in a hands-on class.",
-    location: "indoor",
-    cost_category: "premium",
-    duration: "3 hours",
-    activity_type: "glassMaking",
-    mood: "creative",
-    time_of_day: "afternoon",
-    distance: "nearby",
-    importance: "learning",
-    activity_level: "low",
-    image_url: "/api/placeholder/400/300",
-    interests: ["arts"],
-    group_size: "couple",
-    season: "noPreference",
-  },
+ 
   // 113
   {
     title: "Attend a Literary Festival",
@@ -2446,25 +2133,7 @@ const sampleDateIdeas = [
     group_size: "friends",
     season: "noPreference",
   },
-  // 132
-  {
-    title: "Take a Pottery Wheel Class",
-    description:
-      "Learn to shape clay on the pottery wheel with professional guidance.",
-    location: "indoor",
-    cost_category: "standard",
-    duration: "2-3 hours",
-    activity_type: "potteryWheel",
-    mood: "creative",
-    time_of_day: "afternoon",
-    distance: "local",
-    importance: "learning",
-    activity_level: "low",
-    image_url: "/api/placeholder/400/300",
-    interests: ["arts"],
-    group_size: "couple",
-    season: "noPreference",
-  },
+  
   // 133
   {
     title: "Attend a Local Art Fair",
@@ -2503,25 +2172,7 @@ const sampleDateIdeas = [
     group_size: "couple",
     season: "spring",
   },
-  // 135
-  {
-    title: "Attend a Wine and Cheese Pairing Event",
-    description:
-      "Discover the perfect wine and cheese combinations at a tasting event.",
-    location: "indoor",
-    cost_category: "standard",
-    duration: "2 hours",
-    activity_type: "wineCheesePairing",
-    mood: "relaxed",
-    time_of_day: "evening",
-    distance: "nearby",
-    importance: "experience",
-    activity_level: "low",
-    image_url: "/api/placeholder/400/300",
-    interests: ["food"],
-    group_size: "couple",
-    season: "noPreference",
-  },
+
   // 136
   {
     title: "Take a Salsa Dancing Class",
@@ -2540,25 +2191,7 @@ const sampleDateIdeas = [
     group_size: "couple",
     season: "noPreference",
   },
-  // 137
-  {
-    title: "Attend a Local Farmers Market",
-    description:
-      "Shop for fresh produce and handmade goods at the farmers market.",
-    location: "outdoor",
-    cost_category: "economy",
-    duration: "1-2 hours",
-    activity_type: "farmersMarket",
-    mood: "relaxed",
-    time_of_day: "morning",
-    distance: "local",
-    importance: "comfort",
-    activity_level: "low",
-    image_url: "/api/placeholder/400/300",
-    interests: ["food", "nature"],
-    group_size: "couple",
-    season: "spring",
-  },
+  
   // 138
   {
     title: "Visit a Historical Museum",
