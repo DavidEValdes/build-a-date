@@ -825,7 +825,7 @@ const sampleDateIdeas = [
   },
   // 48
   {
-    title: "Go Bowling",
+    title: "Go to a Bowling Alley",
     description: "Have fun competing in a game of bowling.",
     location: "indoor",
     cost_category: "economy",

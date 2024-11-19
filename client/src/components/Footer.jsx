@@ -67,9 +67,7 @@ const Footer = () => (
         <div
           style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}
         >
-          <Link to="/about" style={{ color: "#6b7280", fontSize: "0.8rem" }}>
-            About Us
-          </Link>
+          
           <Link
             to="/how-it-works"
             style={{ color: "#6b7280", fontSize: "0.8rem" }}
