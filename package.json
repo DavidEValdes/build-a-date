@@ -3,15 +3,18 @@
     "version": "1.0.0",
     "description": "Date planning application",
     "engines": {
-      "node": "18.x",
-      "npm": "10.x"
+        "node": "18.x",
+        "npm": "10.x"
     },
     "scripts": {
-      "start": "cd server && npm start",
-      "heroku-postbuild": "NPM_CONFIG_PRODUCTION=false cd client && npm install && npm run build && cd ../server && npm install"
+        "start": "cd server && npm start",
+        "heroku-postbuild": "NPM_CONFIG_PRODUCTION=false cd client && npm install && npm run build && cd ../server && npm install"
     },
     "cacheDirectories": [
-      "client/node_modules",
-      "server/node_modules"
-    ]
-  }
+        "client/node_modules",
+        "server/node_modules"
+    ],
+    "dependencies": {
+        "prop-types": "^15.8.1"
+    }
+}
