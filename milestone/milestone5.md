@@ -22,8 +22,6 @@ Complete the checklist below detailing each baseline, custom, and stretch featur
 
 ### Baseline Features
 
-👉🏾👉🏾👉🏾 Check off each completed feature below.
-
 - [X] The project includes an Express backend app and a React frontend app
 - [X] The project includes these backend-specific features:
   - [X] At least one of each of the following database relationship in Postgres
@@ -45,8 +43,6 @@ Complete the checklist below detailing each baseline, custom, and stretch featur
 
 ### Custom Features
 
-👉🏾👉🏾👉🏾 Check off each completed feature below.
-
 - [X] The project gracefully handles errors
 - [X] The project includes a one-to-one database relationship
 - [X] The project includes a slide-out pane or modal as appropriate for your use case
@@ -57,8 +53,6 @@ Complete the checklist below detailing each baseline, custom, and stretch featur
 - [X] Data submitted via a POST or PATCH request is validated before the database is updated
 
 ### Stretch Features
-
-👉🏾👉🏾👉🏾 Check off each completed feature below.
 
 - [X] A subset of pages require the user to log in before accessing the content
   - [ ] Users can log in and log out via GitHub OAuth with Passport.js
@@ -73,8 +67,7 @@ Complete the checklist below detailing each baseline, custom, and stretch featur
 
 🔗 https://build-a-date-f2a6ced9317a.herokuapp.com
 
-[Here's a GIF walkthrough of the final project]
-
+![Screen Recording 2024-11-20 at 4 20 26 PM](https://github.com/user-attachments/assets/52ff137a-d855-4577-9df9-a2f6df11439e)
 
 
 
