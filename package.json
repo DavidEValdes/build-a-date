@@ -1,0 +1,17 @@
+{
+    "name": "build-a-date",
+    "version": "1.0.0",
+    "description": "Date planning application",
+    "engines": {
+      "node": "18.x"
+    },
+    "scripts": {
+      "start": "cd server && npm start",
+      "build": "cd client && npm install && npm run build",
+      "heroku-postbuild": "cd client && npm install && npm run build"
+    },
+    "cacheDirectories": [
+      "client/node_modules",
+      "server/node_modules"
+    ]
+  }
