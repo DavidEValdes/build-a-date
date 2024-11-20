@@ -4,7 +4,7 @@ CodePath WEB103 Final Project
 
 Designed and developed by: David Valdes, Matt Dembiczak, Dibas Dauliya
 
-🔗 Link to deployed app:
+🔗 Link to deployed app:https://build-a-date-f2a6ced9317a.herokuapp.com
 
 ## About
 
@@ -42,6 +42,4 @@ Backend: Express.js, Node.js, PostgreSQL
 
 ![Screen Recording 2024-11-06 at 10 51 26 PM](https://github.com/user-attachments/assets/d8b41436-208d-4098-b423-de5c4eeff986)
 
-## Installation Instructions
 
-[instructions go here]

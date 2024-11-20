@@ -8,6 +8,9 @@ import dateIdeasRouter from "./routes/dateIdeas.js";
 import usersRouter from "./routes/users.js";
 import commentsRouter from "./routes/comments.js";
 import imageRoutes from './routes/images.js';
+import { checkRequiredEnv } from './config/check-env.js';
+checkRequiredEnv();
+
 
 // ES Module equivalent of __dirname
 const __filename = fileURLToPath(import.meta.url);

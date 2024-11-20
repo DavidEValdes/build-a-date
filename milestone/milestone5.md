@@ -6,15 +6,15 @@ This document should be completed and submitted during **Unit 9** of this course
 
 This unit, be sure to complete all tasks listed below. To complete a task, place an `x` between the brackets.
 
-- [ ] Deploy your project on Railway
-  - [ ] In `readme.md`, add the link to your deployed project
-- [ ] Update the status of issues in your project board as you complete them
+- [X] Deploy your project on Heroku
+  - [X] In `readme.md`, add the link to your deployed project
+- [X] Update the status of issues in your project board as you complete them
 - [ ] In `readme.md`, check off the features you have completed in this unit by adding a ✅ emoji in front of their title
-  - [ ] Under each feature you have completed, **include a GIF** showing feature functionality
-- [ ] In this document, complete the **Reflection** section below
-- [ ] 🚩🚩🚩**Complete the Final Project Feature Checklist section below**, detailing each feature you completed in the project (ONLY include features you implemented, not features you planned)
-- [ ] 🚩🚩🚩**Record a GIF showing a complete run-through of your app** that displays all the components included in the **Final Project Feature Checklist** below
-  - [ ] Include this GIF in the **Final Demo GIF** section below
+  - [X] Under each feature you have completed, **include a GIF** showing feature functionality
+- [X] In this document, complete the **Reflection** section below
+- [X] 🚩🚩🚩**Complete the Final Project Feature Checklist section below**, detailing each feature you completed in the project (ONLY include features you implemented, not features you planned)
+- [X] 🚩🚩🚩**Record a GIF showing a complete run-through of your app** that displays all the components included in the **Final Project Feature Checklist** below
+  - [X] Include this GIF in the **Final Demo GIF** section below
 
 ## Final Project Feature Checklist
 
@@ -71,26 +71,31 @@ Complete the checklist below detailing each baseline, custom, and stretch featur
 
 ## Final Demo GIF
 
-🔗 [Here's a GIF walkthrough of the final project](👉🏾👉🏾👉🏾 your link here)
+🔗 https://build-a-date-f2a6ced9317a.herokuapp.com
+
+[Here's a GIF walkthrough of the final project]
+
+
+
 
 ## Reflection
 
 ### 1. What went well during this unit?
 
-[👉🏾👉🏾👉🏾 your answer here]
+During this unit we were able to fix all of the bugs and finalize all the quirks in the project. During this time we were able to get the pictures api to become much more accurate, aswell as add a few more dates.
 
 ### 2. What were some challenges your group faced in this unit? 
 
-[👉🏾👉🏾👉🏾 your answer here]
+Some challenges we faced included issues relating to the suggestion display and question pipeline, aswell as overall refining the algorithm.
 
 ### 3. What were some of the highlights or achievements that you are most proud of in this project?
 
-[👉🏾👉🏾👉🏾 your answer here]
+We would say that actually making the idea come to life is the proudest feeling we have about the project. Having it work with pictures api was also a difficult but doable task we feel proud of accomplishing.
 
 ### 4. Reflecting on your web development journey so far, how have you grown since the beginning of the course?
 
-[👉🏾👉🏾👉🏾 your answer here]
+We feel like we have refined our development skills greatly and have become better developers in general.
 
 ### 5. Looking ahead, what are your goals related to web development, and what steps do you plan to take to achieve them?
 
-[👉🏾👉🏾👉🏾 your answer here]
+ Our goals are to become well rounded engineers and have the ability to create and solve problems with tools and languages such as the ones we've learned and used in class.
