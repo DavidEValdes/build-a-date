@@ -51,7 +51,7 @@ Complete the checklist below detailing each baseline, custom, and stretch featur
 - [X] The project includes a one-to-one database relationship
 - [X] The project includes a slide-out pane or modal as appropriate for your use case
 - [X] The project includes a unique field within the join table
-- [ ] The project includes a custom non-RESTful route with corresponding controller actions (Matt needs to complete)
+- [ ] The project includes a custom non-RESTful route with corresponding controller actions 
 - [X] The project allows filtering and/or sorting as appropriate for your use case
 - [X] Data is automatically generated in response to a certain event or user action. Examples include generating a default inventory for a new user starting a game or creating a starter set of tasks for a user creating a new task app account
 - [X] Data submitted via a POST or PATCH request is validated before the database is updated
