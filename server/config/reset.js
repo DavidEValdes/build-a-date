@@ -1113,24 +1113,7 @@ const sampleDateIdeas = [
     season: "summer",
   },
   
-  // 66
-  {
-    title: "Visit a Local Fair",
-    description: "Enjoy rides, games, and food at a local fair.",
-    location: "outdoor",
-    cost_category: "economy",
-    duration: "3-4 hours",
-    activity_type: "localFair",
-    mood: "relaxed",
-    time_of_day: "afternoon",
-    distance: "nearby",
-    importance: "experience",
-    activity_level: "moderate",
-    image_url: "/api/placeholder/400/300",
-    interests: ["arts", "food"],
-    group_size: "friends",
-    season: "summer",
-  },
+  
   // 67
   {
     title: "Attend a Meditation Class",
