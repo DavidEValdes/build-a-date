@@ -126,16 +126,11 @@ const UserMenu = () => {
               <button
                 onClick={handleSavedDatesClick}
                 className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                style={{ color: "#507acf", fontWeight: "bold" }}
               >
                 Saved Dates
               </button>
-              <button
-                onClick={handlePlanADateClick}
-                className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 transition-colors"
-                style={{ color: "#507acf", fontWeight: "bold" }}
-              >
-                Plan a Date
-              </button>
+              
               <button
                 onClick={() => {
                   logout();
@@ -170,13 +165,7 @@ const UserMenu = () => {
               >
                 Register
               </button>
-              <button
-                onClick={handlePlanADateClick}
-                className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 transition-colors"
-                style={{ color: "#507acf", fontWeight: "bold" }}
-              >
-                Plan a Date
-              </button>
+             
             </>
           )}
         </div>

@@ -582,45 +582,7 @@ const Home = () => {
                   "0 2px 4px rgba(0, 0, 0, 0.05)";
               }}
             >
-              <Link
-                to="/plan-a-date"
-                className="plan-date-link"
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "0.5rem",
-                  padding: "1rem",
-                  color: "#4f46e5",
-                  fontSize: "0.95rem",
-                  fontWeight: "500",
-                  textDecoration: "none",
-                  transition: "all 0.2s ease",
-                  letterSpacing: "0.01em",
-                }}
-              >
-                <span>Already have a date idea? Plan it here</span>
-                <ArrowRight
-                  size={18}
-                  style={{
-                    marginLeft: "4px",
-                    transition: "transform 0.2s ease",
-                  }}
-                />
-              </Link>
-              <div
-                style={{
-                  position: "absolute",
-                  bottom: "-1px",
-                  left: "50%",
-                  transform: "translateX(-50%)",
-                  width: "50%",
-                  height: "2px",
-                  background:
-                    "linear-gradient(90deg, transparent, #4f46e5, transparent)",
-                  opacity: 0.5,
-                }}
-              />
+              
             </div>
           </div>
         )}
