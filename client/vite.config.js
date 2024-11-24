@@ -12,9 +12,17 @@ export default defineConfig({
       },
     },
   },
+  resolve: {
+    alias: {
+      'prop-types': 'prop-types',
+    },
+  },
   build: {
     rollupOptions: {
       external: ['prop-types'],
+    },
+    commonjsOptions: {
+      include: [/prop-types/, /node_modules/],
     },
     outDir: 'dist',
     sourcemap: false
