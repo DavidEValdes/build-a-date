@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import path from 'path';
 
 export default defineConfig({
   plugins: [react()],
@@ -14,15 +15,23 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      'prop-types': 'prop-types',
-    },
+      'prop-types': path.resolve(__dirname, 'node_modules/prop-types'),
+    }
+  },
+  optimizeDeps: {
+    include: ['prop-types']
   },
   build: {
     rollupOptions: {
-      external: ['prop-types'],
+      output: {
+        manualChunks: {
+          'prop-types': ['prop-types']
+        }
+      }
     },
     commonjsOptions: {
-      include: [/prop-types/, /node_modules/],
+      include: [/node_modules/],
+      transformMixedEsModules: true
     },
     outDir: 'dist',
     sourcemap: false
