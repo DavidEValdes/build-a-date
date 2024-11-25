@@ -13,6 +13,7 @@ import Profile from "./pages/Profile";
 import SavedDates from "./pages/SavedDates";
 import UserMenu from "./components/UserMenu";
 import PlanADate from "./pages/PlanADate";
+import { PrivacyPolicy, TermsAndConditions, CookiePolicy } from './pages/LegalPages';
 import "./App.css";
 
 // Create a client
@@ -66,6 +67,9 @@ function App() {
               <Route path="/profile" element={<Profile />} />
               <Route path="/saved-dates" element={<SavedDates />} />
               <Route path="/plan-a-date" element={<PlanADate />} />
+              <Route path="/privacy" element={<PrivacyPolicy />} />
+              <Route path="/terms" element={<TermsAndConditions />} />
+              <Route path="/cookiepolicy" element={<CookiePolicy />} />
             </Routes>
           </div>
         </Router>
