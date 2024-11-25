@@ -14,6 +14,16 @@ import {
 } from "lucide-react";
 import Footer from "../components/Footer";
 
+
+const budgetLevels = {
+  free: 0,
+  economy: 1,
+  standard: 2,
+  premium: 3,
+  luxury: 4,
+};
+
+
 // Updated Sort Options to include Duration Sorting
 const sortOptions = [
   { value: "newest", label: "Newest First" },
@@ -135,171 +145,163 @@ const Home = () => {
   });
 
   const handleQuestionnaireComplete = async (answers) => {
-    // Ensure budget is selected
-    if (!answers.budget) {
-      console.error("Budget not selected.");
-      return;
-    }
-    
-    // Filter date ideas that match the selected budget
-    const filteredDates = allDates.filter(date => date.cost_category === answers.budget);
-    
-    if (filteredDates.length === 0) {
-      console.error("No date ideas found for the selected budget.");
-      return;
-    }
-    
-    // Function to calculate Jaccard Similarity for multiple-choice questions
-    const calculateSimilarity = (arr1 = [], arr2 = []) => {
-      if (arr1.length === 0 && arr2.length === 0) return 1;
-      if (arr1.length === 0 || arr2.length === 0) return 0;
-      const set1 = new Set(arr1);
-      const set2 = new Set(arr2);
+    // Convert the ranking to a sorted array of attribute IDs based on rank
+    const prioritiesRanking = answers.priorities; // This is an object
+    // Create an array of [attributeId, rank] pairs
+    const prioritiesArray = Object.entries(prioritiesRanking).map(
+      ([attributeId, rank]) => ({ attributeId, rank: parseInt(rank, 10) })
+    );
+    // Sort the array based on rank
+    const sortedPriorities = prioritiesArray
+      .sort((a, b) => a.rank - b.rank)
+      .map((item) => item.attributeId);
+
+    // Map user priorities to weights
+    const baseWeight = 5; // Adjust as needed
+    const dynamicWeights = {};
+    sortedPriorities.forEach((attr, index) => {
+      dynamicWeights[attr] = baseWeight - index; // Higher priority gets higher weight
+    });
+
+    const calculateSimilarity = (arr1, arr2) => {
+      // Ensure arrays are defined and convert non-arrays to empty arrays
+      const array1 = Array.isArray(arr1) ? arr1 : [];
+      const array2 = Array.isArray(arr2) ? arr2 : [];
+      
+      // If both arrays are empty, return 1 (100% similar)
+      if (array1.length === 0 && array2.length === 0) return 1;
+      
+      // If one array is empty and the other isn't, return 0 (0% similar)
+      if (array1.length === 0 || array2.length === 0) return 0;
+      
+      // Calculate similarity using sets
+      const set1 = new Set(array1);
+      const set2 = new Set(array2);
       const intersection = [...set1].filter(x => set2.has(x)).length;
       const union = new Set([...set1, ...set2]).size;
+      
       return intersection / union;
     };
-  
-    const scoredDates = filteredDates.map((date) => {
+
+    const scoredDates = allDates.map((date) => {
       let score = 0;
       let totalWeight = 0;
-      const contributions = {}; // To track individual contributions
-  
-      // Time of Day
-      if (answers.timeOfDay) {
-        totalWeight += weights.timeOfDay;
-        if (date.time_of_day === answers.timeOfDay) {
-          score += weights.timeOfDay;
-          contributions.timeOfDay = weights.timeOfDay;
+      const contributions = {};
+
+      // Activity Types (Multiple Choice)
+      const activityWeight = dynamicWeights.activityTypes || 1;
+      totalWeight += activityWeight;
+      const activitySimilarity = calculateSimilarity(
+        date.activity_types,
+        answers.activityTypes || []
+      );
+      const activityScore = activitySimilarity * activityWeight;
+      score += activityScore;
+      contributions.activityTypes = activityScore;
+
+      // Atmosphere
+      const atmosphereWeight = dynamicWeights.atmosphere || 1;
+      totalWeight += atmosphereWeight;
+      if (answers.atmosphere) {
+        if (date.atmosphere === answers.atmosphere) {
+          score += atmosphereWeight;
+          contributions.atmosphere = atmosphereWeight;
         } else {
-          contributions.timeOfDay = 0;
+          contributions.atmosphere = 0;
         }
+      } else {
+        // Neutral score if no preference
+        score += atmosphereWeight / 2;
+        contributions.atmosphere = atmosphereWeight / 2;
       }
-  
-      // Mood
-      if (answers.mood) {
-        totalWeight += weights.mood;
-        if (date.mood === answers.mood) {
-          score += weights.mood;
-          contributions.mood = weights.mood;
-        } else {
-          contributions.mood = 0;
-        }
+
+      // Budget
+      const budgetWeight = dynamicWeights.budget || 1;
+      totalWeight += budgetWeight;
+      if (answers.budget) {
+        const budgetDifference = Math.abs(
+          budgetLevels[date.cost_category] - budgetLevels[answers.budget]
+        );
+        const budgetScore = Math.max(budgetWeight - budgetDifference, 0);
+        score += budgetScore;
+        contributions.budget = budgetScore;
+      } else {
+        score += budgetWeight / 2;
+        contributions.budget = budgetWeight / 2;
       }
-  
-      // Indoor or Outdoor
+
+      // Indoor/Outdoor
+      const locationWeight = dynamicWeights.indoorOutdoor || 1;
+      totalWeight += locationWeight;
       if (answers.indoorOutdoor && answers.indoorOutdoor !== "noPreference") {
-        totalWeight += weights.indoorOutdoor;
         if (date.location === answers.indoorOutdoor) {
-          score += weights.indoorOutdoor;
-          contributions.indoorOutdoor = weights.indoorOutdoor;
+          score += locationWeight;
+          contributions.indoorOutdoor = locationWeight;
         } else {
           contributions.indoorOutdoor = 0;
         }
+      } else {
+        score += locationWeight / 2;
+        contributions.indoorOutdoor = locationWeight / 2;
       }
-  
-      // Activity Level
-      if (answers.activityLevel) {
-        totalWeight += weights.activityLevel;
-        if (date.activity_level === answers.activityLevel) {
-          score += weights.activityLevel;
-          contributions.activityLevel = weights.activityLevel;
-        } else {
-          contributions.activityLevel = 0;
-        }
-      }
-  
-      // Distance Willing to Travel
-      if (answers.distanceWilling) {
-        totalWeight += weights.distanceWilling;
-        if (date.distance === answers.distanceWilling) {
-          score += weights.distanceWilling;
-          contributions.distanceWilling = weights.distanceWilling;
-        } else {
-          contributions.distanceWilling = 0;
-        }
-      }
-  
-      // Importance
-      if (answers.importance) {
-        totalWeight += weights.importance;
-        if (date.importance === answers.importance) {
-          score += weights.importance;
-          contributions.importance = weights.importance;
-        } else {
-          contributions.importance = 0;
-        }
-      }
-  
+
       // Interests (Multiple Choice)
-      if (answers.interests && answers.interests.length > 0) {
-        totalWeight += weights.interests;
-        const dateInterests = Array.isArray(date.interests) ? date.interests : [];
-        const interestsSimilarity = calculateSimilarity(
-          dateInterests,
-          answers.interests
-        );
-        const interestsScore = interestsSimilarity * weights.interests;
-        score += interestsScore;
-        contributions.interests = interestsScore;
-      }
-  
+      const interestsWeight = dynamicWeights.interests || 1;
+      totalWeight += interestsWeight;
+      const interestsSimilarity = calculateSimilarity(
+        date.interests,
+        answers.interests || []
+      );
+      const interestsScore = interestsSimilarity * interestsWeight;
+      score += interestsScore;
+      contributions.interests = interestsScore;
+
       // Group Size
+      const groupSizeWeight = 1; // You can adjust or make dynamic
+      totalWeight += groupSizeWeight;
       if (answers.groupSize) {
-        totalWeight += weights.groupSize;
         if (date.group_size === answers.groupSize) {
-          score += weights.groupSize;
-          contributions.groupSize = weights.groupSize;
+          score += groupSizeWeight;
+          contributions.groupSize = groupSizeWeight;
         } else {
           contributions.groupSize = 0;
         }
+      } else {
+        score += groupSizeWeight / 2;
+        contributions.groupSize = groupSizeWeight / 2;
       }
-  
-      // Season
-      if (answers.season && answers.season !== "noPreference") {
-        totalWeight += weights.season;
-        if (date.season === answers.season) {
-          score += weights.season;
-          contributions.season = weights.season;
-        } else {
-          contributions.season = 0;
-        }
-      }
-  
-      // Calculate normalized score (0 to 1)
+
+      // Calculate normalized score
       const normalizedScore = score / totalWeight;
-  
+
       return { ...date, score: normalizedScore, contributions };
     });
-  
-    // Log scored dates with contributions for debugging
-    console.log("Scored Dates:", scoredDates.map(date => ({
-      id: date.id,
-      title: date.title,
-      score: date.score.toFixed(4),
-      contributions: date.contributions,
-    })));
-  
-    // Sort dates by score in descending order without mutating scoredDates
-    const sortedDates = [...scoredDates].sort((a, b) => b.score - a.score);
-  
-    // Identify the highest score
+
+    // Log for debugging
+    console.log(
+      "Scored Dates:",
+      scoredDates.map((date) => ({
+        id: date.id,
+        title: date.title,
+        score: date.score.toFixed(4),
+        contributions: date.contributions,
+      }))
+    );
+
+    // Sort and select top dates
+    const sortedDates = scoredDates.sort((a, b) => b.score - a.score);
     const highestScore = sortedDates[0]?.score || 0;
-  
-    // Filter all dates with the highest score
-    const topScoringDates = sortedDates.filter(date => date.score === highestScore);
-  
-    // Shuffle top scoring dates to introduce randomness
+    const topScoringDates = sortedDates.filter(
+      (date) => date.score === highestScore
+    );
     const shuffledTopScoringDates = shuffleArray(topScoringDates);
-  
-    // Select the first date from the shuffled top scoring dates
     const bestMatch = shuffledTopScoringDates[0] || null;
-  
+
     if (!bestMatch) {
       console.error("No matching date ideas found.");
       return;
     }
-  
+
     try {
       // Fetch the full date idea from the server to get the image_url
       const response = await api.get(`/dates/${bestMatch.id}`);
@@ -310,7 +312,7 @@ const Home = () => {
       // Fallback to the bestMatch without image_url if fetching fails
       setCurrentSuggestion(bestMatch);
     }
-  
+
     setStage("suggestion");
   };
 

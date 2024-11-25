@@ -1,31 +1,30 @@
-import { useState } from "react";
+import { useState, useCallback  } from "react";
 import PropTypes from "prop-types";
 
 const questions = [
+  
   {
-    id: "timeOfDay",
-    question: "What time of day will your date be?",
+    id: "atmosphere",
+    question: "What atmosphere do you prefer for your date?",
     type: "singleChoice",
     options: [
-      { value: "morning", label: "Morning" },
-      { value: "afternoon", label: "Afternoon" },
-      { value: "evening", label: "Evening" },
-      { value: "night", label: "Night" },
+      { value: "romantic", label: "Romantic" },
+      { value: "casual", label: "Casual" },
+      { value: "energetic", label: "Energetic" },
+      { value: "quiet", label: "Quiet" },
+      { value: "fun", label: "Fun" },
     ],
   },
   {
-    id: "mood",
-    question: "What mood are you in today?",
+    id: "budget",
+    question: "What's your budget range?",
     type: "singleChoice",
     options: [
-      { value: "adventurous", label: "Adventurous" },
-      { value: "relaxed", label: "Relaxed" },
-      { value: "romantic", label: "Romantic" },
-      { value: "creative", label: "Creative" },
-      { value: "energetic", label: "Energetic" },
-      { value: "serene", label: "Serene" },
-      { value: "playful", label: "Playful" },
-      { value: "curious", label: "Curious" },
+      { value: "free", label: "Free" },
+      { value: "economy", label: "$" },
+      { value: "standard", label: "$$" },
+      { value: "premium", label: "$$$" },
+      { value: "luxury", label: "$$$$" },
     ],
   },
   {
@@ -39,90 +38,158 @@ const questions = [
     ],
   },
   {
-    id: "budget",
-    question: "What is your budget for this date?",
+    id: "groupSize",
+    question: "Who will be joining you?",
     type: "singleChoice",
     options: [
-      { value: "free", label: "Free" },
-      { value: "economy", label: "Economy ($)" },
-      { value: "standard", label: "Standard ($$)" },
-      { value: "premium", label: "Premium ($$$)" },
-      { value: "luxury", label: "Luxury ($$$$)" },
+      { value: "couple", label: "Just us" },
+      { value: "smallGroup", label: "Small Group (3-5 people)" },
+      { value: "largeGroup", label: "Larger Group (6+ people)" },
     ],
   },
   {
-    id: "activityLevel",
-    question: "What activity level do you prefer?",
-    type: "singleChoice",
+    id: "activityTypes",
+    question: "What types of activities do you enjoy?",
+    type: "multipleChoice",
     options: [
-      { value: "low", label: "Low (e.g., sitting, relaxing)" },
-      { value: "moderate", label: "Moderate (e.g., walking, light activity)" },
-      { value: "high", label: "High (e.g., sports, physical activities)" },
-    ],
-  },
-  {
-    id: "distanceWilling",
-    question: "How far are you willing to travel?",
-    type: "singleChoice",
-    options: [
-      { value: "local", label: "Within the city" },
-      { value: "nearby", label: "Nearby towns" },
-      { value: "far", label: "A road trip away" },
-    ],
-  },
-  {
-    id: "importance",
-    question: "What is most important for your date?",
-    type: "singleChoice",
-    options: [
-      { value: "experience", label: "Unique Experience" },
-      { value: "comfort", label: "Comfort & Convenience" },
-      { value: "surprise", label: "Element of Surprise" },
-      { value: "connection", label: "Deep Connection" },
-      { value: "learning", label: "Learning & Growth" },
-      { value: "entertainment", label: "Entertainment & Fun" },
-      { value: "wellness", label: "Wellness & Relaxation" },
-      { value: "bonding", label: "Bonding & Togetherness" },
+      { value: "adventure", label: "Adventure" },
+      { value: "relaxation", label: "Relaxation" },
+      { value: "learning", label: "Learning" },
+      { value: "entertainment", label: "Entertainment" },
+      { value: "wellness", label: "Wellness" },
     ],
   },
   {
     id: "interests",
-    question: "What interests do you want to focus on for your date?",
+    question: "Select interests you'd like to explore.",
     type: "multipleChoice",
     options: [
-      { value: "arts", label: "Arts & Culture" },
-      { value: "sports", label: "Sports & Fitness" },
-      { value: "food", label: "Food & Drink" },
-      { value: "nature", label: "Nature & Outdoors" },
-      { value: "technology", label: "Technology & Innovation" },
-      { value: "music", label: "Music & Entertainment" },
-      { value: "learning", label: "Learning & Education" },
-      { value: "wellness", label: "Wellness & Relaxation" },
+      { value: "art", label: "Art" },
+      { value: "music", label: "Music" },
+      { value: "sports", label: "Sports" },
+      { value: "technology", label: "Technology" },
+      { value: "food", label: "Food" },
+      { value: "nature", label: "Nature" },
+      { value: "history", label: "History" },
     ],
   },
   {
-    id: "groupSize",
-    question: "What is the group size for your date?",
-    type: "singleChoice",
+    id: "priorities",
+    question: "Rank the following in order of importance for your date.",
+    type: "ranking",
     options: [
-      { value: "couple", label: "Just the two of us" },
-      { value: "friends", label: "With friends" },
-      { value: "family", label: "With family" },
-    ],
-  },
-  {
-    id: "season",
-    question: "Which season will you be in during your date?",
-    type: "singleChoice",
-    options: [
-      { value: "spring", label: "Spring" },
-      { value: "summer", label: "Summer" },
-      { value: "autumn", label: "Autumn" },
-      { value: "winter", label: "Winter" },
-      { value: "noPreference", label: "No Preference" },
+      { value: "budget", label: "Budget" },
+      { value: "activityTypes", label: "Activity Type" },
+      { value: "atmosphere", label: "Atmosphere" },
+      { value: "indoorOutdoor", label: "Location (Indoor/Outdoor)" },
+      { value: "interests", label: "Interests" },
     ],
   },
 ];
+
+const RankingQuestion = ({ options, onChange, initialRanking = {} }) => {
+  const [items, setItems] = useState(() => {
+    if (Object.keys(initialRanking).length > 0) {
+      return options.map(option => ({
+        id: option.value,
+        label: option.label,
+        rank: initialRanking[option.value] || 0
+      })).sort((a, b) => a.rank - b.rank);
+    }
+    return options.map((option, index) => ({
+      id: option.value,
+      label: option.label,
+      rank: index + 1
+    }));
+  });
+
+  const handleDragStart = (e, startIndex) => {
+    e.dataTransfer.setData('text/plain', startIndex);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (e, dropIndex) => {
+    e.preventDefault();
+    const dragIndex = parseInt(e.dataTransfer.getData('text/plain'));
+    
+    if (dragIndex === dropIndex) return;
+
+    const newItems = [...items];
+    const [draggedItem] = newItems.splice(dragIndex, 1);
+    newItems.splice(dropIndex, 0, draggedItem);
+
+    const updatedItems = newItems.map((item, index) => ({
+      ...item,
+      rank: index + 1
+    }));
+
+    const rankingObject = updatedItems.reduce((acc, item) => {
+      acc[item.id] = item.rank.toString();
+      return acc;
+    }, {});
+
+    setItems(updatedItems);
+    onChange(rankingObject);
+  };
+
+  return (
+    <div className="question-pipeline max-w-md mx-auto">
+      <div className="options-list">
+        <p className="text-sm text-gray-600 mb-4">
+          Drag items to reorder - #1 being most important
+        </p>
+        
+        {items.map((item, index) => (
+          <div
+            key={item.id}
+            draggable
+            onDragStart={(e) => handleDragStart(e, index)}
+            onDragOver={handleDragOver}
+            onDrop={(e) => handleDrop(e, index)}
+            className={`option-button`}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              cursor: 'move',
+              backgroundColor: '#f3f4f6',
+              color: '#1f2937',
+              padding: '1rem',
+              borderRadius: '0.5rem',
+              width: '100%',
+              fontSize: '1rem',
+              fontWeight: '500',
+              transition: 'background-color 0.2s ease, transform 0.1s ease',
+              marginBottom: '1rem'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ color: '#9CA3AF' }}>☰</span>
+              {item.label}
+            </div>
+            <span style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '24px',
+              height: '24px',
+              backgroundColor: '#dbeafe',
+              color: '#1e40af',
+              borderRadius: '9999px',
+              fontSize: '0.875rem',
+              fontWeight: '500'
+            }}>
+              {item.rank}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 const QuestionPipeline = ({ onComplete }) => {
   const [currentStep, setCurrentStep] = useState(0);
@@ -145,6 +212,11 @@ const QuestionPipeline = ({ onComplete }) => {
           [currentQuestion.id]: [...existing, value],
         };
       }
+    } else if (currentQuestion.type === "ranking") {
+      updatedAnswers = {
+        ...answers,
+        [currentQuestion.id]: value,
+      };
     } else {
       updatedAnswers = {
         ...answers,
@@ -167,15 +239,18 @@ const QuestionPipeline = ({ onComplete }) => {
     onComplete(answers);
   };
 
-  const handleTryAgain = () => {
-    setCurrentStep(0);
-    setAnswers({});
-  };
-
-  const isMultipleChoice = currentQuestion.type === "multipleChoice";
-  const canProceed = isMultipleChoice
-    ? answers[currentQuestion.id] && answers[currentQuestion.id].length > 0
-    : answers[currentQuestion.id];
+  const canProceed = (() => {
+    const answer = answers[currentQuestion.id];
+    if (currentQuestion.type === "multipleChoice") {
+      return answer && answer.length > 0;
+    } else if (currentQuestion.type === "ranking") {
+      if (!answer) return false;
+      const values = Object.values(answer).filter(val => val !== "");
+      return values.length === currentQuestion.options.length;
+    } else {
+      return !!answer;
+    }
+  })();
 
   return (
     <div className="question-pipeline max-w-md mx-auto p-4 bg-white shadow-md rounded-lg">
@@ -184,18 +259,18 @@ const QuestionPipeline = ({ onComplete }) => {
           <div
             className="progress-fill"
             style={{
-              width: `${((currentStep + 1) / 10) * 100}%`,
+              width: `${((currentStep + 1) / questions.length) * 100}%`,
             }}
-          ></div>
+          />
         </div>
         <p className="text-sm text-gray-600">
-          Question {currentStep + 1} of 10
+          Question {currentStep + 1} of {questions.length}
         </p>
       </div>
 
       <h3 className="text-lg font-semibold mb-4">{currentQuestion.question}</h3>
 
-      <div className="options-list space-y-2">
+      <div className="options-list">
         {currentQuestion.type === "singleChoice" &&
           currentQuestion.options.map((option) => (
             <button
@@ -211,9 +286,9 @@ const QuestionPipeline = ({ onComplete }) => {
               }`}
               onClick={() => {
                 handleAnswer(option.value);
-                if (!isMultipleChoice && currentStep < 9) {
+                if (currentStep < questions.length - 1) {
                   handleNext();
-                } else if (!isMultipleChoice && currentStep === 9) {
+                } else {
                   handleComplete();
                 }
               }}
@@ -226,28 +301,33 @@ const QuestionPipeline = ({ onComplete }) => {
           currentQuestion.options.map((option) => (
             <button
               key={option.value}
-              className={`option-button flex items-center ${
-                answers[currentQuestion.id] &&
-                answers[currentQuestion.id].includes(option.value)
+              className={`option-button ${
+                answers[currentQuestion.id]?.includes(option.value)
                   ? "bg-blue-600 text-white"
                   : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
               } border ${
-                answers[currentQuestion.id] &&
-                answers[currentQuestion.id].includes(option.value)
+                answers[currentQuestion.id]?.includes(option.value)
                   ? "border-blue-600"
                   : "border"
               }`}
               onClick={() => handleAnswer(option.value)}
             >
               <span className="mr-2">
-                {answers[currentQuestion.id] &&
-                answers[currentQuestion.id].includes(option.value)
-                  ? "✅ "
-                  : "⬜️ "}
+                {answers[currentQuestion.id]?.includes(option.value)
+                  ? "✅"
+                  : "⬜️"}
               </span>
               {option.label}
             </button>
           ))}
+
+        {currentQuestion.type === "ranking" && (
+          <RankingQuestion
+            options={currentQuestion.options}
+            onChange={(ranking) => handleAnswer(ranking)}
+            initialRanking={answers[currentQuestion.id]}
+          />
+        )}
       </div>
 
       <div className="flex items-center justify-center gap-4 mt-6">
@@ -259,20 +339,14 @@ const QuestionPipeline = ({ onComplete }) => {
             Back
           </button>
         )}
-        {isMultipleChoice && (
-          <button
-            className={`primary-button flex-shrink-0 w-24 ${!canProceed ? "opacity-70 cursor-not-allowed" : ""}`}
-            onClick={currentStep === 9 ? handleComplete : handleNext}
-            disabled={!canProceed}
-          >
-            {currentStep === 9 ? "Finish" : "Next"}
-          </button>
-        )}
-      </div>
-
-      <div className="try-again-section mt-6 text-center">
-        <button className="secondary-button" onClick={handleTryAgain}>
-          Start Over
+        <button
+          className={`primary-button flex-shrink-0 w-24 ${
+            !canProceed ? "opacity-70 cursor-not-allowed" : ""
+          }`}
+          onClick={currentStep === questions.length - 1 ? handleComplete : handleNext}
+          disabled={!canProceed}
+        >
+          {currentStep === questions.length - 1 ? "Finish" : "Next"}
         </button>
       </div>
     </div>
