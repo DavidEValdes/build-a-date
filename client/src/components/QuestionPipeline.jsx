@@ -11,7 +11,6 @@ const questions = [
       { value: "romantic", label: "Romantic" },
       { value: "casual", label: "Casual" },
       { value: "energetic", label: "Energetic" },
-      { value: "quiet", label: "Quiet" },
       { value: "fun", label: "Fun" },
     ],
   },
