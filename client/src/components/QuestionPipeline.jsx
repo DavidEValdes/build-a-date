@@ -73,122 +73,17 @@ const questions = [
     ],
   },
   {
-    id: "priorities",
-    question: "Rank the following in order of importance for your date.",
-    type: "ranking",
+    id: "time_of_day",
+    question: "What time of day do you prefer?",
+    type: "singleChoice",
     options: [
-      { value: "budget", label: "Budget" },
-      { value: "activityTypes", label: "Activity Type" },
-      { value: "atmosphere", label: "Atmosphere" },
-      { value: "indoorOutdoor", label: "Location (Indoor/Outdoor)" },
-      { value: "interests", label: "Interests" },
+      { value: "morning", label: "Morning" },
+      { value: "afternoon", label: "Afternoon" },
+      { value: "evening", label: "Evening" },
+      { value: "night", label: "Night" },
     ],
   },
 ];
-
-const RankingQuestion = ({ options, onChange, initialRanking = {} }) => {
-  const [items, setItems] = useState(() => {
-    if (Object.keys(initialRanking).length > 0) {
-      return options.map(option => ({
-        id: option.value,
-        label: option.label,
-        rank: initialRanking[option.value] || 0
-      })).sort((a, b) => a.rank - b.rank);
-    }
-    return options.map((option, index) => ({
-      id: option.value,
-      label: option.label,
-      rank: index + 1
-    }));
-  });
-
-  const handleDragStart = (e, startIndex) => {
-    e.dataTransfer.setData('text/plain', startIndex);
-  };
-
-  const handleDragOver = (e) => {
-    e.preventDefault();
-  };
-
-  const handleDrop = (e, dropIndex) => {
-    e.preventDefault();
-    const dragIndex = parseInt(e.dataTransfer.getData('text/plain'));
-    
-    if (dragIndex === dropIndex) return;
-
-    const newItems = [...items];
-    const [draggedItem] = newItems.splice(dragIndex, 1);
-    newItems.splice(dropIndex, 0, draggedItem);
-
-    const updatedItems = newItems.map((item, index) => ({
-      ...item,
-      rank: index + 1
-    }));
-
-    const rankingObject = updatedItems.reduce((acc, item) => {
-      acc[item.id] = item.rank.toString();
-      return acc;
-    }, {});
-
-    setItems(updatedItems);
-    onChange(rankingObject);
-  };
-
-  return (
-    <div className="question-pipeline max-w-md mx-auto">
-      <div className="options-list">
-        <p className="text-sm text-gray-600 mb-4">
-          Drag items to reorder - #1 being most important
-        </p>
-        
-        {items.map((item, index) => (
-          <div
-            key={item.id}
-            draggable
-            onDragStart={(e) => handleDragStart(e, index)}
-            onDragOver={handleDragOver}
-            onDrop={(e) => handleDrop(e, index)}
-            className={`option-button`}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              cursor: 'move',
-              backgroundColor: '#f3f4f6',
-              color: '#1f2937',
-              padding: '1rem',
-              borderRadius: '0.5rem',
-              width: '100%',
-              fontSize: '1rem',
-              fontWeight: '500',
-              transition: 'background-color 0.2s ease, transform 0.1s ease',
-              marginBottom: '1rem'
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ color: '#9CA3AF' }}>☰</span>
-              {item.label}
-            </div>
-            <span style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '24px',
-              height: '24px',
-              backgroundColor: '#dbeafe',
-              color: '#1e40af',
-              borderRadius: '9999px',
-              fontSize: '0.875rem',
-              fontWeight: '500'
-            }}>
-              {item.rank}
-            </span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
 
 const QuestionPipeline = ({ onComplete }) => {
   const [currentStep, setCurrentStep] = useState(0);
@@ -211,11 +106,6 @@ const QuestionPipeline = ({ onComplete }) => {
           [currentQuestion.id]: [...existing, value],
         };
       }
-    } else if (currentQuestion.type === "ranking") {
-      updatedAnswers = {
-        ...answers,
-        [currentQuestion.id]: value,
-      };
     } else {
       updatedAnswers = {
         ...answers,
@@ -242,10 +132,6 @@ const QuestionPipeline = ({ onComplete }) => {
     const answer = answers[currentQuestion.id];
     if (currentQuestion.type === "multipleChoice") {
       return answer && answer.length > 0;
-    } else if (currentQuestion.type === "ranking") {
-      if (!answer) return false;
-      const values = Object.values(answer).filter(val => val !== "");
-      return values.length === currentQuestion.options.length;
     } else {
       return !!answer;
     }
@@ -283,15 +169,11 @@ const QuestionPipeline = ({ onComplete }) => {
                   ? "border-blue-600"
                   : "border"
               }`}
-              onClick={() => {
-                handleAnswer(option.value);
-                if (currentStep < questions.length - 1) {
-                  handleNext();
-                } else {
-                  handleComplete();
-                }
-              }}
+              onClick={() => handleAnswer(option.value)}
             >
+              {answers[currentQuestion.id] === option.value && (
+                <span className="mr-2">✓</span>
+              )}
               {option.label}
             </button>
           ))}
@@ -313,20 +195,12 @@ const QuestionPipeline = ({ onComplete }) => {
             >
               <span className="mr-2">
                 {answers[currentQuestion.id]?.includes(option.value)
-                  ? "✅"
-                  : "⬜️"}
+                  ? "✓"
+                  : "○"}
               </span>
               {option.label}
             </button>
           ))}
-
-        {currentQuestion.type === "ranking" && (
-          <RankingQuestion
-            options={currentQuestion.options}
-            onChange={(ranking) => handleAnswer(ranking)}
-            initialRanking={answers[currentQuestion.id]}
-          />
-        )}
       </div>
 
       <div className="flex items-center justify-center gap-4 mt-6">

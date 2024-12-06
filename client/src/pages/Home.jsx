@@ -145,23 +145,9 @@ const Home = () => {
   });
 
   const handleQuestionnaireComplete = async (answers) => {
-    // Convert the ranking to a sorted array of attribute IDs based on rank
-    const prioritiesRanking = answers.priorities; // This is an object
-    // Create an array of [attributeId, rank] pairs
-    const prioritiesArray = Object.entries(prioritiesRanking).map(
-      ([attributeId, rank]) => ({ attributeId, rank: parseInt(rank, 10) })
-    );
-    // Sort the array based on rank
-    const sortedPriorities = prioritiesArray
-      .sort((a, b) => a.rank - b.rank)
-      .map((item) => item.attributeId);
-
-    // Map user priorities to weights
-    const baseWeight = 5; // Adjust as needed
-    const dynamicWeights = {};
-    sortedPriorities.forEach((attr, index) => {
-      dynamicWeights[attr] = baseWeight - index; // Higher priority gets higher weight
-    });
+    // Log user answers
+    console.log('\n=== USER PREFERENCES ===');
+    console.log(JSON.stringify(answers, null, 2));
 
     const calculateSimilarity = (arr1, arr2) => {
       // Ensure arrays are defined and convert non-arrays to empty arrays
@@ -183,13 +169,17 @@ const Home = () => {
       return intersection / union;
     };
 
+    console.log('\n=== WEIGHTS USED ===');
+    console.log(JSON.stringify(weights, null, 2));
+
     const scoredDates = allDates.map((date) => {
       let score = 0;
       let totalWeight = 0;
       const contributions = {};
+      const matchDetails = {}; // Store detailed matching information
 
       // Activity Types (Multiple Choice)
-      const activityWeight = dynamicWeights.activityTypes || 1;
+      const activityWeight = weights.activityTypes || 1;
       totalWeight += activityWeight;
       const activitySimilarity = calculateSimilarity(
         date.activity_types,
@@ -198,55 +188,90 @@ const Home = () => {
       const activityScore = activitySimilarity * activityWeight;
       score += activityScore;
       contributions.activityTypes = activityScore;
+      matchDetails.activityTypes = {
+        dateValue: date.activity_types,
+        userValue: answers.activityTypes || [],
+        similarity: activitySimilarity,
+        weight: activityWeight,
+        score: activityScore
+      };
 
       // Atmosphere
-      const atmosphereWeight = dynamicWeights.atmosphere || 1;
+      const atmosphereWeight = weights.atmosphere || 1;
       totalWeight += atmosphereWeight;
+      let atmosphereScore = 0;
       if (answers.atmosphere) {
         if (date.atmosphere === answers.atmosphere) {
+          atmosphereScore = atmosphereWeight;
           score += atmosphereWeight;
           contributions.atmosphere = atmosphereWeight;
         } else {
           contributions.atmosphere = 0;
         }
       } else {
-        // Neutral score if no preference
+        atmosphereScore = atmosphereWeight / 2;
         score += atmosphereWeight / 2;
         contributions.atmosphere = atmosphereWeight / 2;
       }
+      matchDetails.atmosphere = {
+        dateValue: date.atmosphere,
+        userValue: answers.atmosphere,
+        exact_match: date.atmosphere === answers.atmosphere,
+        weight: atmosphereWeight,
+        score: atmosphereScore
+      };
 
       // Budget
-      const budgetWeight = dynamicWeights.budget || 1;
+      const budgetWeight = weights.budget || 1;
       totalWeight += budgetWeight;
+      let budgetScore = 0;
       if (answers.budget) {
         const budgetDifference = Math.abs(
           budgetLevels[date.cost_category] - budgetLevels[answers.budget]
         );
-        const budgetScore = Math.max(budgetWeight - budgetDifference, 0);
+        budgetScore = Math.max(budgetWeight - budgetDifference, 0);
         score += budgetScore;
         contributions.budget = budgetScore;
       } else {
+        budgetScore = budgetWeight / 2;
         score += budgetWeight / 2;
         contributions.budget = budgetWeight / 2;
       }
+      matchDetails.budget = {
+        dateValue: date.cost_category,
+        userValue: answers.budget,
+        budgetDifference: answers.budget ? Math.abs(budgetLevels[date.cost_category] - budgetLevels[answers.budget]) : null,
+        weight: budgetWeight,
+        score: budgetScore
+      };
 
       // Indoor/Outdoor
-      const locationWeight = dynamicWeights.indoorOutdoor || 1;
+      const locationWeight = weights.indoorOutdoor || 1;
       totalWeight += locationWeight;
+      let locationScore = 0;
       if (answers.indoorOutdoor && answers.indoorOutdoor !== "noPreference") {
         if (date.location === answers.indoorOutdoor) {
+          locationScore = locationWeight;
           score += locationWeight;
           contributions.indoorOutdoor = locationWeight;
         } else {
           contributions.indoorOutdoor = 0;
         }
       } else {
+        locationScore = locationWeight / 2;
         score += locationWeight / 2;
         contributions.indoorOutdoor = locationWeight / 2;
       }
+      matchDetails.indoorOutdoor = {
+        dateValue: date.location,
+        userValue: answers.indoorOutdoor,
+        exact_match: answers.indoorOutdoor === "noPreference" || date.location === answers.indoorOutdoor,
+        weight: locationWeight,
+        score: locationScore
+      };
 
       // Interests (Multiple Choice)
-      const interestsWeight = dynamicWeights.interests || 1;
+      const interestsWeight = weights.interests || 1;
       totalWeight += interestsWeight;
       const interestsSimilarity = calculateSimilarity(
         date.interests,
@@ -255,40 +280,110 @@ const Home = () => {
       const interestsScore = interestsSimilarity * interestsWeight;
       score += interestsScore;
       contributions.interests = interestsScore;
+      matchDetails.interests = {
+        dateValue: date.interests,
+        userValue: answers.interests || [],
+        similarity: interestsSimilarity,
+        weight: interestsWeight,
+        score: interestsScore
+      };
 
       // Group Size
-      const groupSizeWeight = 1; // You can adjust or make dynamic
+      const groupSizeWeight = weights.groupSize || 1;
       totalWeight += groupSizeWeight;
+      let groupSizeScore = 0;
       if (answers.groupSize) {
         if (date.group_size === answers.groupSize) {
+          groupSizeScore = groupSizeWeight;
           score += groupSizeWeight;
           contributions.groupSize = groupSizeWeight;
         } else {
           contributions.groupSize = 0;
         }
       } else {
+        groupSizeScore = groupSizeWeight / 2;
         score += groupSizeWeight / 2;
         contributions.groupSize = groupSizeWeight / 2;
       }
+      matchDetails.groupSize = {
+        dateValue: date.group_size,
+        userValue: answers.groupSize,
+        exact_match: date.group_size === answers.groupSize,
+        weight: groupSizeWeight,
+        score: groupSizeScore
+      };
+
+      // Time of Day
+      const timeOfDayWeight = weights.timeOfDay || 1;
+      totalWeight += timeOfDayWeight;
+      let timeOfDayScore = 0;
+      if (answers.time_of_day) {
+        if (date.time_of_day === answers.time_of_day) {
+          timeOfDayScore = timeOfDayWeight;
+          score += timeOfDayWeight;
+          contributions.timeOfDay = timeOfDayWeight;
+        } else {
+          contributions.timeOfDay = 0;
+        }
+      } else {
+        timeOfDayScore = timeOfDayWeight / 2;
+        score += timeOfDayWeight / 2;
+        contributions.timeOfDay = timeOfDayWeight / 2;
+      }
+      matchDetails.timeOfDay = {
+        dateValue: date.time_of_day,
+        userValue: answers.time_of_day,
+        exact_match: date.time_of_day === answers.time_of_day,
+        weight: timeOfDayWeight,
+        score: timeOfDayScore
+      };
 
       // Calculate normalized score
       const normalizedScore = score / totalWeight;
 
-      return { ...date, score: normalizedScore, contributions };
+      return { 
+        ...date, 
+        score: normalizedScore, 
+        contributions,
+        matchDetails,
+        rawScore: score,
+        totalWeight
+      };
     });
 
-    // Log for debugging
-    console.log(
-      "Scored Dates:",
-      scoredDates.map((date) => ({
-        id: date.id,
+    // Log detailed matching results
+    console.log('\n=== MATCHING RESULTS ===');
+    const topResults = scoredDates
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 5)
+      .map(date => ({
         title: date.title,
-        score: date.score.toFixed(4),
-        contributions: date.contributions,
-      }))
-    );
+        normalizedScore: date.score.toFixed(4),
+        rawScore: date.rawScore.toFixed(4),
+        totalWeight: date.totalWeight,
+        contributions: Object.entries(date.contributions).map(([key, value]) => ({
+          category: key,
+          contribution: value.toFixed(4)
+        })),
+        matchDetails: date.matchDetails
+      }));
 
-    // Sort and select top dates
+    console.log('Top 5 Matches:');
+    console.log(JSON.stringify(topResults, null, 2));
+
+    // Distribution Analysis
+    const scores = scoredDates.map(d => d.score);
+    const stats = {
+      min: Math.min(...scores).toFixed(4),
+      max: Math.max(...scores).toFixed(4),
+      avg: (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(4),
+      median: scores.sort((a, b) => a - b)[Math.floor(scores.length / 2)].toFixed(4)
+    };
+    
+    console.log('\n=== SCORE DISTRIBUTION ===');
+    console.log(JSON.stringify(stats, null, 2));
+
+    // Continue with the existing logic
     const sortedDates = scoredDates.sort((a, b) => b.score - a.score);
     const highestScore = sortedDates[0]?.score || 0;
     const topScoringDates = sortedDates.filter(
