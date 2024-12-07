@@ -172,7 +172,7 @@ const QuestionPipeline = ({ onComplete }) => {
               onClick={() => handleAnswer(option.value)}
             >
               {answers[currentQuestion.id] === option.value && (
-                <span className="mr-2">✓</span>
+                <span className="mr-2">✅ </span>
               )}
               {option.label}
             </button>
@@ -195,7 +195,7 @@ const QuestionPipeline = ({ onComplete }) => {
             >
               <span className="mr-2">
                 {answers[currentQuestion.id]?.includes(option.value)
-                  ? "✓"
+                  ? "✅ "
                   : "○"}
               </span>
               {option.label}
