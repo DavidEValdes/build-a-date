@@ -517,6 +517,74 @@ body {
   color: #1f2937;
 }
 
+.feed-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.feed-header-container {
+  width: 100%;
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 415px) and (min-width: 388px) {
+  .feed-header {
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .feed-title {
+    text-align: center;
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+
+  .sort-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  .sort-container button {
+    width: 100%;
+    max-width: 250px;
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 388px) {
+  .feed-header {
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    text-align: center;
+  }
+
+  .feed-title {
+    margin-bottom: 0.5rem;
+    width: 100%;
+    text-align: center;
+  }
+
+  .sort-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  .sort-container button {
+    width: 100%;
+    max-width: 250px;
+    justify-content: space-between;
+  }
+}
+
 .dates-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
@@ -1180,6 +1248,3 @@ body {
     margin: 1rem 1rem 0.75rem;
   }
 }
-
-
-</```rewritten_file>
