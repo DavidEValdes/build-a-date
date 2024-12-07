@@ -89,44 +89,24 @@ body {
 /* Dropdown Menu */
 .dropdown-menu {
   position: absolute;
-  top: 100%;
+  top: calc(100% + 10px);
   right: 50%;
   transform: translateX(35%) translateY(-10px);
   width: auto;
   min-width: 160px;
   max-width: calc(100vw - 32px);
   background-color: white;
-  border-radius: 0.5rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  z-index: 50;
-  margin-top: 0.5rem;
-  overflow: hidden;
+  border-radius: 0.375rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  padding: 0.5rem 0;
+  right: 40px;
+  margin-top: 5px;
 }
 
 /* Ensure the container for the dropdown has proper positioning */
 .header-actions {
   position: relative;
-}
-
-/* Adjust dropdown position at different breakpoints */
-@media (max-width: 780px) {
-  .dropdown-menu {
-    right: -20px; /* Move it more to the right */
-  }
-}
-
-@media (max-width: 680px) {
-  .dropdown-menu {
-    right: 20px; /* Move it more to the left */
-  }
-}
-
-/* For mobile screens, center the dropdown */
-@media (max-width: 480px) {
-  .dropdown-menu {
-    right: 50%;
-    transform: translateX(50%);
-  }
 }
 
 /* Main Content */
@@ -1012,32 +992,24 @@ body {
 /* Dropdown Menu Fix */
 .dropdown-menu {
   position: absolute;
-  top: calc(100% + 8px); /* Position below the button with a small gap */
-  right: 0;
-  min-width: 200px;
+  top: calc(100% + 10px);
+  right: 50%;
+  transform: translateX(35%) translateY(-10px);
+  width: auto;
+  min-width: 160px;
+  max-width: calc(100vw - 32px);
   background-color: white;
   border-radius: 0.375rem;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   z-index: 1000;
   padding: 0.5rem 0;
+  right: 40px;
+  margin-top: 5px;
 }
 
-/* Mobile-specific adjustments */
-@media (max-width: 640px) {
-  .dropdown-menu {
-    position: absolute;
-    right: 50%;
-    transform: translateX(35%) translateY(-10px);
-    width: auto;
-    min-width: 160px;
-    max-width: calc(100vw - 32px);
-    right: 40px;
-  }
-
-  /* Ensure the container for the dropdown has proper positioning */
-  .header-actions {
-    position: relative;
-  }
+/* Ensure the container for the dropdown has proper positioning */
+.header-actions {
+  position: relative;
 }
 
 /* Dropdown menu items */
