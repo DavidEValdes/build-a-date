@@ -34,7 +34,7 @@ const Profile = () => {
 
   // Inline Styles
   const profilePageStyle = {
-    background: "linear-gradient(to bottom, #e0e7ff, #f8fafc)", // Soft gradient background
+    
     minHeight: "100vh", // Full viewport height
     display: "flex",
     justifyContent: "center", // Horizontal centering
@@ -45,15 +45,15 @@ const Profile = () => {
 
   const profileContainerStyle = {
     maxWidth: "500px",
-    width: "90%", // Changed from 100% to 90% for better mobile margins
+    width: "90%",
     backgroundColor: "white",
     borderRadius: "1.5rem",
-    padding: "2rem", // Reduced padding for mobile
+    padding: "1.75rem", // Even padding all around
     boxShadow: "0 8px 16px rgba(0, 0, 0, 0.1)",
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    gap: "2rem", // Reduced gap for mobile
+    gap: "1.25rem", // Reduced gap
     position: "relative",
   };
 
@@ -62,8 +62,9 @@ const Profile = () => {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    gap: "1.5rem", // Reduced gap for mobile
+    gap: "1rem", // Slightly reduced gap
     position: "relative",
+    margin: "0", // No margin
   };
 
   const avatarStyle = {
@@ -95,10 +96,10 @@ const Profile = () => {
   };
 
   const editButtonStyle = {
-    padding: "0.5rem 1.25rem", // Reduced padding for mobile
+    padding: "0.5rem 1.25rem",
     backgroundColor: isEditHovered ? "#4338ca" : "#4f46e5",
     color: "white",
-    fontSize: "0.875rem", // Reduced font size for mobile
+    fontSize: "0.875rem",
     fontWeight: "500",
     border: "none",
     borderRadius: "0.5rem",
@@ -108,15 +109,15 @@ const Profile = () => {
     alignItems: "center",
     justifyContent: "center",
     gap: "0.5rem",
-    marginTop: "1rem",
-    width: "auto", // Changed from fixed width to auto
-    minWidth: "120px", // Added minimum width
+    marginTop: "0.5rem", // Reduced top margin
+    width: "auto",
+    minWidth: "120px",
   };
 
   const backButtonStyle = {
     position: "absolute",
-    top: "1rem",
-    left: "1rem",
+    top: "0.75rem", // Reduced from 1rem
+    left: "0.75rem", // Reduced from 1rem
     background: isBackHovered ? "rgba(0, 0, 0, 0.7)" : "rgba(0, 0, 0, 0.5)",
     color: "white",
     border: "none",
