@@ -44,31 +44,31 @@ const Profile = () => {
   };
 
   const profileContainerStyle = {
-    maxWidth: "500px", // Fixed max width
-    width: "100%", // Full width within max-width
-    backgroundColor: "white", // White background
-    borderRadius: "1.5rem", // Rounded corners
-    padding: "2.5rem", // Inner padding
-    boxShadow: "0 8px 16px rgba(0, 0, 0, 0.1)", // Subtle shadow
+    maxWidth: "500px",
+    width: "90%", // Changed from 100% to 90% for better mobile margins
+    backgroundColor: "white",
+    borderRadius: "1.5rem",
+    padding: "2rem", // Reduced padding for mobile
+    boxShadow: "0 8px 16px rgba(0, 0, 0, 0.1)",
     display: "flex",
-    flexDirection: "column", // Stack items vertically
-    alignItems: "center", // Center items horizontally
-    gap: "2.5rem", // Space between items
-    position: "relative", // For positioning child elements
+    flexDirection: "column",
+    alignItems: "center",
+    gap: "2rem", // Reduced gap for mobile
+    position: "relative",
   };
 
   const profileCardStyle = {
     width: "100%",
     display: "flex",
-    flexDirection: "column", // Stack content vertically
+    flexDirection: "column",
     alignItems: "center",
-    gap: "2rem", // Space between avatar and info
-    position: "relative", // To position the back button inside the card
+    gap: "1.5rem", // Reduced gap for mobile
+    position: "relative",
   };
 
   const avatarStyle = {
-    width: "100px", // Reduced size from 128px to 100px
-    height: "100px", // Reduced size from 128px to 100px
+    width: "80px", // Reduced size for mobile
+    height: "80px", // Reduced size for mobile
     borderRadius: "50%",
     backgroundColor: "#e2e8f0",
     display: "flex",
@@ -79,24 +79,26 @@ const Profile = () => {
   };
 
   const textSmStyle = {
-    fontSize: "0.875rem", // Equivalent to text-sm
-    color: "#6b7280", // Gray-500
+    fontSize: "0.875rem",
+    color: "#6b7280",
     fontWeight: "bold",
     marginBottom: "0.25rem",
     textTransform: "uppercase",
   };
 
   const textXlStyle = {
-    fontSize: "1.25rem", // Equivalent to text-xl
-    color: "#1f2937", // Gray-900
+    fontSize: "1.125rem", // Slightly reduced for mobile
+    color: "#1f2937",
     fontWeight: "500",
+    wordBreak: "break-word", // Added to prevent text overflow
+    maxWidth: "100%", // Added to contain long text
   };
 
   const editButtonStyle = {
-    padding: "0.5rem 1.5rem", // Reduced padding for smaller button
-    backgroundColor: isEditHovered ? "#4338ca" : "#4f46e5", // Change color on hover
+    padding: "0.5rem 1.25rem", // Reduced padding for mobile
+    backgroundColor: isEditHovered ? "#4338ca" : "#4f46e5",
     color: "white",
-    fontSize: "1rem", // Reduced font size
+    fontSize: "0.875rem", // Reduced font size for mobile
     fontWeight: "500",
     border: "none",
     borderRadius: "0.5rem",
@@ -104,32 +106,31 @@ const Profile = () => {
     transition: "background-color 0.3s ease",
     display: "flex",
     alignItems: "center",
-    justifyContent: "center", // Center the content
-    gap: "0.5rem", // Space between icon and text
-    marginTop: "1rem", // Added top margin for spacing
+    justifyContent: "center",
+    gap: "0.5rem",
+    marginTop: "1rem",
+    width: "auto", // Changed from fixed width to auto
+    minWidth: "120px", // Added minimum width
   };
 
   const backButtonStyle = {
-    position: "absolute", // Position within the profile card
-    top: "10px", // Adjust as needed
-    left: "10px", // Adjust as needed
-    background: isBackHovered ? "rgba(0, 0, 0, 0.7)" : "rgba(0, 0, 0, 0.5)", // Darker on hover
+    position: "absolute",
+    top: "1rem",
+    left: "1rem",
+    background: isBackHovered ? "rgba(0, 0, 0, 0.7)" : "rgba(0, 0, 0, 0.5)",
     color: "white",
     border: "none",
     padding: "8px",
     borderRadius: "50%",
     cursor: "pointer",
-    zIndex: 10, // Ensure it's above other elements
+    zIndex: 10,
     transition: "background 0.3s ease",
   };
 
   return (
     <div style={profilePageStyle} className="profile-page">
-      {/* Profile Container */}
       <div style={profileContainerStyle} className="profile-container">
-        {/* Profile Card */}
         <div style={profileCardStyle} className="profile-card">
-          {/* Back Button */}
           <button
             onClick={handleBack}
             style={backButtonStyle}
@@ -140,7 +141,6 @@ const Profile = () => {
             <ArrowLeft className="w-5 h-5" />
           </button>
 
-          {/* Profile Avatar */}
           <div style={avatarStyle} className="avatar">
             {user.avatar ? (
               <img
@@ -154,11 +154,10 @@ const Profile = () => {
                 }}
               />
             ) : (
-              <User className="w-6 h-6 text-gray-400" />
+              <User size={24} className="text-gray-400" /> // Reduced icon size
             )}
           </div>
 
-          {/* Profile Information */}
           <div
             style={{
               width: "100%",
@@ -166,6 +165,7 @@ const Profile = () => {
               display: "flex",
               flexDirection: "column",
               gap: "1rem",
+              padding: "0 1rem", // Added horizontal padding
             }}
           >
             <div>
@@ -178,21 +178,19 @@ const Profile = () => {
               <p style={textXlStyle}>{user.email}</p>
             </div>
 
-            {/* Edit Button */}
             <button
               onClick={handleEditProfile}
               style={editButtonStyle}
               onMouseEnter={() => setIsEditHovered(true)}
               onMouseLeave={() => setIsEditHovered(false)}
             >
-              <Edit2 className="w-4 h-4" />
+              <Edit2 size={16} /> {/* Reduced icon size */}
               Edit Profile
             </button>
           </div>
         </div>
       </div>
 
-      {/* Edit Profile Modal */}
       {showEditModal && (
         <EditProfileModal
           user={user}
