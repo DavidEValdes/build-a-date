@@ -16,14 +16,14 @@ const questions = [
   },
   {
     id: "budget",
-    question: "What's your budget range?",
+    question: "What's your budget range for the date?",
     type: "singleChoice",
     options: [
-      { value: "free", label: "Free" },
-      { value: "economy", label: "$" },
-      { value: "standard", label: "$$" },
-      { value: "premium", label: "$$$" },
-      { value: "luxury", label: "$$$$" },
+      { value: "free", label: "No cost activities" },
+      { value: "economy", label: "Budget-friendly (under $30)" },
+      { value: "standard", label: "Mid-range ($30-$75)" },
+      { value: "premium", label: "Premium ($75-$150)" },
+      { value: "luxury", label: "Luxury (Over $150)" },
     ],
   },
   {
@@ -196,7 +196,7 @@ const QuestionPipeline = ({ onComplete }) => {
               <span className="mr-2">
                 {answers[currentQuestion.id]?.includes(option.value)
                   ? "✅ "
-                  : "○"}
+                  : "⬜ "}
               </span>
               {option.label}
             </button>
