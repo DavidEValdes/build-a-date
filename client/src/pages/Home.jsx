@@ -783,8 +783,11 @@ const Home = () => {
                 {isSaved ? "Already Saved" : "Save Date"}
               </button>
               <button
-                className="tertiary-button"
-                onClick={handleStartOver}
+                onClick={() => {
+                  setStage("welcome");
+                  setIsSaved(false);
+                }}
+                className="secondary-button"
                 style={{
                   padding: "0.75rem 1.5rem",
                   backgroundColor: "#e5e7eb",
