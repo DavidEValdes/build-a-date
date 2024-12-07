@@ -704,7 +704,10 @@ const Home = () => {
             >
               Your Perfect Date Match!
             </h2>
-            <SuggestionDisplay date={currentSuggestion} />
+            <SuggestionDisplay 
+              date={currentSuggestion} 
+              onDisplay={() => window.scrollTo(0, 0)} 
+            />
             <div
               className="suggestion-actions mt-8 flex justify-center gap-4 flex-wrap"
               style={{ marginTop: "2rem" }}

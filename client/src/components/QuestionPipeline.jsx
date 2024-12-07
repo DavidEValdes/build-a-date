@@ -111,20 +111,24 @@ const QuestionPipeline = ({ onComplete }) => {
         ...answers,
         [currentQuestion.id]: value,
       };
+      window.scrollTo(0, 0);
     }
 
     setAnswers(updatedAnswers);
   };
 
   const handleNext = () => {
+    window.scrollTo(0, 0);
     setCurrentStep((prevStep) => prevStep + 1);
   };
 
   const handleBack = () => {
+    window.scrollTo(0, 0);
     setCurrentStep((prevStep) => prevStep - 1);
   };
 
   const handleComplete = () => {
+    window.scrollTo(0, 0);
     onComplete(answers);
   };
 

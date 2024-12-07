@@ -1,9 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../App.css";
 import Spinner from "./Spinner";
 
-const SuggestionDisplay = ({ date }) => {
+const SuggestionDisplay = ({ date, onDisplay }) => {
   const [isImageLoading, setIsImageLoading] = useState(true);
+
+  // Call onDisplay when component mounts
+  useEffect(() => {
+    if (onDisplay) {
+      window.scrollTo(0, 0);
+      onDisplay();
+    }
+  }, [onDisplay]);
 
   // Helper function to format the cost category
   const formatCostCategory = (category) => {
