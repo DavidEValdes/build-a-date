@@ -107,22 +107,18 @@ const QuestionPipeline = ({ onComplete }) => {
           [currentQuestion.id]: [...existing, value],
         };
       }
-      if (!hasVisitedStep.has(currentStep + 1) && currentStep < questions.length - 1) {
-        setCurrentStep(currentStep + 1);
-        setHasVisitedStep(prev => new Set([...prev, currentStep + 1]));
-      }
+      setAnswers(updatedAnswers);
     } else {
       updatedAnswers = {
         ...answers,
         [currentQuestion.id]: value,
       };
+      setAnswers(updatedAnswers);
       if (currentStep < questions.length - 1) {
         setCurrentStep(currentStep + 1);
         setHasVisitedStep(prev => new Set([...prev, currentStep + 1]));
       }
     }
-
-    setAnswers(updatedAnswers);
   };
 
   const handleNext = () => {
