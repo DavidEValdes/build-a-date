@@ -1,7 +1,10 @@
-import React from "react";
-import "../App.css"; // Ensure this path is correct based on your project structure
+import React, { useState } from "react";
+import "../App.css";
+import Spinner from "./Spinner";
 
 const SuggestionDisplay = ({ date }) => {
+  const [isImageLoading, setIsImageLoading] = useState(true);
+
   // Helper function to format the cost category
   const formatCostCategory = (category) => {
     switch (category.toLowerCase()) {
@@ -16,21 +19,33 @@ const SuggestionDisplay = ({ date }) => {
       case "luxury":
         return "$$$$";
       default:
-        return category; // return the original text if no match
+        return category;
     }
   };
 
   return (
     <div className="suggestion-display">
       <div className="suggestion-display-image-container">
+        {isImageLoading && (
+          <div style={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            zIndex: 1
+          }}>
+            <Spinner size={40} />
+          </div>
+        )}
         <img
           src={date.image_url}
           alt={date.title}
           className="suggestion-display-image"
+          style={{ opacity: isImageLoading ? 0 : 1, transition: "opacity 0.3s ease" }}
+          onLoad={() => setIsImageLoading(false)}
         />
       </div>
 
-      {/* Title moved outside the image container */}
       <h2 className="suggestion-display-title">{date.title}</h2>
 
       <div className="suggestion-display-content">

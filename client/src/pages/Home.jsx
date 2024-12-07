@@ -1,11 +1,12 @@
 import { useState, useRef, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import QuestionPipeline from "../components/QuestionPipeline";
 import DateCard from "../components/DateCard";
 import SuggestionDisplay from "../components/SuggestionDisplay";
 import Spinner from "../components/Spinner";
-import api, { getDateIdeas, getAllDateIdeas, createDateIdea, fetchImageForDate } from "../api";
+import api, { getDateIdeas, getAllDateIdeas, createDateIdea, fetchImageForDate, saveDateIdea } from "../api";
+import { useAuth } from "../context/AuthContext";
 import {
   ArrowRight,
   SlidersHorizontal,
@@ -116,8 +117,10 @@ const shuffleArray = (array) => {
 };
 
 const Home = () => {
+  const { isAuthenticated } = useAuth();
   const [stage, setStage] = useState("welcome");
   const [currentSuggestion, setCurrentSuggestion] = useState(null);
+  const [isSaved, setIsSaved] = useState(false);
   const [sortBy, setSortBy] = useState("newest");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -703,7 +706,7 @@ const Home = () => {
             </h2>
             <SuggestionDisplay date={currentSuggestion} />
             <div
-              className="suggestion-actions mt-8 flex justify-center gap-4"
+              className="suggestion-actions mt-8 flex justify-center gap-4 flex-wrap"
               style={{ marginTop: "2rem" }}
             >
               <button
@@ -727,10 +730,60 @@ const Home = () => {
                   (e.currentTarget.style.backgroundColor = "#4f46e5")
                 }
               >
-                Share to Feed
+                Share to Public Feed
               </button>
               <button
                 className="secondary-button"
+                onClick={() => {
+                  if (!isAuthenticated) {
+                    alert("Please login to save dates");
+                    return;
+                  }
+                  if (isSaved) {
+                    alert("This date is already saved!");
+                    return;
+                  }
+                  saveDateIdea(currentSuggestion.id)
+                    .then(() => {
+                      setIsSaved(true);
+                      alert("Date saved successfully!");
+                    })
+                    .catch((error) => {
+                      if (error.response?.status === 400) {
+                        setIsSaved(true);
+                        alert("This date is already saved!");
+                      } else {
+                        console.error("Error saving date:", error);
+                        alert("Failed to save date. Please try again.");
+                      }
+                    });
+                }}
+                style={{
+                  padding: "0.75rem 1.5rem",
+                  backgroundColor: isSaved ? "#e5e7eb" : "#ffffff",
+                  color: isSaved ? "#374151" : "#4f46e5",
+                  border: isSaved ? "none" : "2px solid #4f46e5",
+                  borderRadius: "0.5rem",
+                  fontSize: "1rem",
+                  cursor: isSaved ? "default" : "pointer",
+                  transition: "all 0.3s ease",
+                }}
+                onMouseOver={(e) => {
+                  if (!isSaved) {
+                    e.currentTarget.style.backgroundColor = "#f5f5f5";
+                  }
+                }}
+                onMouseOut={(e) => {
+                  if (!isSaved) {
+                    e.currentTarget.style.backgroundColor = "#ffffff";
+                  }
+                }}
+                disabled={isSaved}
+              >
+                {isSaved ? "Already Saved" : "Save Date"}
+              </button>
+              <button
+                className="tertiary-button"
                 onClick={handleStartOver}
                 style={{
                   padding: "0.75rem 1.5rem",

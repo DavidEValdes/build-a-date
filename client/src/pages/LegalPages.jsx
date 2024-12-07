@@ -1651,7 +1651,6 @@ export const HowItWorks = () => {
             <ul style={{ listStyleType: 'circle', paddingLeft: '1.5rem', marginTop: '0.5rem' }}>
               <li>Advanced algorithm analyzes your preferences</li>
               <li>Weighs multiple factors for optimal matches</li>
-              <li>Considers seasonal appropriateness</li>
               <li>Adapts to time-of-day preferences</li>
             </ul>
           </li>
