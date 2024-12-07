@@ -1,11 +1,11 @@
 // src/components/Footer.jsx
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import "./Footer.css"; // Import the external CSS
+import "./Footer.css";
 
 const Footer = () => {
   const location = useLocation();
-  const legalPages = ["/privacy", "/terms", "/cookiepolicy"];
+  const legalPages = ["/privacy-policy", "/terms-and-conditions", "/cookie-policy"];
   const isLegalPage = legalPages.includes(location.pathname.toLowerCase());
 
   return (
@@ -24,7 +24,7 @@ const Footer = () => {
           <h3>Quick Links</h3>
           <div>
             <Link to="/how-it-works">How It Works</Link>
-            <Link to="/contact">Contact Us</Link>
+            <Link to="/contact-us">Contact Us</Link>
           </div>
         </div>
 
@@ -32,9 +32,9 @@ const Footer = () => {
         <div className="footer-section">
           <h3>Legal</h3>
           <div>
-            <Link to="/privacy">Privacy Policy</Link>
-            <Link to="/terms">Terms and Conditions</Link>
-            <Link to="/cookiepolicy">Cookie Policy</Link>
+            <Link to="/privacy-policy">Privacy Policy</Link>
+            <Link to="/terms-and-conditions">Terms and Conditions</Link>
+            <Link to="/cookie-policy">Cookie Policy</Link>
           </div>
         </div>
       </div>
