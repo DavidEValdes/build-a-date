@@ -632,7 +632,7 @@ const Home = () => {
                 lineHeight: "1.6",
               }}
             >
-              Choose from over <strong>250+ unique date ideas</strong>, each
+              Choose from over <strong>500+ unique date ideas</strong>, each
               crafted to create an unforgettable experience.
             </p>
             <button

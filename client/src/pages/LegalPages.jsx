@@ -1599,3 +1599,247 @@ export const CookiePolicy = () => {
   );
   
 };
+
+export const HowItWorks = () => {
+  return (
+    <div
+      style={{
+        maxWidth: '64rem',
+        margin: '0 auto',
+        padding: '2rem 1rem',
+        backgroundColor: 'white',
+        borderRadius: '1rem',
+        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+      }}
+    >
+      <h1
+        style={{
+          fontSize: '1.875rem',
+          fontWeight: '700',
+          marginBottom: '1.5rem',
+          color: '#1f2937',
+          textAlign: 'center',
+        }}
+      >
+        How Build a Date Works
+      </h1>
+
+      {/* 1. Smart Matching System */}
+      <section style={{ marginBottom: '2rem' }}>
+        <h2
+          style={{
+            fontSize: '1.5rem',
+            fontWeight: '600',
+            marginBottom: '1rem',
+            color: '#1f2937',
+          }}
+        >
+          1. Smart Matching System
+        </h2>
+        <ul style={{ listStyleType: 'disc', paddingLeft: '1.5rem', marginBottom: '1rem' }}>
+          <li>
+            <strong>Preference Analysis:</strong>
+            <ul style={{ listStyleType: 'circle', paddingLeft: '1.5rem', marginTop: '0.5rem' }}>
+              <li>Tell us your activity preferences</li>
+              <li>Specify your budget range</li>
+              <li>Choose indoor or outdoor settings</li>
+              <li>Set your ideal group size</li>
+            </ul>
+          </li>
+          <li>
+            <strong>AI-Powered Matching:</strong>
+            <ul style={{ listStyleType: 'circle', paddingLeft: '1.5rem', marginTop: '0.5rem' }}>
+              <li>Advanced algorithm analyzes your preferences</li>
+              <li>Weighs multiple factors for optimal matches</li>
+              <li>Considers seasonal appropriateness</li>
+              <li>Adapts to time-of-day preferences</li>
+            </ul>
+          </li>
+        </ul>
+      </section>
+
+      {/* 2. Date Ideas Database */}
+      <section style={{ marginBottom: '2rem' }}>
+        <h2
+          style={{
+            fontSize: '1.5rem',
+            fontWeight: '600',
+            marginBottom: '1rem',
+            color: '#1f2937',
+          }}
+        >
+          2. Date Ideas Database
+        </h2>
+        <ul style={{ listStyleType: 'disc', paddingLeft: '1.5rem', marginBottom: '1rem' }}>
+          <li>Access to 500+ unique date ideas</li>
+          <li>Regularly updated with new suggestions</li>
+          <li>Diverse range of activities and experiences</li>
+          <li>Carefully curated for different preferences</li>
+        </ul>
+      </section>
+
+      {/* 3. Social Features */}
+      <section style={{ marginBottom: '2rem' }}>
+        <h2
+          style={{
+            fontSize: '1.5rem',
+            fontWeight: '600',
+            marginBottom: '1rem',
+            color: '#1f2937',
+          }}
+        >
+          3. Social Features
+        </h2>
+        <ul style={{ listStyleType: 'disc', paddingLeft: '1.5rem', marginBottom: '1rem' }}>
+          <li>Share your favorite date ideas</li>
+          <li>Save suggestions for later</li>
+          <li>Like and comment on date ideas</li>
+          <li>Build a community of date planners</li>
+        </ul>
+      </section>
+
+      {/* 4. Getting Started */}
+      <section style={{ marginBottom: '2rem' }}>
+        <h2
+          style={{
+            fontSize: '1.5rem',
+            fontWeight: '600',
+            marginBottom: '1rem',
+            color: '#1f2937',
+          }}
+        >
+          4. Getting Started
+        </h2>
+        <ol style={{ listStyleType: 'decimal', paddingLeft: '1.5rem', marginBottom: '1rem' }}>
+          <li>Create your free account</li>
+          <li>Complete the preference questionnaire</li>
+          <li>Receive personalized date suggestions</li>
+          <li>Save and share your favorites</li>
+        </ol>
+      </section>
+    </div>
+  );
+};
+
+export const ContactUs = () => {
+  return (
+    <div
+      style={{
+        maxWidth: '64rem',
+        margin: '0 auto',
+        padding: '2rem 1rem',
+        backgroundColor: 'white',
+        borderRadius: '1rem',
+        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+      }}
+    >
+      <h1
+        style={{
+          fontSize: '1.875rem',
+          fontWeight: '700',
+          marginBottom: '1.5rem',
+          color: '#1f2937',
+          textAlign: 'center',
+        }}
+      >
+        Contact Us
+      </h1>
+
+      {/* 1. General Support */}
+      <section style={{ marginBottom: '2rem' }}>
+        <h2
+          style={{
+            fontSize: '1.5rem',
+            fontWeight: '600',
+            marginBottom: '1rem',
+            color: '#1f2937',
+          }}
+        >
+          1. General Support
+        </h2>
+        <p style={{ marginBottom: '1rem', color: '#4b5563' }}>
+          For general inquiries and support, please email us at:
+        </p>
+        <ul style={{ listStyleType: 'disc', paddingLeft: '1.5rem', marginBottom: '1rem' }}>
+          <li>
+            <a href="mailto:support@buildadate.com" style={{ color: '#2563eb', textDecoration: 'underline' }}>
+              support@buildadate.com
+            </a>
+          </li>
+        </ul>
+      </section>
+
+      {/* 2. Business Hours */}
+      <section style={{ marginBottom: '2rem' }}>
+        <h2
+          style={{
+            fontSize: '1.5rem',
+            fontWeight: '600',
+            marginBottom: '1rem',
+            color: '#1f2937',
+          }}
+        >
+          2. Business Hours
+        </h2>
+        <ul style={{ listStyleType: 'disc', paddingLeft: '1.5rem', marginBottom: '1rem' }}>
+          <li>Monday - Friday: 9:00 AM - 5:00 PM (PST)</li>
+          <li>Saturday: 10:00 AM - 2:00 PM (PST)</li>
+          <li>Sunday: Closed</li>
+        </ul>
+      </section>
+
+      {/* 3. Response Time */}
+      <section style={{ marginBottom: '2rem' }}>
+        <h2
+          style={{
+            fontSize: '1.5rem',
+            fontWeight: '600',
+            marginBottom: '1rem',
+            color: '#1f2937',
+          }}
+        >
+          3. Response Time
+        </h2>
+        <ul style={{ listStyleType: 'disc', paddingLeft: '1.5rem', marginBottom: '1rem' }}>
+          <li>We aim to respond to all inquiries within 24 business hours</li>
+          <li>For urgent matters, please mark your email as "Urgent" in the subject line</li>
+          <li>Weekend responses may be delayed until the next business day</li>
+        </ul>
+      </section>
+
+      {/* 4. Specific Inquiries */}
+      <section style={{ marginBottom: '2rem' }}>
+        <h2
+          style={{
+            fontSize: '1.5rem',
+            fontWeight: '600',
+            marginBottom: '1rem',
+            color: '#1f2937',
+          }}
+        >
+          4. Specific Inquiries
+        </h2>
+        <ul style={{ listStyleType: 'disc', paddingLeft: '1.5rem', marginBottom: '1rem' }}>
+          <li>
+            <strong>Technical Support:</strong>{' '}
+            <a href="mailto:tech@buildadate.com" style={{ color: '#2563eb', textDecoration: 'underline' }}>
+              tech@buildadate.com
+            </a>
+          </li>
+          <li>
+            <strong>Privacy Concerns:</strong>{' '}
+            <a href="mailto:privacy@buildadate.com" style={{ color: '#2563eb', textDecoration: 'underline' }}>
+              privacy@buildadate.com
+            </a>
+          </li>
+          <li>
+            <strong>Business Partnerships:</strong>{' '}
+            <a href="mailto:partners@buildadate.com" style={{ color: '#2563eb', textDecoration: 'underline' }}>
+              partners@buildadate.com
+            </a>
+          </li>
+        </ul>
+      </section>
+    </div>
+  );
+};
