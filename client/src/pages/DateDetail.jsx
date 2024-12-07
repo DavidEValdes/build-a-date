@@ -204,7 +204,7 @@ const DateDetail = () => {
     navigator.clipboard
       .writeText(window.location.origin + `/dates/${id}`)
       .then(() => {
-        alert("Date link copied to clipboard!");
+        alert("Web URL link copied to clipboard!");
       })
       .catch(() => {
         alert("Failed to copy the link.");
