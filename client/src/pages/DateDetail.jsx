@@ -305,58 +305,56 @@ const DateDetail = () => {
 
             {/* Interaction Buttons */}
             <section style={styles.section}>
-              <div style={styles.interactionButtons}>
-                <button
-                  style={{
-                    ...styles.iconButton,
-                    ...(isLiked ? styles.likedButton : {}),
-                  }}
-                  onClick={handleLike}
-                  aria-label="Like Date Idea"
-                >
-                  <Heart
-                    size={20}
-                    style={{
-                      marginRight: "6px",
-                      ...(isLiked
-                        ? { color: "#e0245e" }
-                        : { color: "#555555" }),
-                    }}
-                  />
-                  <span>
-                    {likesCount} {likesCount === 1 ? "Like" : "Likes"}
-                  </span>
-                </button>
-                <button
-                  style={{
-                    ...styles.iconButton,
-                    ...(isSaved ? styles.savedButton : {}),
-                  }}
-                  onClick={handleSave}
-                  aria-label="Save Date Idea"
-                >
-                  <Bookmark
-                    size={20}
-                    style={{
-                      marginRight: "6px",
-                      ...(isSaved
-                        ? { color: "#1da1f2" }
-                        : { color: "#555555" }),
-                    }}
-                  />
-                  <span>{isSaved ? "Saved" : "Save"}</span>
-                </button>
-                <button
-                  style={styles.iconButton}
-                  onClick={handleShare}
-                  aria-label="Share Date Idea"
-                >
-                  <Share2
-                    size={20}
-                    style={{ marginRight: "6px", color: "#555555" }}
-                  />
-                  <span>Share</span>
-                </button>
+              <div className="detail-actions">
+                <div className="detail-interaction-row">
+                  <button
+                    className={`icon-button ${isLiked ? "liked" : ""}`}
+                    onClick={handleLike}
+                    aria-label="Like Date Idea"
+                  >
+                    <Heart
+                      size={20}
+                      style={{
+                        marginRight: "6px",
+                        ...(isLiked
+                          ? { color: "#e0245e" }
+                          : { color: "#555555" }),
+                      }}
+                    />
+                    <span>
+                      {likesCount} {likesCount === 1 ? "Like" : "Likes"}
+                    </span>
+                  </button>
+                  <button
+                    className={`icon-button ${isSaved ? "saved" : ""}`}
+                    onClick={handleSave}
+                    aria-label="Save Date Idea"
+                  >
+                    <Bookmark
+                      size={20}
+                      style={{
+                        marginRight: "6px",
+                        ...(isSaved
+                          ? { color: "#1da1f2" }
+                          : { color: "#555555" }),
+                      }}
+                    />
+                    <span>{isSaved ? "Saved" : "Save"}</span>
+                  </button>
+                </div>
+                <div className="detail-share-row">
+                  <button
+                    className="icon-button"
+                    onClick={handleShare}
+                    aria-label="Share Date Idea"
+                  >
+                    <Share2
+                      size={20}
+                      style={{ marginRight: "6px", color: "#555555" }}
+                    />
+                    <span>Share</span>
+                  </button>
+                </div>
               </div>
               <div style={styles.postedDate}>Posted: {formattedDate}</div>
             </section>

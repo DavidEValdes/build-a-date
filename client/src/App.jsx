@@ -17,9 +17,9 @@ import {
   PrivacyPolicy, 
   TermsAndConditions, 
   CookiePolicy,
-  HowItWorks,
-  ContactUs
 } from './pages/LegalPages';
+import HowItWorks from './pages/HowItWorks';
+import ContactUs from './pages/ContactUs';
 import "./App.css";
 
 // Create a client
