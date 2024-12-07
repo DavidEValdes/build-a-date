@@ -41,9 +41,6 @@ const Header = () => {
   const handleLogoClick = (e) => {
     e.preventDefault();
     navigate("/");
-    setTimeout(() => {
-      window.location.reload();
-    }, 500);
   };
 
   return (
@@ -67,18 +64,20 @@ function App() {
         <Router>
           <div className="app">
             <Header />
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/date/:id" element={<DateDetail />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/saved-dates" element={<SavedDates />} />
-              <Route path="/plan-a-date" element={<PlanADate />} />
-              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-              <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
-              <Route path="/cookie-policy" element={<CookiePolicy />} />
-              <Route path="/how-it-works" element={<HowItWorks />} />
-              <Route path="/contact-us" element={<ContactUs />} />
-            </Routes>
+            <main className="main-content">
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/dates/:id" element={<DateDetail />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/saved-dates" element={<SavedDates />} />
+                <Route path="/plan-a-date" element={<PlanADate />} />
+                <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+                <Route path="/cookie-policy" element={<CookiePolicy />} />
+                <Route path="/how-it-works" element={<HowItWorks />} />
+                <Route path="/contact-us" element={<ContactUs />} />
+              </Routes>
+            </main>
           </div>
         </Router>
       </AuthProvider>

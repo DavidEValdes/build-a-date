@@ -17,11 +17,7 @@ const UserMenu = () => {
 
   const handleNavigation = (path) => {
     setShowMenu(false);
-    setLoading(true);
-    setTimeout(() => {
-      navigate(path);
-      window.location.reload(); // Refreshes the page
-    }, 500); // Delay to show spinner briefly
+    navigate(path);
   };
 
   const handleHomeClick = () => handleNavigation("/");
@@ -39,6 +35,12 @@ const UserMenu = () => {
     setShowMenu(false);
   };
 
+  const handleLogout = () => {
+    logout();
+    setShowMenu(false);
+    navigate("/");
+  };
+
   // Toggle menu visibility
   const toggleMenu = () => {
     setShowMenu((prev) => !prev);
@@ -51,48 +53,41 @@ const UserMenu = () => {
     }
   };
 
-  // Close menu on Escape key press
-  const handleKeyDown = (e) => {
-    if (e.key === "Escape") {
-      setShowMenu(false);
-    }
-  };
-
   useEffect(() => {
-    if (showMenu) {
-      document.addEventListener("mousedown", handleClickOutside);
-      document.addEventListener("keydown", handleKeyDown);
-    } else {
-      document.removeEventListener("mousedown", handleClickOutside);
-      document.removeEventListener("keydown", handleKeyDown);
-    }
-
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
-      document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [showMenu]);
+  }, []);
 
   return (
-    <div className="user-menu-container relative" ref={menuRef}>
+    <div className="user-menu-container" ref={menuRef}>
+      {loading && (
+        <div
+          style={{
+            position: "fixed",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            zIndex: 9999,
+          }}
+        >
+          <Spinner size={40} />
+        </div>
+      )}
       <button
         onClick={toggleMenu}
-        className="profile-button p-2 rounded-full hover:bg-gray-100 focus:outline-none transition-colors"
-        aria-haspopup="true"
-        aria-expanded={showMenu}
-        aria-label="User menu"
+        className="profile-button"
+        aria-label="Toggle user menu"
       >
-        {loading ? (
-          <Spinner size={24} color="#4f46e5" /> // Spinner replaces UserCircle
-        ) : (
-          <UserCircle
-            className={`w-6 h-6 text-gray-600 transition-transform duration-300 ${showMenu ? "transform rotate-90" : ""}`}
-          />
-        )}
+        <UserCircle
+          size={24}
+          className={isAuthenticated ? "text-blue-600" : "text-gray-600"}
+        />
       </button>
 
       {showMenu && (
-        <div className="dropdown-menu absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+        <div className="dropdown-menu">
           {isAuthenticated ? (
             <>
               <div
@@ -130,16 +125,8 @@ const UserMenu = () => {
               >
                 Saved Dates
               </button>
-              
               <button
-                onClick={() => {
-                  logout();
-                  setShowMenu(false);
-                  setLoading(true);
-                  setTimeout(() => {
-                    window.location.reload(); // Refresh after logout
-                  }, 500);
-                }}
+                onClick={handleLogout}
                 className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
               >
                 Logout
@@ -165,15 +152,12 @@ const UserMenu = () => {
               >
                 Register
               </button>
-             
             </>
           )}
         </div>
       )}
 
-      {showLoginModal && (
-        <LoginModal onClose={() => setShowLoginModal(false)} />
-      )}
+      {showLoginModal && <LoginModal onClose={() => setShowLoginModal(false)} />}
       {showRegisterModal && (
         <RegisterModal onClose={() => setShowRegisterModal(false)} />
       )}
