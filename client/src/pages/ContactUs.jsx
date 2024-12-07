@@ -48,11 +48,11 @@ const ContactUs = () => {
             </div>
             <div className="info-item">
               <strong>Hours:</strong>
-              <p>Monday - Friday: 9:00 AM - 5:00 PM PST</p>
+              <p>Monday - Friday: 9:00 AM - 5:00 PM EST</p>
             </div>
             <div className="info-item">
               <strong>Location:</strong>
-              <p>San Francisco, CA</p>
+              <p>Orlando, FL</p>
             </div>
           </div>
 

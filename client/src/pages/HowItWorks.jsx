@@ -20,12 +20,7 @@ const HowItWorks = () => {
         "Found a date idea you love? Save it to your profile for easy access later. You can also like and share great date ideas with others.",
       icon: "❤️",
     },
-    {
-      title: "Plan and Execute",
-      description:
-        "Each date suggestion comes with detailed information about location, duration, cost, and what to expect, making it easy to plan your perfect date.",
-      icon: "📅",
-    },
+   
   ];
 
   const features = [
@@ -41,18 +36,8 @@ const HowItWorks = () => {
         "From cozy indoor activities to outdoor adventures, we have date ideas for every preference and budget.",
       icon: "🎨",
     },
-    {
-      title: "Community Driven",
-      description:
-        "Benefit from real user reviews and ratings to find the perfect date idea for you.",
-      icon: "👥",
-    },
-    {
-      title: "Easy Planning",
-      description:
-        "Get all the details you need, including estimated costs, duration, and location information.",
-      icon: "📝",
-    },
+    
+  
   ];
 
   return (

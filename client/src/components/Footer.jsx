@@ -8,6 +8,14 @@ const Footer = () => {
   const legalPages = ["/privacy-policy", "/terms-and-conditions", "/cookie-policy"];
   const isLegalPage = legalPages.includes(location.pathname.toLowerCase());
 
+  // Add scroll to top function
+  const handleClick = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth" // For smooth scrolling
+    });
+  };
+
   return (
     <footer className={`footer-container ${isLegalPage ? "footer-legal" : ""}`}>
       <div className="footer-content">
@@ -23,8 +31,8 @@ const Footer = () => {
         <div className="footer-section">
           <h3>Quick Links</h3>
           <div>
-            <Link to="/how-it-works">How It Works</Link>
-            <Link to="/contact-us">Contact Us</Link>
+            <Link to="/how-it-works" onClick={handleClick}>How It Works</Link>
+            <Link to="/contact-us" onClick={handleClick}>Contact Us</Link>
           </div>
         </div>
 
@@ -32,9 +40,9 @@ const Footer = () => {
         <div className="footer-section">
           <h3>Legal</h3>
           <div>
-            <Link to="/privacy-policy">Privacy Policy</Link>
-            <Link to="/terms-and-conditions">Terms and Conditions</Link>
-            <Link to="/cookie-policy">Cookie Policy</Link>
+            <Link to="/privacy-policy" onClick={handleClick}>Privacy Policy</Link>
+            <Link to="/terms-and-conditions" onClick={handleClick}>Terms and Conditions</Link>
+            <Link to="/cookie-policy" onClick={handleClick}>Cookie Policy</Link>
           </div>
         </div>
       </div>
