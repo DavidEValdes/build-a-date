@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import PropTypes from "prop-types";
+import "./Modal.css";
 
 const LoginModal = ({ onClose }) => {
   const [identifier, setIdentifier] = useState(""); // Changed from email to identifier

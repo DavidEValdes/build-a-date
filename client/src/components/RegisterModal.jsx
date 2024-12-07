@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import PropTypes from "prop-types";
+import "./Modal.css";
 
 const RegisterModal = ({ onClose }) => {
   const [username, setUsername] = useState("");

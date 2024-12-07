@@ -69,15 +69,15 @@ function App() {
             <Header />
             <Routes>
               <Route path="/" element={<Home />} />
-              <Route path="/dates/:id" element={<DateDetail />} />
+              <Route path="/date/:id" element={<DateDetail />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/saved-dates" element={<SavedDates />} />
               <Route path="/plan-a-date" element={<PlanADate />} />
-              <Route path="/privacy" element={<PrivacyPolicy />} />
-              <Route path="/terms" element={<TermsAndConditions />} />
-              <Route path="/cookiepolicy" element={<CookiePolicy />} />
+              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+              <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+              <Route path="/cookie-policy" element={<CookiePolicy />} />
               <Route path="/how-it-works" element={<HowItWorks />} />
-              <Route path="/contact" element={<ContactUs />} />
+              <Route path="/contact-us" element={<ContactUs />} />
             </Routes>
           </div>
         </Router>

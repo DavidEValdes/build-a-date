@@ -1082,6 +1082,14 @@ const Home = () => {
             justify-content: space-between;
             align-items: center;
             width: 100%;
+            max-width: 1280px;
+            margin: 0 auto;
+          }
+
+          .feed-header-container {
+            width: 100%;
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
           }
 
           @media (max-width: 388px) {
