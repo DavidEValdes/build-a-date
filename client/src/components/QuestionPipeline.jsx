@@ -88,6 +88,7 @@ const questions = [
 const QuestionPipeline = ({ onComplete }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState({});
+  const [hasVisitedStep, setHasVisitedStep] = useState(new Set([0]));
 
   const currentQuestion = questions[currentStep];
 
@@ -106,12 +107,19 @@ const QuestionPipeline = ({ onComplete }) => {
           [currentQuestion.id]: [...existing, value],
         };
       }
+      if (!hasVisitedStep.has(currentStep + 1) && currentStep < questions.length - 1) {
+        setCurrentStep(currentStep + 1);
+        setHasVisitedStep(prev => new Set([...prev, currentStep + 1]));
+      }
     } else {
       updatedAnswers = {
         ...answers,
         [currentQuestion.id]: value,
       };
-      window.scrollTo(0, 0);
+      if (currentStep < questions.length - 1) {
+        setCurrentStep(currentStep + 1);
+        setHasVisitedStep(prev => new Set([...prev, currentStep + 1]));
+      }
     }
 
     setAnswers(updatedAnswers);
@@ -120,11 +128,13 @@ const QuestionPipeline = ({ onComplete }) => {
   const handleNext = () => {
     window.scrollTo(0, 0);
     setCurrentStep((prevStep) => prevStep + 1);
+    setHasVisitedStep(prev => new Set([...prev, currentStep + 1]));
   };
 
   const handleBack = () => {
     window.scrollTo(0, 0);
     setCurrentStep((prevStep) => prevStep - 1);
+    setHasVisitedStep(prev => new Set([...prev, currentStep - 1]));
   };
 
   const handleComplete = () => {
@@ -140,6 +150,10 @@ const QuestionPipeline = ({ onComplete }) => {
       return !!answer;
     }
   })();
+
+  const showNextButton = 
+    currentQuestion.type === "singleChoice" || 
+    hasVisitedStep.has(currentStep);
 
   return (
     <div className="question-pipeline max-w-md mx-auto p-4 bg-white shadow-md rounded-lg">
@@ -197,11 +211,13 @@ const QuestionPipeline = ({ onComplete }) => {
               }`}
               onClick={() => handleAnswer(option.value)}
             >
-              <span className="mr-2">
-                {answers[currentQuestion.id]?.includes(option.value)
-                  ? "✅ "
-                  : "⬜ "}
-              </span>
+              {hasVisitedStep.has(currentStep) && (
+                <span className="mr-2">
+                  {answers[currentQuestion.id]?.includes(option.value)
+                    ? "✅ "
+                    : "⬜ "}
+                </span>
+              )}
               {option.label}
             </button>
           ))}
@@ -216,15 +232,17 @@ const QuestionPipeline = ({ onComplete }) => {
             Back
           </button>
         )}
-        <button
-          className={`primary-button flex-shrink-0 w-24 ${
-            !canProceed ? "opacity-70 cursor-not-allowed" : ""
-          }`}
-          onClick={currentStep === questions.length - 1 ? handleComplete : handleNext}
-          disabled={!canProceed}
-        >
-          {currentStep === questions.length - 1 ? "Finish" : "Next"}
-        </button>
+        {(showNextButton || currentStep === questions.length - 1) && (
+          <button
+            className={`primary-button flex-shrink-0 w-24 ${
+              !canProceed ? "opacity-70 cursor-not-allowed" : ""
+            }`}
+            onClick={currentStep === questions.length - 1 ? handleComplete : handleNext}
+            disabled={!canProceed}
+          >
+            {currentStep === questions.length - 1 ? "Finish" : "Next"}
+          </button>
+        )}
       </div>
     </div>
   );
