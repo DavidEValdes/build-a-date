@@ -810,19 +810,10 @@ const Home = () => {
 
         {/* Feed Section */}
         <div className="feed-section" style={{ padding: "0 2rem" }}>
-          <div
-            className="feed-header-container"
-            style={{ marginTop: "1.5rem", marginBottom: "1rem" }}
-          >
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
+          <div className="feed-header-container" style={{ marginTop: "1.5rem", marginBottom: "1rem" }}>
+            <div className="feed-header">
               <h2
-                className="feed-title custom-feed-title"
+                className="feed-title"
                 style={{
                   fontSize: "1.75rem",
                   fontWeight: "bold",
@@ -936,7 +927,7 @@ const Home = () => {
                 )}
               </div>
             </div>
-
+            
             {/* Divider */}
             <div
               style={{
@@ -1084,6 +1075,41 @@ const Home = () => {
           }
 
           /* Additional styles if needed */
+
+          /* Feed Header Responsive Layout */
+          .feed-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+          }
+
+          @media (max-width: 388px) {
+            .feed-header {
+              flex-direction: column;
+              align-items: center;
+              gap: 1rem;
+              text-align: center;
+            }
+
+            .feed-title {
+              margin-bottom: 0.5rem;
+              width: 100%;
+              text-align: center;
+            }
+
+            .sort-container {
+              width: 100%;
+              display: flex;
+              justify-content: center;
+            }
+
+            .sort-container button {
+              width: 100%;
+              max-width: 250px;
+              justify-content: space-between;
+            }
+          }
         `}
       </style>
       <Footer />
