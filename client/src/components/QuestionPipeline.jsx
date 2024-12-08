@@ -225,11 +225,14 @@ const QuestionPipeline = ({ onComplete }) => {
           ...answers,
           [currentQuestion.id]: existing.filter((v) => v !== value),
         };
-      } else {
+      } else if (existing.length < 3) {
         updatedAnswers = {
           ...answers,
           [currentQuestion.id]: [...existing, value],
         };
+      } else {
+        // Don't update if already at 3 selections
+        return;
       }
       setAnswers(updatedAnswers);
     } else {
@@ -246,19 +249,16 @@ const QuestionPipeline = ({ onComplete }) => {
   };
 
   const handleNext = () => {
-    window.scrollTo(0, 0);
     setCurrentStep((prevStep) => prevStep + 1);
     setHasVisitedStep(prev => new Set([...prev, currentStep + 1]));
   };
 
   const handleBack = () => {
-    window.scrollTo(0, 0);
     setCurrentStep((prevStep) => prevStep - 1);
     setHasVisitedStep(prev => new Set([...prev, currentStep - 1]));
   };
 
   const handleComplete = () => {
-    window.scrollTo(0, 0);
     onComplete(answers);
   };
 
@@ -319,9 +319,10 @@ const QuestionPipeline = ({ onComplete }) => {
             Based on your choices, we're:
           </p>
           <ul style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "8px"
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+            gap: "8px 24px",
+            width: "100%"
           }}>
             {getCurrentSuggestions().map((suggestion, index) => (
               <li 
@@ -330,8 +331,9 @@ const QuestionPipeline = ({ onComplete }) => {
                   fontSize: "13px",
                   color: "#333",
                   display: "flex",
-                  alignItems: "center",
-                  gap: "8px"
+                  alignItems: "flex-start",
+                  gap: "8px",
+                  minWidth: "240px"
                 }}
               >
                 <span style={{
@@ -339,7 +341,9 @@ const QuestionPipeline = ({ onComplete }) => {
                   height: "4px",
                   backgroundColor: "#6c5ce7",
                   borderRadius: "50%",
-                  display: "inline-block"
+                  display: "inline-block",
+                  marginTop: "8px",
+                  flexShrink: 0
                 }}></span>
                 {suggestion}
               </li>
