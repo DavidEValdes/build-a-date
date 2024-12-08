@@ -84,12 +84,9 @@ const SuggestionDisplay = ({ date, onDisplay }) => {
 
         <div className="suggestion-display-tags">
           <span className="tag mood" style={{ textTransform: "capitalize" }}>
-            {date.mood}
+            {date.atmosphere}
           </span>
-          <span
-            className="tag time-of-day"
-            style={{ textTransform: "capitalize" }}
-          >
+          <span className="tag time-of-day" style={{ textTransform: "capitalize" }}>
             {date.time_of_day}
           </span>
         </div>

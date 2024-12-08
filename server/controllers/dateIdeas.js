@@ -135,23 +135,22 @@ const DateIdeasController = {
         location,
         cost_category,
         duration,
-        activity_type,
-        mood,
+        activity_types,
+        atmosphere,
         time_of_day,
-        distance,
-        importance,
+        interests,
+        group_size,
+        season,
         activity_level,
+        image_url
       } = req.body;
-  
-      // Fetch image URL before creating the date idea
-      const image_url = await fetchImageUrl(title);
   
       const results = await pool.query(
         `INSERT INTO date_ideas 
           (title, description, location, cost_category, duration, 
-          activity_type, mood, time_of_day, distance, importance, 
-          activity_level, image_url, is_shared, creator_id)
-          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+          activity_types, atmosphere, time_of_day, interests, group_size, 
+          season, activity_level, image_url, is_shared, creator_id)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
           RETURNING *`,
         [
           title,
@@ -159,13 +158,14 @@ const DateIdeasController = {
           location,
           cost_category,
           duration,
-          activity_type,
-          mood,
+          activity_types,
+          atmosphere,
           time_of_day,
-          distance,
-          importance,
+          interests,
+          group_size,
+          season,
           activity_level,
-          image_url,
+          image_url || "/api/placeholder/400/300",
           true,
           null,
         ]
@@ -173,6 +173,7 @@ const DateIdeasController = {
   
       res.status(201).json(results.rows[0]);
     } catch (error) {
+      console.error("Error creating date idea:", error);
       res.status(500).json({ error: error.message });
     }
   },
