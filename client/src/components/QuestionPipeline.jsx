@@ -2,16 +2,25 @@ import { useState, useCallback  } from "react";
 import PropTypes from "prop-types";
 
 const questions = [
-  
   {
     id: "atmosphere",
-    question: "What atmosphere do you prefer for your date?",
+    question: "What kind of vibe are you looking for?",
     type: "singleChoice",
     options: [
-      { value: "romantic", label: "Romantic" },
-      { value: "casual", label: "Casual" },
-      { value: "energetic", label: "Energetic" },
-      { value: "fun", label: "Fun" },
+      { value: "romantic", label: "Romantic & Intimate" },
+      { value: "casual", label: "Casual & Relaxed" },
+      { value: "energetic", label: "Energetic & Active" },
+      { value: "fun", label: "Fun & Playful" },
+    ],
+  },
+  {
+    id: "activity_level",
+    question: "How active would you like the date to be?",
+    type: "singleChoice",
+    options: [
+      { value: "low", label: "Low - Relaxed and easygoing" },
+      { value: "moderate", label: "Moderate - Some light activity" },
+      { value: "high", label: "High - Very active and engaging" },
     ],
   },
   {
@@ -19,7 +28,7 @@ const questions = [
     question: "What's your budget range for the date?",
     type: "singleChoice",
     options: [
-      { value: "free", label: "No cost activities" },
+      { value: "free", label: "Free activities" },
       { value: "economy", label: "Budget-friendly (under $30)" },
       { value: "standard", label: "Mid-range ($30-$75)" },
       { value: "premium", label: "Premium ($75-$150)" },
@@ -27,60 +36,72 @@ const questions = [
     ],
   },
   {
-    id: "indoorOutdoor",
-    question: "Do you prefer indoor or outdoor activities?",
+    id: "season",
+    question: "Do you have a seasonal preference?",
     type: "singleChoice",
     options: [
-      { value: "indoor", label: "Indoor" },
-      { value: "outdoor", label: "Outdoor" },
       { value: "noPreference", label: "No Preference" },
+      { value: "spring", label: "Spring" },
+      { value: "summer", label: "Summer" },
+      { value: "autumn", label: "Autumn" },
+      { value: "winter", label: "Winter" },
     ],
   },
   {
-    id: "groupSize",
-    question: "Who will be joining you?",
+    id: "location",
+    question: "Where would you prefer the date to take place?",
     type: "singleChoice",
     options: [
-      { value: "couple", label: "Just us" },
-      { value: "smallGroup", label: "Small Group (3-5 people)" },
-      { value: "largeGroup", label: "Larger Group (6+ people)" },
-    ],
-  },
-  {
-    id: "activityTypes",
-    question: "What types of activities do you enjoy?",
-    type: "multipleChoice",
-    options: [
-      { value: "adventure", label: "Adventure" },
-      { value: "relaxation", label: "Relaxation" },
-      { value: "learning", label: "Learning" },
-      { value: "entertainment", label: "Entertainment" },
-      { value: "wellness", label: "Wellness" },
-    ],
-  },
-  {
-    id: "interests",
-    question: "Select interests you'd like to explore.",
-    type: "multipleChoice",
-    options: [
-      { value: "art", label: "Art" },
-      { value: "music", label: "Music" },
-      { value: "sports", label: "Sports" },
-      { value: "technology", label: "Technology" },
-      { value: "food", label: "Food" },
-      { value: "nature", label: "Nature" },
-      { value: "history", label: "History" },
+      { value: "indoor", label: "Indoor Activities" },
+      { value: "outdoor", label: "Outdoor Adventures" },
+      { value: "both", label: "Mix of Both" },
     ],
   },
   {
     id: "time_of_day",
-    question: "What time of day do you prefer?",
+    question: "What time of day works best?",
     type: "singleChoice",
     options: [
-      { value: "morning", label: "Morning" },
-      { value: "afternoon", label: "Afternoon" },
-      { value: "evening", label: "Evening" },
-      { value: "night", label: "Night" },
+      { value: "morning", label: "Morning - Start the day together" },
+      { value: "afternoon", label: "Afternoon - Perfect for day activities" },
+      { value: "evening", label: "Evening - Dinner time and beyond" },
+      { value: "night", label: "Night - Late night adventures" },
+    ],
+  },
+  {
+    id: "activityTypes",
+    question: "What kind of experiences interest you? (Choose up to 3)",
+    type: "multipleChoice",
+    options: [
+      { value: "adventure", label: "Adventure & Excitement" },
+      { value: "relaxation", label: "Relaxation & Unwinding" },
+      { value: "learning", label: "Learning & Discovery" },
+      { value: "entertainment", label: "Entertainment & Fun" },
+      { value: "wellness", label: "Wellness & Self-care" },
+    ],
+  },
+  {
+    id: "interests",
+    question: "What specific interests would you like to explore? (Choose up to 3)",
+    type: "multipleChoice",
+    options: [
+      { value: "art", label: "Arts & Creativity" },
+      { value: "music", label: "Music & Performance" },
+      { value: "sports", label: "Sports & Physical Activities" },
+      { value: "technology", label: "Technology & Innovation" },
+      { value: "food", label: "Food & Culinary Experiences" },
+      { value: "nature", label: "Nature & Outdoors" },
+      { value: "history", label: "History & Culture" },
+    ],
+  },
+  {
+    id: "groupSize",
+    question: "Who will be joining for this date?",
+    type: "singleChoice",
+    options: [
+      { value: "couple", label: "Just the two of us" },
+      { value: "smallGroup", label: "Double date or small group (3-4 people)" },
+      { value: "largeGroup", label: "Group date (5+ people)" },
     ],
   },
 ];
