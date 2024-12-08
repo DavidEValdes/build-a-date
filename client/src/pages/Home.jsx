@@ -151,6 +151,26 @@ const Home = () => {
     console.log('\n=== USER PREFERENCES ===');
     console.log(JSON.stringify(answers, null, 2));
 
+    const calculateSimilarity = (arr1, arr2) => {
+      // Ensure arrays are defined and convert non-arrays to empty arrays
+      const array1 = Array.isArray(arr1) ? arr1 : [];
+      const array2 = Array.isArray(arr2) ? arr2 : [];
+      
+      // If both arrays are empty, return 1 (100% similar)
+      if (array1.length === 0 && array2.length === 0) return 1;
+      
+      // If one array is empty and the other isn't, return 0 (0% similar)
+      if (array1.length === 0 || array2.length === 0) return 0;
+      
+      // Calculate similarity using sets
+      const set1 = new Set(array1);
+      const set2 = new Set(array2);
+      const intersection = [...set1].filter(x => set2.has(x)).length;
+      const union = new Set([...set1, ...set2]).size;
+      
+      return intersection / union;
+    };
+
     console.log('\n=== WEIGHTS USED ===');
     console.log(JSON.stringify(weights, null, 2));
 
