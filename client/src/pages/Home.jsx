@@ -106,7 +106,7 @@ const weights = {
   time_of_day: 1,
   activityTypes: 2,
   interests: 2,
-  groupSize: 1
+  groupSize: 2.5  // Increased weight for group size
 };
 
 const shuffleArray = (array) => {
@@ -125,6 +125,12 @@ const Home = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
   const queryClient = useQueryClient();
+  const [alternativeSuggestions, setAlternativeSuggestions] = useState([]);
+  const [sharedSuggestions, setSharedSuggestions] = useState(new Set());
+  const [savedSuggestions, setSavedSuggestions] = useState(new Set());
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const allSuggestions = currentSuggestion ? [currentSuggestion, ...alternativeSuggestions] : [];
 
   const { data: feedDates = [], isLoading: isFeedLoading } = useQuery({
     queryKey: ["feedDateIdeas"],
@@ -274,13 +280,28 @@ const Home = () => {
       // Group Size
       const groupSizeWeight = weights.groupSize;
       totalWeight += groupSizeWeight;
-      const groupSizeScore = date.group_size === answers.groupSize ? groupSizeWeight : 0;
+      let groupSizeScore = 0;
+      
+      // Define group size compatibility
+      const groupSizeCompatibility = {
+        individual: ["individual", "couple"],
+        couple: ["couple", "smallGroup"],
+        smallGroup: ["couple", "smallGroup", "largeGroup"],
+        largeGroup: ["smallGroup", "largeGroup"]
+      };
+
+      if (date.group_size === answers.groupSize) {
+        groupSizeScore = groupSizeWeight; // Perfect match
+      } else if (groupSizeCompatibility[answers.groupSize]?.includes(date.group_size)) {
+        groupSizeScore = groupSizeWeight * 0.7; // Compatible match
+      }
+
       score += groupSizeScore;
       contributions.groupSize = groupSizeScore;
       matchDetails.groupSize = {
         dateValue: date.group_size,
         userValue: answers.groupSize,
-        exact_match: date.group_size === answers.groupSize,
+        compatibility: groupSizeScore / groupSizeWeight,
         weight: groupSizeWeight,
         score: groupSizeScore
       };
@@ -330,7 +351,7 @@ const Home = () => {
     });
 
     // Select matches with a higher minimum threshold
-    const threshold = 0.42; // Slightly lowered threshold for initial matches
+    const threshold = answers.groupSize === 'largeGroup' ? 0.38 : 0.42;
     const goodMatches = scoredDates.filter(date => date.score >= threshold);
     
     if (goodMatches.length === 0) {
@@ -463,29 +484,89 @@ const Home = () => {
     try {
       const response = await api.get(`/dates/${selectedMatch.id}`);
       const fetchedDateIdea = response.data;
+      
+      // Get the other matches (excluding the selected one)
+      const alternativeMatches = diverseMatches
+        .filter(match => match.id !== selectedMatch.id)
+        .slice(0, 2); // Take up to 2 alternatives
+        
+      console.log('Alternative matches before fetch:', alternativeMatches); // Debug log
+      
+      // Fetch full details for alternative matches
+      const alternativeFetches = await Promise.all(
+        alternativeMatches.map(match => api.get(`/dates/${match.id}`))
+      );
+      const alternativeSuggestions = alternativeFetches.map(response => response.data);
+      
+      console.log('Alternative suggestions after fetch:', alternativeSuggestions); // Debug log
+
       setCurrentSuggestion(fetchedDateIdea);
+      setAlternativeSuggestions(alternativeSuggestions);
     } catch (error) {
-      console.error("Error fetching date idea:", error);
+      console.error("Error fetching date ideas:", error);
       setCurrentSuggestion(selectedMatch);
+      const fallbackAlternatives = diverseMatches
+        .filter(match => match.id !== selectedMatch.id)
+        .slice(0, 2);
+      console.log('Fallback alternatives:', fallbackAlternatives); // Debug log
+      setAlternativeSuggestions(fallbackAlternatives);
     }
 
     setStage("suggestion");
   };
 
   const handleShareToFeed = async () => {
-    if (currentSuggestion) {
-      // Ensure we include the fetched image URL when sharing to feed
-      await createDateMutation.mutateAsync({
-        ...currentSuggestion,
-        image_url: currentSuggestion.image_url
-      });
-      setStage("feed");
+    if (allSuggestions.length === 0) return;
+    
+    const currentlyDisplayed = allSuggestions[currentIndex];
+    if (currentlyDisplayed && !sharedSuggestions.has(currentlyDisplayed.id)) {
+      try {
+        await createDateMutation.mutateAsync({
+          ...currentlyDisplayed,
+          image_url: currentlyDisplayed.image_url
+        });
+        setSharedSuggestions(prev => new Set([...prev, currentlyDisplayed.id]));
+      } catch (error) {
+        console.error("Error sharing date:", error);
+        alert("Failed to share date. Please try again.");
+      }
+    }
+  };
+
+  const handleSaveDate = async () => {
+    if (allSuggestions.length === 0) return;
+    
+    const currentlyDisplayed = allSuggestions[currentIndex];
+    if (!isAuthenticated) {
+      alert("Please login to save dates");
+      return;
+    }
+    if (savedSuggestions.has(currentlyDisplayed.id)) {
+      alert("This date is already saved!");
+      return;
+    }
+    try {
+      await saveDateIdea(currentlyDisplayed.id);
+      setSavedSuggestions(prev => new Set([...prev, currentlyDisplayed.id]));
+      alert("Date saved successfully!");
+    } catch (error) {
+      if (error.response?.status === 400) {
+        setSavedSuggestions(prev => new Set([...prev, currentlyDisplayed.id]));
+        alert("This date is already saved!");
+      } else {
+        console.error("Error saving date:", error);
+        alert("Failed to save date. Please try again.");
+      }
     }
   };
 
   const handleStartOver = () => {
     setStage("questions");
     setCurrentSuggestion(null);
+    setAlternativeSuggestions([]);
+    setSharedSuggestions(new Set());
+    setSavedSuggestions(new Set());
+    setCurrentIndex(0);
   };
 
   // Enhanced getSortedDates Function with Proper Duration Handling
@@ -763,8 +844,11 @@ const Home = () => {
               Your Perfect Date Match!
             </h2>
             <SuggestionDisplay 
-              date={currentSuggestion} 
+              suggestion={currentSuggestion} 
+              alternativeSuggestions={alternativeSuggestions}
               onDisplay={() => window.scrollTo(0, 0)} 
+              currentIndex={currentIndex}
+              setCurrentIndex={setCurrentIndex}
             />
             <div
               className="suggestion-actions mt-8 flex justify-center gap-4 flex-wrap"
@@ -773,75 +857,64 @@ const Home = () => {
               <button
                 className="primary-button"
                 onClick={handleShareToFeed}
-                disabled={createDateMutation.isLoading}
+                disabled={createDateMutation.isLoading || 
+                  !allSuggestions.length || 
+                  sharedSuggestions.has(allSuggestions[currentIndex]?.id)}
                 style={{
                   padding: "0.75rem 1.5rem",
-                  backgroundColor: "#4f46e5",
-                  color: "#ffffff",
+                  backgroundColor: !allSuggestions.length || sharedSuggestions.has(allSuggestions[currentIndex]?.id) ? "#e5e7eb" : "#4f46e5",
+                  color: !allSuggestions.length || sharedSuggestions.has(allSuggestions[currentIndex]?.id) ? "#374151" : "#ffffff",
                   border: "none",
                   borderRadius: "0.5rem",
                   fontSize: "1rem",
-                  cursor: "pointer",
+                  cursor: !allSuggestions.length || sharedSuggestions.has(allSuggestions[currentIndex]?.id) ? "default" : "pointer",
                   transition: "background-color 0.3s ease",
                 }}
-                onMouseOver={(e) =>
-                  (e.currentTarget.style.backgroundColor = "#4338ca")
-                }
-                onMouseOut={(e) =>
-                  (e.currentTarget.style.backgroundColor = "#4f46e5")
-                }
+                onMouseOver={(e) => {
+                  if (!(!allSuggestions.length || sharedSuggestions.has(allSuggestions[currentIndex]?.id))) {
+                    e.currentTarget.style.backgroundColor = "#4338ca";
+                  }
+                }}
+                onMouseOut={(e) => {
+                  if (!(!allSuggestions.length || sharedSuggestions.has(allSuggestions[currentIndex]?.id))) {
+                    e.currentTarget.style.backgroundColor = "#4f46e5";
+                  } else {
+                    e.currentTarget.style.backgroundColor = "#e5e7eb";
+                  }
+                }}
               >
-                Share to Public Feed
+                {!allSuggestions.length || sharedSuggestions.has(allSuggestions[currentIndex]?.id) 
+                  ? "Shared to Feed" 
+                  : "Share to Public Feed"}
               </button>
               <button
                 className="secondary-button"
-                onClick={() => {
-                  if (!isAuthenticated) {
-                    alert("Please login to save dates");
-                    return;
-                  }
-                  if (isSaved) {
-                    alert("This date is already saved!");
-                    return;
-                  }
-                  saveDateIdea(currentSuggestion.id)
-                    .then(() => {
-                      setIsSaved(true);
-                      alert("Date saved successfully!");
-                    })
-                    .catch((error) => {
-                      if (error.response?.status === 400) {
-                        setIsSaved(true);
-                        alert("This date is already saved!");
-                      } else {
-                        console.error("Error saving date:", error);
-                        alert("Failed to save date. Please try again.");
-                      }
-                    });
-                }}
+                onClick={handleSaveDate}
+                disabled={!allSuggestions.length || savedSuggestions.has(allSuggestions[currentIndex]?.id)}
                 style={{
                   padding: "0.75rem 1.5rem",
-                  backgroundColor: isSaved ? "#e5e7eb" : "#ffffff",
-                  color: isSaved ? "#374151" : "#4f46e5",
-                  border: isSaved ? "none" : "2px solid #4f46e5",
+                  backgroundColor: !allSuggestions.length || savedSuggestions.has(allSuggestions[currentIndex]?.id) ? "#e5e7eb" : "#ffffff",
+                  color: !allSuggestions.length || savedSuggestions.has(allSuggestions[currentIndex]?.id) ? "#374151" : "#4f46e5",
+                  border: !allSuggestions.length || savedSuggestions.has(allSuggestions[currentIndex]?.id) ? "none" : "2px solid #4f46e5",
                   borderRadius: "0.5rem",
                   fontSize: "1rem",
-                  cursor: isSaved ? "default" : "pointer",
+                  cursor: !allSuggestions.length || savedSuggestions.has(allSuggestions[currentIndex]?.id) ? "default" : "pointer",
                   transition: "all 0.3s ease",
                 }}
                 onMouseOver={(e) => {
-                  if (!isSaved) {
+                  if (!allSuggestions.length || savedSuggestions.has(allSuggestions[currentIndex]?.id)) {
                     e.currentTarget.style.backgroundColor = "#f5f5f5";
                   }
                 }}
                 onMouseOut={(e) => {
-                  if (!isSaved) {
+                  if (!allSuggestions.length || savedSuggestions.has(allSuggestions[currentIndex]?.id)) {
                     e.currentTarget.style.backgroundColor = "#ffffff";
                   }
                 }}
-                disabled={isSaved}
               >
-                {isSaved ? "Already Saved" : "Save Date"}
+                {!allSuggestions.length || savedSuggestions.has(allSuggestions[currentIndex]?.id) 
+                  ? "Already Saved" 
+                  : "Save Date"}
               </button>
               <button
                 onClick={() => {

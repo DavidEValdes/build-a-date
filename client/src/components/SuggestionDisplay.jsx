@@ -1,96 +1,123 @@
 import React, { useState, useEffect } from "react";
 import "../App.css";
+import "./SuggestionDisplay.css";
 import Spinner from "./Spinner";
+import { Heart, Share2, ArrowRight, ArrowLeft } from 'lucide-react';
 
-const SuggestionDisplay = ({ date, onDisplay }) => {
-  const [isImageLoading, setIsImageLoading] = useState(true);
+const SuggestionDisplay = ({ 
+  suggestion, 
+  alternativeSuggestions = [], 
+  currentIndex,
+  setCurrentIndex 
+}) => {
+  const allSuggestions = [suggestion, ...alternativeSuggestions];
 
-  // Call onDisplay when component mounts
+  console.log('Current suggestion:', suggestion); // Debug log
+  console.log('Alternative suggestions:', alternativeSuggestions); // Debug log
+  console.log('All suggestions:', allSuggestions); // Debug log
+
   useEffect(() => {
-    if (onDisplay) {
-      window.scrollTo(0, 0);
-      onDisplay();
-    }
-  }, [onDisplay]);
+    console.log('Number of suggestions:', allSuggestions.length); // Debug log
+    console.log('Current index:', currentIndex);
+  }, [allSuggestions, currentIndex]);
 
-  // Helper function to format the cost category
-  const formatCostCategory = (category) => {
-    switch (category.toLowerCase()) {
-      case "free":
-        return "Free";
-      case "economy":
-        return "$";
-      case "standard":
-        return "$$";
-      case "premium":
-        return "$$$";
-      case "luxury":
-        return "$$$$";
-      default:
-        return category;
-    }
+  const handleNext = () => {
+    setCurrentIndex((prev) => {
+      const next = (prev + 1) % allSuggestions.length;
+      console.log('Navigating to next:', next); // Debug log
+      return next;
+    });
+  };
+
+  const handlePrev = () => {
+    setCurrentIndex((prev) => {
+      const next = prev === 0 ? allSuggestions.length - 1 : prev - 1;
+      console.log('Navigating to prev:', next); // Debug log
+      return next;
+    });
   };
 
   return (
     <div className="suggestion-display">
-      <div className="suggestion-display-image-container">
-        {isImageLoading && (
-          <div style={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            zIndex: 1
-          }}>
-            <Spinner size={40} />
+      {/* Main Display */}
+      <div className="suggestion-main">
+        <div className="suggestion-card">
+          <img 
+            src={allSuggestions[currentIndex].image_url || '/placeholder.jpg'} 
+            alt={allSuggestions[currentIndex].title}
+            className="suggestion-image"
+          />
+          <div className="suggestion-content">
+            <h3 className="suggestion-title">{allSuggestions[currentIndex].title}</h3>
+            <p className="suggestion-description">{allSuggestions[currentIndex].description}</p>
+            
+            <div className="suggestion-details">
+              <span className="detail-item">
+                <strong>Duration:</strong> {allSuggestions[currentIndex].duration}
+              </span>
+              <span className="detail-item">
+                <strong>Cost:</strong> {allSuggestions[currentIndex].cost_category}
+              </span>
+              <span className="detail-item">
+                <strong>Location:</strong> {allSuggestions[currentIndex].location}
+              </span>
+            </div>
           </div>
+        </div>
+
+        {/* Only show navigation when there are multiple suggestions */}
+        {allSuggestions.length > 1 && (
+          <>
+            <div className="navigation-arrows">
+              <button 
+                onClick={handlePrev}
+                className="nav-button prev"
+                aria-label="Previous suggestion"
+              >
+                <ArrowLeft size={24} />
+              </button>
+              <button 
+                onClick={handleNext}
+                className="nav-button next"
+                aria-label="Next suggestion"
+              >
+                <ArrowRight size={24} />
+              </button>
+            </div>
+
+            <div className="pagination-dots">
+              {allSuggestions.map((_, index) => (
+                <button
+                  key={index}
+                  className={`dot ${index === currentIndex ? 'active' : ''}`}
+                  onClick={() => setCurrentIndex(index)}
+                  aria-label={`Go to suggestion ${index + 1}`}
+                />
+              ))}
+            </div>
+          </>
         )}
-        <img
-          src={date.image_url}
-          alt={date.title}
-          className="suggestion-display-image"
-          style={{ opacity: isImageLoading ? 0 : 1, transition: "opacity 0.3s ease" }}
-          onLoad={() => setIsImageLoading(false)}
-        />
       </div>
 
-      <h2 className="suggestion-display-title">{date.title}</h2>
-
-      <div className="suggestion-display-content">
-        <p className="suggestion-display-description">{date.description}</p>
-
-        <div className="suggestion-display-grid">
-          <div>
-            <h3 className="suggestion-display-grid-title">Location</h3>
-            <p className="suggestion-display-grid-value">{date.location}</p>
-          </div>
-          <div>
-            <h3 className="suggestion-display-grid-title">Duration</h3>
-            <p className="suggestion-display-grid-value">{date.duration}</p>
-          </div>
-          <div>
-            <h3 className="suggestion-display-grid-title">Cost</h3>
-            <p className="suggestion-display-grid-value">
-              {formatCostCategory(date.cost_category)}
-            </p>
-          </div>
-          <div>
-            <h3 className="suggestion-display-grid-title">Activity Level</h3>
-            <p className="suggestion-display-grid-value">
-              {date.activity_level}
-            </p>
-          </div>
+      {/* Only show preview when there are multiple suggestions */}
+      {allSuggestions.length > 1 && (
+        <div className="suggestions-preview">
+          {allSuggestions.map((item, index) => (
+            <div
+              key={index}
+              className={`preview-card ${index === currentIndex ? 'active' : ''}`}
+              onClick={() => setCurrentIndex(index)}
+            >
+              <img 
+                src={item.image_url || '/placeholder.jpg'} 
+                alt={item.title}
+                className="preview-image"
+              />
+              <div className="preview-title">{item.title}</div>
+            </div>
+          ))}
         </div>
-
-        <div className="suggestion-display-tags">
-          <span className="tag mood" style={{ textTransform: "capitalize" }}>
-            {date.atmosphere}
-          </span>
-          <span className="tag time-of-day" style={{ textTransform: "capitalize" }}>
-            {date.time_of_day}
-          </span>
-        </div>
-      </div>
+      )}
     </div>
   );
 };
