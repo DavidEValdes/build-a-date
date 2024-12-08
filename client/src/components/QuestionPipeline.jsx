@@ -62,6 +62,7 @@ const questions = [
     question: "What time of day works best?",
     type: "singleChoice",
     options: [
+      { value: "noPreference", label: "No Preference" },
       { value: "morning", label: "Morning - Start the day together" },
       { value: "afternoon", label: "Afternoon - Perfect for day activities" },
       { value: "evening", label: "Evening - Dinner time and beyond" },
@@ -110,6 +111,108 @@ const QuestionPipeline = ({ onComplete }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState({});
   const [hasVisitedStep, setHasVisitedStep] = useState(new Set([0]));
+
+  const getSuggestionHint = useCallback((questionId, value) => {
+    const hints = {
+      atmosphere: {
+        romantic: "Looking for intimate and cozy date spots",
+        casual: "Keeping it laid-back and comfortable",
+        energetic: "Finding active and upbeat experiences",
+        fun: "Searching for playful and entertaining activities",
+      },
+      activity_level: {
+        low: "Focusing on relaxed, low-key options",
+        moderate: "Including some light physical activity",
+        high: "Prioritizing active and engaging experiences",
+      },
+      budget: {
+        free: "Finding no-cost activities",
+        economy: "Looking for budget-friendly options",
+        standard: "Including mid-range experiences",
+        premium: "Considering premium experiences",
+        luxury: "Exploring luxury date options",
+      },
+      location: {
+        indoor: "Focusing on indoor venues",
+        outdoor: "Exploring outdoor activities",
+        both: "Mix of indoor and outdoor experiences",
+      },
+      time_of_day: {
+        morning: "Planning early day activities",
+        afternoon: "Looking at daytime options",
+        evening: "Considering dinner and evening activities",
+        night: "Exploring nighttime experiences",
+        noPreference: "Flexible with timing",
+      },
+      activityTypes: {
+        adventure: "Including adventurous and exciting activities",
+        relaxation: "Adding relaxing and peaceful options",
+        learning: "Incorporating educational experiences",
+        entertainment: "Including fun entertainment options",
+        wellness: "Adding wellness and self-care activities",
+      },
+      interests: {
+        art: "Including artistic and creative activities",
+        music: "Adding musical experiences",
+        sports: "Including sports-related activities",
+        technology: "Adding tech-focused experiences",
+        food: "Including culinary experiences",
+        nature: "Adding outdoor nature activities",
+        history: "Including historical and cultural elements",
+      },
+      season: {
+        spring: "Planning for spring weather",
+        summer: "Considering summer activities",
+        autumn: "Including fall-appropriate options",
+        winter: "Planning for winter conditions",
+        noPreference: "",
+      },
+      groupSize: {
+        couple: "Planning for just the two of you",
+        smallGroup: "Planning for a small group (3-4 people)",
+        largeGroup: "Planning for a larger group (5+ people)",
+      },
+    };
+    return hints[questionId]?.[value] || "";
+  }, []);
+
+  const getCurrentSuggestions = useCallback(() => {
+    return Object.entries(answers)
+      .map(([questionId, value]) => {
+        if (Array.isArray(value)) {
+          if (questionId === 'interests') {
+            const interestLabels = value.map(v => {
+              switch(v) {
+                case 'art': return 'art';
+                case 'music': return 'music';
+                case 'sports': return 'sports';
+                case 'technology': return 'technology';
+                case 'food': return 'food';
+                case 'nature': return 'nature';
+                case 'history': return 'history';
+                default: return v;
+              }
+            });
+            return <span><strong>Interests:</strong> {interestLabels.join(', ')}</span>;
+          } else if (questionId === 'activityTypes') {
+            const activityLabels = value.map(v => {
+              switch(v) {
+                case 'adventure': return 'adventure';
+                case 'relaxation': return 'relaxation';
+                case 'learning': return 'learning';
+                case 'entertainment': return 'entertainment';
+                case 'wellness': return 'wellness';
+                default: return v;
+              }
+            });
+            return <span><strong>Activities:</strong> {activityLabels.join(', ')}</span>;
+          }
+          return getSuggestionHint(questionId, value[0]);
+        }
+        return getSuggestionHint(questionId, value);
+      })
+      .filter(Boolean);
+  }, [answers, getSuggestionHint]);
 
   const currentQuestion = questions[currentStep];
 
@@ -172,6 +275,18 @@ const QuestionPipeline = ({ onComplete }) => {
     currentQuestion.type === "singleChoice" || 
     hasVisitedStep.has(currentStep);
 
+  const getQuestionLabel = (questionId) => {
+    const question = questions.find(q => q.id === questionId);
+    return question?.question || questionId;
+  };
+
+  const getOptionLabel = (questionId, value) => {
+    const question = questions.find(q => q.id === questionId);
+    if (!question) return value;
+    const option = question.options.find(opt => opt.value === value);
+    return option?.label || value;
+  };
+
   return (
     <div className="question-pipeline max-w-md mx-auto p-4 bg-white shadow-md rounded-lg">
       <div className="progress-section mb-4">
@@ -187,6 +302,51 @@ const QuestionPipeline = ({ onComplete }) => {
           Question {currentStep + 1} of {questions.length}
         </p>
       </div>
+
+      {getCurrentSuggestions().length > 0 && (
+        <div style={{
+          marginBottom: "24px",
+          borderLeft: "2px solid #6c5ce7",
+          paddingLeft: "16px"
+        }}>
+          <p style={{
+            fontSize: "11px",
+            textTransform: "uppercase",
+            letterSpacing: "0.05em",
+            color: "#666",
+            marginBottom: "12px"
+          }}>
+            Based on your choices, we're:
+          </p>
+          <ul style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "8px"
+          }}>
+            {getCurrentSuggestions().map((suggestion, index) => (
+              <li 
+                key={index} 
+                style={{
+                  fontSize: "13px",
+                  color: "#333",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px"
+                }}
+              >
+                <span style={{
+                  width: "4px",
+                  height: "4px",
+                  backgroundColor: "#6c5ce7",
+                  borderRadius: "50%",
+                  display: "inline-block"
+                }}></span>
+                {suggestion}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <h3 className="text-lg font-semibold mb-4">{currentQuestion.question}</h3>
 
