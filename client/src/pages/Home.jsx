@@ -493,34 +493,30 @@ const Home = () => {
           .filter(match => match.id !== selectedMatch.id)
           .slice(0, 2); // Take up to 2 alternatives
           
-        console.log('Alternative matches before fetch:', alternativeMatches); // Debug log
-        
         // Fetch full details for alternative matches
         const alternativeFetches = await Promise.all(
           alternativeMatches.map(match => api.get(`/dates/${match.id}`))
         );
         const alternativeSuggestions = alternativeFetches.map(response => response.data);
-        
-        console.log('Alternative suggestions after fetch:', alternativeSuggestions); // Debug log
 
         setCurrentSuggestion(fetchedDateIdea);
         setAlternativeSuggestions(alternativeSuggestions);
+        setStage("suggestion");
+        setIsProcessing(false);
       } catch (error) {
         console.error("Error fetching date ideas:", error);
         setCurrentSuggestion(selectedMatch);
         const fallbackAlternatives = diverseMatches
           .filter(match => match.id !== selectedMatch.id)
           .slice(0, 2);
-        console.log('Fallback alternatives:', fallbackAlternatives); // Debug log
         setAlternativeSuggestions(fallbackAlternatives);
+        setStage("suggestion");
+        setIsProcessing(false);
       }
-
-      setStage("suggestion");
     } catch (error) {
       console.error("Error processing questionnaire:", error);
       alert("Something went wrong. Please try again.");
-    } finally {
-      setIsProcessing(false); // Stop loading regardless of outcome
+      setIsProcessing(false);
     }
   };
 
@@ -838,7 +834,38 @@ const Home = () => {
         {/* Questions Stage */}
         {stage === "questions" && (
           <div style={{ position: 'relative' }}>
-            <QuestionPipeline onComplete={handleQuestionnaireComplete} />
+            {isProcessing ? (
+              <div 
+                style={{
+                  maxWidth: '1200px',
+                  margin: '0 auto',
+                  padding: '1rem',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  height: '400px'
+                }}
+              >
+                <Spinner size={50} />
+              </div>
+            ) : (
+              <QuestionPipeline onComplete={handleQuestionnaireComplete} />
+            )}
+          </div>
+        )}
+
+        {/* Suggestion Stage */}
+        {stage === "suggestion" && (
+          <div
+            className="suggestion-screen"
+            style={{ padding: "2rem", textAlign: "center" }}
+          >
+            <h2
+              className="text-2xl font-bold mb-6"
+              style={{ fontSize: "2rem", color: "#000000" }}
+            >
+              Your Perfect Date Match!
+            </h2>
             {isProcessing && (
               <div 
                 style={{
@@ -854,121 +881,110 @@ const Home = () => {
                 <Spinner size={50} />
               </div>
             )}
-          </div>
-        )}
-
-        {/* Suggestion Stage */}
-        {stage === "suggestion" && currentSuggestion && (
-          <div
-            className="suggestion-screen"
-            style={{ padding: "2rem", textAlign: "center" }}
-          >
-            <h2
-              className="text-2xl font-bold mb-6"
-              style={{ fontSize: "2rem", color: "#000000" }}
-            >
-              Your Perfect Date Match!
-            </h2>
-            <SuggestionDisplay 
-              suggestion={currentSuggestion} 
-              alternativeSuggestions={alternativeSuggestions}
-              onDisplay={() => window.scrollTo(0, 0)} 
-              currentIndex={currentIndex}
-              setCurrentIndex={setCurrentIndex}
-            />
-            <div
-              className="suggestion-actions mt-8 flex justify-center gap-4 flex-wrap"
-              style={{ marginTop: "2rem" }}
-            >
-              <button
-                className="primary-button"
-                onClick={handleShareToFeed}
-                disabled={createDateMutation.isLoading || 
-                  !allSuggestions.length || 
-                  sharedSuggestions.has(allSuggestions[currentIndex]?.id)}
-                style={{
-                  padding: "0.75rem 1.5rem",
-                  backgroundColor: !allSuggestions.length || sharedSuggestions.has(allSuggestions[currentIndex]?.id) ? "#e5e7eb" : "#4f46e5",
-                  color: !allSuggestions.length || sharedSuggestions.has(allSuggestions[currentIndex]?.id) ? "#374151" : "#ffffff",
-                  border: "none",
-                  borderRadius: "0.5rem",
-                  fontSize: "1rem",
-                  cursor: !allSuggestions.length || sharedSuggestions.has(allSuggestions[currentIndex]?.id) ? "default" : "pointer",
-                  transition: "background-color 0.3s ease",
-                }}
-                onMouseOver={(e) => {
-                  if (!(!allSuggestions.length || sharedSuggestions.has(allSuggestions[currentIndex]?.id))) {
-                    e.currentTarget.style.backgroundColor = "#4338ca";
-                  }
-                }}
-                onMouseOut={(e) => {
-                  if (!(!allSuggestions.length || sharedSuggestions.has(allSuggestions[currentIndex]?.id))) {
-                    e.currentTarget.style.backgroundColor = "#4f46e5";
-                  } else {
-                    e.currentTarget.style.backgroundColor = "#e5e7eb";
-                  }
-                }}
-              >
-                {!allSuggestions.length || sharedSuggestions.has(allSuggestions[currentIndex]?.id) 
-                  ? "Shared to Feed" 
-                  : "Share to Public Feed"}
-              </button>
-              <button
-                className="secondary-button"
-                onClick={handleSaveDate}
-                disabled={!allSuggestions.length || savedSuggestions.has(allSuggestions[currentIndex]?.id)}
-                style={{
-                  padding: "0.75rem 1.5rem",
-                  backgroundColor: !allSuggestions.length || savedSuggestions.has(allSuggestions[currentIndex]?.id) ? "#e5e7eb" : "#ffffff",
-                  color: !allSuggestions.length || savedSuggestions.has(allSuggestions[currentIndex]?.id) ? "#374151" : "#4f46e5",
-                  border: !allSuggestions.length || savedSuggestions.has(allSuggestions[currentIndex]?.id) ? "none" : "2px solid #4f46e5",
-                  borderRadius: "0.5rem",
-                  fontSize: "1rem",
-                  cursor: !allSuggestions.length || savedSuggestions.has(allSuggestions[currentIndex]?.id) ? "default" : "pointer",
-                  transition: "all 0.3s ease",
-                }}
-                onMouseOver={(e) => {
-                  if (!allSuggestions.length || savedSuggestions.has(allSuggestions[currentIndex]?.id)) {
-                    e.currentTarget.style.backgroundColor = "#f5f5f5";
-                  }
-                }}
-                onMouseOut={(e) => {
-                  if (!allSuggestions.length || savedSuggestions.has(allSuggestions[currentIndex]?.id)) {
-                    e.currentTarget.style.backgroundColor = "#ffffff";
-                  }
-                }}
-              >
-                {!allSuggestions.length || savedSuggestions.has(allSuggestions[currentIndex]?.id) 
-                  ? "Already Saved" 
-                  : "Save Date"}
-              </button>
-              <button
-                onClick={() => {
-                  setStage("questions");
-                  setIsSaved(false);
-                  setCurrentSuggestion(null);
-                }}
-                className="secondary-button"
-                style={{
-                  padding: "0.75rem 1.5rem",
-                  backgroundColor: "#e5e7eb",
-                  color: "#374151",
-                  border: "none",
-                  borderRadius: "0.5rem",
-                  fontSize: "1rem",
-                  cursor: "pointer",
-                  transition: "background-color 0.3s ease",
-                }}
-                onMouseOver={(e) =>
-                  (e.currentTarget.style.backgroundColor = "#d1d5db")
-                }
-                onMouseOut={(e) =>
-                  (e.currentTarget.style.backgroundColor = "#e5e7eb")
-                }
-              >
-                Try Different Preferences
-              </button>
-            </div>
+            {!isProcessing && currentSuggestion && (
+              <>
+                <SuggestionDisplay 
+                  suggestion={currentSuggestion}
+                  alternativeSuggestions={alternativeSuggestions}
+                  onDisplay={() => window.scrollTo(0, 0)} 
+                  currentIndex={currentIndex}
+                  setCurrentIndex={setCurrentIndex}
+                />
+                <div
+                  className="suggestion-actions mt-8 flex justify-center gap-4 flex-wrap"
+                  style={{ marginTop: "2rem" }}
+                >
+                  <button
+                    className="primary-button"
+                    onClick={handleShareToFeed}
+                    disabled={createDateMutation.isLoading || 
+                      !allSuggestions.length || 
+                      sharedSuggestions.has(allSuggestions[currentIndex]?.id)}
+                    style={{
+                      padding: "0.75rem 1.5rem",
+                      backgroundColor: !allSuggestions.length || sharedSuggestions.has(allSuggestions[currentIndex]?.id) ? "#e5e7eb" : "#4f46e5",
+                      color: !allSuggestions.length || sharedSuggestions.has(allSuggestions[currentIndex]?.id) ? "#374151" : "#ffffff",
+                      border: "none",
+                      borderRadius: "0.5rem",
+                      fontSize: "1rem",
+                      cursor: !allSuggestions.length || sharedSuggestions.has(allSuggestions[currentIndex]?.id) ? "default" : "pointer",
+                      transition: "background-color 0.3s ease",
+                    }}
+                    onMouseOver={(e) => {
+                      if (!(!allSuggestions.length || sharedSuggestions.has(allSuggestions[currentIndex]?.id))) {
+                        e.currentTarget.style.backgroundColor = "#4338ca";
+                      }
+                    }}
+                    onMouseOut={(e) => {
+                      if (!(!allSuggestions.length || sharedSuggestions.has(allSuggestions[currentIndex]?.id))) {
+                        e.currentTarget.style.backgroundColor = "#4f46e5";
+                      } else {
+                        e.currentTarget.style.backgroundColor = "#e5e7eb";
+                      }
+                    }}
+                  >
+                    {!allSuggestions.length || sharedSuggestions.has(allSuggestions[currentIndex]?.id) 
+                      ? "Shared to Feed" 
+                      : "Share to Public Feed"}
+                  </button>
+                  <button
+                    className="secondary-button"
+                    onClick={handleSaveDate}
+                    disabled={!allSuggestions.length || savedSuggestions.has(allSuggestions[currentIndex]?.id)}
+                    style={{
+                      padding: "0.75rem 1.5rem",
+                      backgroundColor: !allSuggestions.length || savedSuggestions.has(allSuggestions[currentIndex]?.id) ? "#e5e7eb" : "#ffffff",
+                      color: !allSuggestions.length || savedSuggestions.has(allSuggestions[currentIndex]?.id) ? "#374151" : "#4f46e5",
+                      border: !allSuggestions.length || savedSuggestions.has(allSuggestions[currentIndex]?.id) ? "none" : "2px solid #4f46e5",
+                      borderRadius: "0.5rem",
+                      fontSize: "1rem",
+                      cursor: !allSuggestions.length || savedSuggestions.has(allSuggestions[currentIndex]?.id) ? "default" : "pointer",
+                      transition: "all 0.3s ease",
+                    }}
+                    onMouseOver={(e) => {
+                      if (!allSuggestions.length || savedSuggestions.has(allSuggestions[currentIndex]?.id)) {
+                        e.currentTarget.style.backgroundColor = "#f5f5f5";
+                      }
+                    }}
+                    onMouseOut={(e) => {
+                      if (!allSuggestions.length || savedSuggestions.has(allSuggestions[currentIndex]?.id)) {
+                        e.currentTarget.style.backgroundColor = "#ffffff";
+                      }
+                    }}
+                  >
+                    {!allSuggestions.length || savedSuggestions.has(allSuggestions[currentIndex]?.id) 
+                      ? "Already Saved" 
+                      : "Save Date"}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setStage("questions");
+                      setIsSaved(false);
+                      setCurrentSuggestion(null);
+                    }}
+                    className="secondary-button"
+                    style={{
+                      padding: "0.75rem 1.5rem",
+                      backgroundColor: "#e5e7eb",
+                      color: "#374151",
+                      border: "none",
+                      borderRadius: "0.5rem",
+                      fontSize: "1rem",
+                      cursor: "pointer",
+                      transition: "background-color 0.3s ease",
+                    }}
+                    onMouseOver={(e) =>
+                      (e.currentTarget.style.backgroundColor = "#d1d5db")
+                    }
+                    onMouseOut={(e) =>
+                      (e.currentTarget.style.backgroundColor = "#e5e7eb")
+                    }
+                  >
+                    Try Different Preferences
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         )}
 
