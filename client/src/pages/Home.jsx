@@ -96,17 +96,17 @@ const fetchImageFromPexels = async (searchTerm) => {
   }
 };
 
-// Updated Weight Structure without Budget
+// Updated Weight Structure
 const weights = {
-  timeOfDay: 1,
-  mood: 2, 
-  indoorOutdoor: 1,
-  activityLevel: 2, 
-  distanceWilling: 1,
-  importance: 1,
-  interests: 2, 
-  groupSize: 2,
+  atmosphere: 2,
+  activity_level: 2,
+  budget: 1,
   season: 1,
+  location: 1,
+  time_of_day: 1,
+  activityTypes: 2,
+  interests: 2,
+  groupSize: 1
 };
 
 const shuffleArray = (array) => {
@@ -148,29 +148,8 @@ const Home = () => {
   });
 
   const handleQuestionnaireComplete = async (answers) => {
-    // Log user answers
     console.log('\n=== USER PREFERENCES ===');
     console.log(JSON.stringify(answers, null, 2));
-
-    const calculateSimilarity = (arr1, arr2) => {
-      // Ensure arrays are defined and convert non-arrays to empty arrays
-      const array1 = Array.isArray(arr1) ? arr1 : [];
-      const array2 = Array.isArray(arr2) ? arr2 : [];
-      
-      // If both arrays are empty, return 1 (100% similar)
-      if (array1.length === 0 && array2.length === 0) return 1;
-      
-      // If one array is empty and the other isn't, return 0 (0% similar)
-      if (array1.length === 0 || array2.length === 0) return 0;
-      
-      // Calculate similarity using sets
-      const set1 = new Set(array1);
-      const set2 = new Set(array2);
-      const intersection = [...set1].filter(x => set2.has(x)).length;
-      const union = new Set([...set1, ...set2]).size;
-      
-      return intersection / union;
-    };
 
     console.log('\n=== WEIGHTS USED ===');
     console.log(JSON.stringify(weights, null, 2));
@@ -179,10 +158,10 @@ const Home = () => {
       let score = 0;
       let totalWeight = 0;
       const contributions = {};
-      const matchDetails = {}; // Store detailed matching information
+      const matchDetails = {};
 
       // Activity Types (Multiple Choice)
-      const activityWeight = weights.activityTypes || 1;
+      const activityWeight = weights.activityTypes;
       totalWeight += activityWeight;
       const activitySimilarity = calculateSimilarity(
         date.activity_types,
@@ -200,22 +179,11 @@ const Home = () => {
       };
 
       // Atmosphere
-      const atmosphereWeight = weights.atmosphere || 1;
+      const atmosphereWeight = weights.atmosphere;
       totalWeight += atmosphereWeight;
-      let atmosphereScore = 0;
-      if (answers.atmosphere) {
-        if (date.atmosphere === answers.atmosphere) {
-          atmosphereScore = atmosphereWeight;
-          score += atmosphereWeight;
-          contributions.atmosphere = atmosphereWeight;
-        } else {
-          contributions.atmosphere = 0;
-        }
-      } else {
-        atmosphereScore = atmosphereWeight / 2;
-        score += atmosphereWeight / 2;
-        contributions.atmosphere = atmosphereWeight / 2;
-      }
+      const atmosphereScore = date.atmosphere === answers.atmosphere ? atmosphereWeight : 0;
+      score += atmosphereScore;
+      contributions.atmosphere = atmosphereScore;
       matchDetails.atmosphere = {
         dateValue: date.atmosphere,
         userValue: answers.atmosphere,
@@ -225,56 +193,38 @@ const Home = () => {
       };
 
       // Budget
-      const budgetWeight = weights.budget || 1;
+      const budgetWeight = weights.budget;
       totalWeight += budgetWeight;
-      let budgetScore = 0;
-      if (answers.budget) {
-        const budgetDifference = Math.abs(
-          budgetLevels[date.cost_category] - budgetLevels[answers.budget]
-        );
-        budgetScore = Math.max(budgetWeight - budgetDifference, 0);
-        score += budgetScore;
-        contributions.budget = budgetScore;
-      } else {
-        budgetScore = budgetWeight / 2;
-        score += budgetWeight / 2;
-        contributions.budget = budgetWeight / 2;
-      }
+      const budgetDifference = Math.abs(
+        budgetLevels[date.cost_category] - budgetLevels[answers.budget]
+      );
+      const budgetScore = Math.max(0, budgetWeight * (1 - budgetDifference / 4));
+      score += budgetScore;
+      contributions.budget = budgetScore;
       matchDetails.budget = {
         dateValue: date.cost_category,
         userValue: answers.budget,
-        budgetDifference: answers.budget ? Math.abs(budgetLevels[date.cost_category] - budgetLevels[answers.budget]) : null,
+        budgetDifference: budgetDifference,
         weight: budgetWeight,
         score: budgetScore
       };
 
-      // Indoor/Outdoor
-      const locationWeight = weights.indoorOutdoor || 1;
+      // Location
+      const locationWeight = weights.location;
       totalWeight += locationWeight;
-      let locationScore = 0;
-      if (answers.indoorOutdoor && answers.indoorOutdoor !== "noPreference") {
-        if (date.location === answers.indoorOutdoor) {
-          locationScore = locationWeight;
-          score += locationWeight;
-          contributions.indoorOutdoor = locationWeight;
-        } else {
-          contributions.indoorOutdoor = 0;
-        }
-      } else {
-        locationScore = locationWeight / 2;
-        score += locationWeight / 2;
-        contributions.indoorOutdoor = locationWeight / 2;
-      }
-      matchDetails.indoorOutdoor = {
+      const locationScore = date.location === answers.location ? locationWeight : 0;
+      score += locationScore;
+      contributions.location = locationScore;
+      matchDetails.location = {
         dateValue: date.location,
-        userValue: answers.indoorOutdoor,
-        exact_match: answers.indoorOutdoor === "noPreference" || date.location === answers.indoorOutdoor,
+        userValue: answers.location,
+        exact_match: date.location === answers.location,
         weight: locationWeight,
         score: locationScore
       };
 
       // Interests (Multiple Choice)
-      const interestsWeight = weights.interests || 1;
+      const interestsWeight = weights.interests;
       totalWeight += interestsWeight;
       const interestsSimilarity = calculateSimilarity(
         date.interests,
@@ -292,22 +242,11 @@ const Home = () => {
       };
 
       // Group Size
-      const groupSizeWeight = weights.groupSize || 1;
+      const groupSizeWeight = weights.groupSize;
       totalWeight += groupSizeWeight;
-      let groupSizeScore = 0;
-      if (answers.groupSize) {
-        if (date.group_size === answers.groupSize) {
-          groupSizeScore = groupSizeWeight;
-          score += groupSizeWeight;
-          contributions.groupSize = groupSizeWeight;
-        } else {
-          contributions.groupSize = 0;
-        }
-      } else {
-        groupSizeScore = groupSizeWeight / 2;
-        score += groupSizeWeight / 2;
-        contributions.groupSize = groupSizeWeight / 2;
-      }
+      const groupSizeScore = date.group_size === answers.groupSize ? groupSizeWeight : 0;
+      score += groupSizeScore;
+      contributions.groupSize = groupSizeScore;
       matchDetails.groupSize = {
         dateValue: date.group_size,
         userValue: answers.groupSize,
@@ -317,36 +256,39 @@ const Home = () => {
       };
 
       // Time of Day
-      const timeOfDayWeight = weights.timeOfDay || 1;
-      totalWeight += timeOfDayWeight;
-      let timeOfDayScore = 0;
-      if (answers.time_of_day) {
-        if (date.time_of_day === answers.time_of_day) {
-          timeOfDayScore = timeOfDayWeight;
-          score += timeOfDayWeight;
-          contributions.timeOfDay = timeOfDayWeight;
-        } else {
-          contributions.timeOfDay = 0;
-        }
-      } else {
-        timeOfDayScore = timeOfDayWeight / 2;
-        score += timeOfDayWeight / 2;
-        contributions.timeOfDay = timeOfDayWeight / 2;
-      }
+      const timeWeight = weights.time_of_day;
+      totalWeight += timeWeight;
+      const timeScore = date.time_of_day === answers.time_of_day ? timeWeight : 0;
+      score += timeScore;
+      contributions.timeOfDay = timeScore;
       matchDetails.timeOfDay = {
         dateValue: date.time_of_day,
         userValue: answers.time_of_day,
         exact_match: date.time_of_day === answers.time_of_day,
-        weight: timeOfDayWeight,
-        score: timeOfDayScore
+        weight: timeWeight,
+        score: timeScore
       };
 
-      // Calculate normalized score
+      // Season
+      const seasonWeight = weights.season;
+      totalWeight += seasonWeight;
+      const seasonScore = (answers.season === "noPreference" || date.season === answers.season) ? seasonWeight : 0;
+      score += seasonScore;
+      contributions.season = seasonScore;
+      matchDetails.season = {
+        dateValue: date.season,
+        userValue: answers.season,
+        exact_match: answers.season === "noPreference" || date.season === answers.season,
+        weight: seasonWeight,
+        score: seasonScore
+      };
+
+      // Calculate normalized score (0 to 1)
       const normalizedScore = score / totalWeight;
 
-      return { 
-        ...date, 
-        score: normalizedScore, 
+      return {
+        ...date,
+        score: normalizedScore,
         contributions,
         matchDetails,
         rawScore: score,
@@ -382,33 +324,30 @@ const Home = () => {
       avg: (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(4),
       median: scores.sort((a, b) => a - b)[Math.floor(scores.length / 2)].toFixed(4)
     };
-    
+
     console.log('\n=== SCORE DISTRIBUTION ===');
     console.log(JSON.stringify(stats, null, 2));
 
-    // Continue with the existing logic
-    const sortedDates = scoredDates.sort((a, b) => b.score - a.score);
-    const highestScore = sortedDates[0]?.score || 0;
-    const topScoringDates = sortedDates.filter(
-      (date) => date.score === highestScore
-    );
-    const shuffledTopScoringDates = shuffleArray(topScoringDates);
-    const bestMatch = shuffledTopScoringDates[0] || null;
-
-    if (!bestMatch) {
-      console.error("No matching date ideas found.");
+    // Select matches with a minimum threshold
+    const threshold = 0.3; // 30% match or better
+    const goodMatches = scoredDates.filter(date => date.score >= threshold);
+    
+    if (goodMatches.length === 0) {
+      console.error("No matching date ideas found above threshold.");
       return;
     }
 
+    // Randomly select from top matches
+    const topMatches = goodMatches.filter(date => date.score >= goodMatches[0].score * 0.9);
+    const selectedMatch = topMatches[Math.floor(Math.random() * topMatches.length)];
+
     try {
-      // Fetch the full date idea from the server to get the image_url
-      const response = await api.get(`/dates/${bestMatch.id}`);
+      const response = await api.get(`/dates/${selectedMatch.id}`);
       const fetchedDateIdea = response.data;
       setCurrentSuggestion(fetchedDateIdea);
     } catch (error) {
       console.error("Error fetching date idea:", error);
-      // Fallback to the bestMatch without image_url if fetching fails
-      setCurrentSuggestion(bestMatch);
+      setCurrentSuggestion(selectedMatch);
     }
 
     setStage("suggestion");
