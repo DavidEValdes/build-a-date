@@ -129,6 +129,7 @@ const Home = () => {
   const [sharedSuggestions, setSharedSuggestions] = useState(new Set());
   const [savedSuggestions, setSavedSuggestions] = useState(new Set());
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const allSuggestions = currentSuggestion ? [currentSuggestion, ...alternativeSuggestions] : [];
 
@@ -154,365 +155,373 @@ const Home = () => {
   });
 
   const handleQuestionnaireComplete = async (answers) => {
-    console.log('\n=== USER PREFERENCES ===');
-    console.log(JSON.stringify(answers, null, 2));
+    setIsProcessing(true); // Start loading
+    try {
+      console.log('\n=== USER PREFERENCES ===');
+      console.log(JSON.stringify(answers, null, 2));
 
-    const calculateSimilarity = (arr1, arr2) => {
-      // Ensure arrays are defined and convert non-arrays to empty arrays
-      const array1 = Array.isArray(arr1) ? arr1 : [];
-      const array2 = Array.isArray(arr2) ? arr2 : [];
+      const calculateSimilarity = (arr1, arr2) => {
+        // Ensure arrays are defined and convert non-arrays to empty arrays
+        const array1 = Array.isArray(arr1) ? arr1 : [];
+        const array2 = Array.isArray(arr2) ? arr2 : [];
+        
+        // If both arrays are empty, return 1 (100% similar)
+        if (array1.length === 0 && array2.length === 0) return 1;
+        
+        // If one array is empty and the other isn't, return 0 (0% similar)
+        if (array1.length === 0 || array2.length === 0) return 0;
+        
+        // Calculate similarity using sets
+        const set1 = new Set(array1);
+        const set2 = new Set(array2);
+        const intersection = [...set1].filter(x => set2.has(x)).length;
+        const union = new Set([...set1, ...set2]).size;
+        
+        return intersection / union;
+      };
+
+      console.log('\n=== WEIGHTS USED ===');
+      console.log(JSON.stringify(weights, null, 2));
+
+      const scoredDates = allDates.map((date) => {
+        let score = 0;
+        let totalWeight = 0;
+        const contributions = {};
+        const matchDetails = {};
+
+        // Activity Types (Multiple Choice)
+        const activityWeight = weights.activityTypes;
+        totalWeight += activityWeight;
+        const activitySimilarity = calculateSimilarity(
+          date.activity_types,
+          answers.activityTypes || []
+        );
+        const activityScore = activitySimilarity * activityWeight;
+        score += activityScore;
+        contributions.activityTypes = activityScore;
+        matchDetails.activityTypes = {
+          dateValue: date.activity_types,
+          userValue: answers.activityTypes || [],
+          similarity: activitySimilarity,
+          weight: activityWeight,
+          score: activityScore
+        };
+
+        // Atmosphere
+        const atmosphereWeight = weights.atmosphere;
+        totalWeight += atmosphereWeight;
+        const atmosphereScore = date.atmosphere === answers.atmosphere ? atmosphereWeight : 0;
+        score += atmosphereScore;
+        contributions.atmosphere = atmosphereScore;
+        matchDetails.atmosphere = {
+          dateValue: date.atmosphere,
+          userValue: answers.atmosphere,
+          exact_match: date.atmosphere === answers.atmosphere,
+          weight: atmosphereWeight,
+          score: atmosphereScore
+        };
+
+        // Budget
+        const budgetWeight = weights.budget;
+        totalWeight += budgetWeight;
+        const budgetDifference = Math.abs(
+          budgetLevels[date.cost_category] - budgetLevels[answers.budget]
+        );
+        const budgetScore = budgetDifference === 0 ? budgetWeight : 
+                           budgetDifference === 1 ? budgetWeight * 0.6 : // Increased partial credit
+                           budgetDifference === 2 ? budgetWeight * 0.3 : 0; // Added partial credit for 2-level difference
+        score += budgetScore;
+        contributions.budget = budgetScore;
+        matchDetails.budget = {
+          dateValue: date.cost_category,
+          userValue: answers.budget,
+          budgetDifference: budgetDifference,
+          weight: budgetWeight,
+          score: budgetScore
+        };
+
+        // Location matching - improved handling for "both" option
+        const locationWeight = weights.location;
+        totalWeight += locationWeight;
+        const locationScore = answers.location === "both" ? 
+          locationWeight * 0.8 : // Partial credit for "both" to avoid over-scoring
+          date.location === answers.location ? locationWeight :
+          date.location === "both" ? locationWeight * 0.6 : 0; // Partial credit for date ideas that work in both locations
+        score += locationScore;
+        contributions.location = locationScore;
+        matchDetails.location = {
+          dateValue: date.location,
+          userValue: answers.location,
+          exact_match: answers.location === "both" || date.location === answers.location,
+          weight: locationWeight,
+          score: locationScore
+        };
+
+        // Add debug logging
+        console.log(`\n=== Processing date: ${date.title} ===`);
+        console.log('Location score:', locationScore);
+        console.log('Total score so far:', score);
+
+        // Interests (Multiple Choice)
+        const interestsWeight = weights.interests;
+        totalWeight += interestsWeight;
+        const interestsSimilarity = calculateSimilarity(
+          date.interests,
+          answers.interests || []
+        );
+        const interestsScore = interestsSimilarity * interestsWeight;
+        score += interestsScore;
+        contributions.interests = interestsScore;
+        matchDetails.interests = {
+          dateValue: date.interests,
+          userValue: answers.interests || [],
+          similarity: interestsSimilarity,
+          weight: interestsWeight,
+          score: interestsScore
+        };
+
+        // Group Size
+        const groupSizeWeight = weights.groupSize;
+        totalWeight += groupSizeWeight;
+        let groupSizeScore = 0;
+        
+        // Define group size compatibility
+        const groupSizeCompatibility = {
+          individual: ["individual", "couple"],
+          couple: ["couple", "smallGroup"],
+          smallGroup: ["couple", "smallGroup", "largeGroup"],
+          largeGroup: ["smallGroup", "largeGroup"]
+        };
+
+        if (date.group_size === answers.groupSize) {
+          groupSizeScore = groupSizeWeight; // Perfect match
+        } else if (groupSizeCompatibility[answers.groupSize]?.includes(date.group_size)) {
+          groupSizeScore = groupSizeWeight * 0.7; // Compatible match
+        }
+
+        score += groupSizeScore;
+        contributions.groupSize = groupSizeScore;
+        matchDetails.groupSize = {
+          dateValue: date.group_size,
+          userValue: answers.groupSize,
+          compatibility: groupSizeScore / groupSizeWeight,
+          weight: groupSizeWeight,
+          score: groupSizeScore
+        };
+
+        // Time of Day
+        const timeWeight = weights.time_of_day;
+        totalWeight += timeWeight;
+        const timeScore = date.time_of_day === answers.time_of_day ? timeWeight : 0;
+        score += timeScore;
+        contributions.timeOfDay = timeScore;
+        matchDetails.timeOfDay = {
+          dateValue: date.time_of_day,
+          userValue: answers.time_of_day,
+          exact_match: date.time_of_day === answers.time_of_day,
+          weight: timeWeight,
+          score: timeScore
+        };
+
+        // Season
+        const seasonWeight = weights.season;
+        totalWeight += seasonWeight;
+        const seasonScore = answers.season === "noPreference" ? seasonWeight * 0.5 :
+                           date.season === "noPreference" ? seasonWeight * 0.5 :
+                           date.season === answers.season ? seasonWeight : 0;
+        score += seasonScore;
+        contributions.season = seasonScore;
+        matchDetails.season = {
+          dateValue: date.season,
+          userValue: answers.season,
+          exact_match: date.season === answers.season,
+          weight: seasonWeight,
+          score: seasonScore
+        };
+
+        // Calculate normalized score (0 to 1)
+        const maxPossibleScore = Object.values(weights).reduce((sum, weight) => sum + weight, 0);
+        const normalizedScore = score / maxPossibleScore;
+
+        return {
+          ...date,
+          score: normalizedScore,
+          contributions,
+          matchDetails,
+          rawScore: score,
+          totalWeight: maxPossibleScore
+        };
+      });
+
+      // Select matches with a higher minimum threshold
+      const threshold = answers.groupSize === 'largeGroup' ? 0.38 : 0.42;
+      const goodMatches = scoredDates.filter(date => date.score >= threshold);
       
-      // If both arrays are empty, return 1 (100% similar)
-      if (array1.length === 0 && array2.length === 0) return 1;
-      
-      // If one array is empty and the other isn't, return 0 (0% similar)
-      if (array1.length === 0 || array2.length === 0) return 0;
-      
-      // Calculate similarity using sets
-      const set1 = new Set(array1);
-      const set2 = new Set(array2);
-      const intersection = [...set1].filter(x => set2.has(x)).length;
-      const union = new Set([...set1, ...set2]).size;
-      
-      return intersection / union;
-    };
-
-    console.log('\n=== WEIGHTS USED ===');
-    console.log(JSON.stringify(weights, null, 2));
-
-    const scoredDates = allDates.map((date) => {
-      let score = 0;
-      let totalWeight = 0;
-      const contributions = {};
-      const matchDetails = {};
-
-      // Activity Types (Multiple Choice)
-      const activityWeight = weights.activityTypes;
-      totalWeight += activityWeight;
-      const activitySimilarity = calculateSimilarity(
-        date.activity_types,
-        answers.activityTypes || []
-      );
-      const activityScore = activitySimilarity * activityWeight;
-      score += activityScore;
-      contributions.activityTypes = activityScore;
-      matchDetails.activityTypes = {
-        dateValue: date.activity_types,
-        userValue: answers.activityTypes || [],
-        similarity: activitySimilarity,
-        weight: activityWeight,
-        score: activityScore
-      };
-
-      // Atmosphere
-      const atmosphereWeight = weights.atmosphere;
-      totalWeight += atmosphereWeight;
-      const atmosphereScore = date.atmosphere === answers.atmosphere ? atmosphereWeight : 0;
-      score += atmosphereScore;
-      contributions.atmosphere = atmosphereScore;
-      matchDetails.atmosphere = {
-        dateValue: date.atmosphere,
-        userValue: answers.atmosphere,
-        exact_match: date.atmosphere === answers.atmosphere,
-        weight: atmosphereWeight,
-        score: atmosphereScore
-      };
-
-      // Budget
-      const budgetWeight = weights.budget;
-      totalWeight += budgetWeight;
-      const budgetDifference = Math.abs(
-        budgetLevels[date.cost_category] - budgetLevels[answers.budget]
-      );
-      const budgetScore = budgetDifference === 0 ? budgetWeight : 
-                         budgetDifference === 1 ? budgetWeight * 0.6 : // Increased partial credit
-                         budgetDifference === 2 ? budgetWeight * 0.3 : 0; // Added partial credit for 2-level difference
-      score += budgetScore;
-      contributions.budget = budgetScore;
-      matchDetails.budget = {
-        dateValue: date.cost_category,
-        userValue: answers.budget,
-        budgetDifference: budgetDifference,
-        weight: budgetWeight,
-        score: budgetScore
-      };
-
-      // Location matching - improved handling for "both" option
-      const locationWeight = weights.location;
-      totalWeight += locationWeight;
-      const locationScore = answers.location === "both" ? 
-        locationWeight * 0.8 : // Partial credit for "both" to avoid over-scoring
-        date.location === answers.location ? locationWeight :
-        date.location === "both" ? locationWeight * 0.6 : 0; // Partial credit for date ideas that work in both locations
-      score += locationScore;
-      contributions.location = locationScore;
-      matchDetails.location = {
-        dateValue: date.location,
-        userValue: answers.location,
-        exact_match: answers.location === "both" || date.location === answers.location,
-        weight: locationWeight,
-        score: locationScore
-      };
-
-      // Add debug logging
-      console.log(`\n=== Processing date: ${date.title} ===`);
-      console.log('Location score:', locationScore);
-      console.log('Total score so far:', score);
-
-      // Interests (Multiple Choice)
-      const interestsWeight = weights.interests;
-      totalWeight += interestsWeight;
-      const interestsSimilarity = calculateSimilarity(
-        date.interests,
-        answers.interests || []
-      );
-      const interestsScore = interestsSimilarity * interestsWeight;
-      score += interestsScore;
-      contributions.interests = interestsScore;
-      matchDetails.interests = {
-        dateValue: date.interests,
-        userValue: answers.interests || [],
-        similarity: interestsSimilarity,
-        weight: interestsWeight,
-        score: interestsScore
-      };
-
-      // Group Size
-      const groupSizeWeight = weights.groupSize;
-      totalWeight += groupSizeWeight;
-      let groupSizeScore = 0;
-      
-      // Define group size compatibility
-      const groupSizeCompatibility = {
-        individual: ["individual", "couple"],
-        couple: ["couple", "smallGroup"],
-        smallGroup: ["couple", "smallGroup", "largeGroup"],
-        largeGroup: ["smallGroup", "largeGroup"]
-      };
-
-      if (date.group_size === answers.groupSize) {
-        groupSizeScore = groupSizeWeight; // Perfect match
-      } else if (groupSizeCompatibility[answers.groupSize]?.includes(date.group_size)) {
-        groupSizeScore = groupSizeWeight * 0.7; // Compatible match
-      }
-
-      score += groupSizeScore;
-      contributions.groupSize = groupSizeScore;
-      matchDetails.groupSize = {
-        dateValue: date.group_size,
-        userValue: answers.groupSize,
-        compatibility: groupSizeScore / groupSizeWeight,
-        weight: groupSizeWeight,
-        score: groupSizeScore
-      };
-
-      // Time of Day
-      const timeWeight = weights.time_of_day;
-      totalWeight += timeWeight;
-      const timeScore = date.time_of_day === answers.time_of_day ? timeWeight : 0;
-      score += timeScore;
-      contributions.timeOfDay = timeScore;
-      matchDetails.timeOfDay = {
-        dateValue: date.time_of_day,
-        userValue: answers.time_of_day,
-        exact_match: date.time_of_day === answers.time_of_day,
-        weight: timeWeight,
-        score: timeScore
-      };
-
-      // Season
-      const seasonWeight = weights.season;
-      totalWeight += seasonWeight;
-      const seasonScore = answers.season === "noPreference" ? seasonWeight * 0.5 :
-                         date.season === "noPreference" ? seasonWeight * 0.5 :
-                         date.season === answers.season ? seasonWeight : 0;
-      score += seasonScore;
-      contributions.season = seasonScore;
-      matchDetails.season = {
-        dateValue: date.season,
-        userValue: answers.season,
-        exact_match: date.season === answers.season,
-        weight: seasonWeight,
-        score: seasonScore
-      };
-
-      // Calculate normalized score (0 to 1)
-      const maxPossibleScore = Object.values(weights).reduce((sum, weight) => sum + weight, 0);
-      const normalizedScore = score / maxPossibleScore;
-
-      return {
-        ...date,
-        score: normalizedScore,
-        contributions,
-        matchDetails,
-        rawScore: score,
-        totalWeight: maxPossibleScore
-      };
-    });
-
-    // Select matches with a higher minimum threshold
-    const threshold = answers.groupSize === 'largeGroup' ? 0.38 : 0.42;
-    const goodMatches = scoredDates.filter(date => date.score >= threshold);
-    
-    if (goodMatches.length === 0) {
-      console.log('\n=== No matches above threshold ===');
-      console.log('Threshold:', threshold);
-      console.log('Number of scored dates:', scoredDates.length);
-      console.log('Top 3 scores:', scoredDates
-        .sort((a, b) => b.score - a.score)
-        .slice(0, 3)
-        .map(d => ({title: d.title, score: d.score}))
-      );
-      
-      const fallbackThreshold = 0.32; // Slightly lowered fallback threshold
-      console.log('Trying fallback threshold:', fallbackThreshold);
-      const fallbackMatches = scoredDates.filter(date => date.score >= fallbackThreshold);
-      
-      if (fallbackMatches.length === 0) {
-        console.error("No matching date ideas found above fallback threshold.");
-        console.log('Lowest required score:', fallbackThreshold);
-        console.log('Highest available score:', Math.max(...scoredDates.map(d => d.score)));
+      if (goodMatches.length === 0) {
+        console.log('\n=== No matches above threshold ===');
+        console.log('Threshold:', threshold);
+        console.log('Number of scored dates:', scoredDates.length);
+        console.log('Top 3 scores:', scoredDates
+          .sort((a, b) => b.score - a.score)
+          .slice(0, 3)
+          .map(d => ({title: d.title, score: d.score}))
+        );
+        
+        const fallbackThreshold = 0.32; // Slightly lowered fallback threshold
+        console.log('Trying fallback threshold:', fallbackThreshold);
+        const fallbackMatches = scoredDates.filter(date => date.score >= fallbackThreshold);
+        
+        if (fallbackMatches.length === 0) {
+          console.error("No matching date ideas found above fallback threshold.");
+          console.log('Lowest required score:', fallbackThreshold);
+          console.log('Highest available score:', Math.max(...scoredDates.map(d => d.score)));
+          return;
+        }
+        
+        console.log('Found fallback matches:', fallbackMatches.length);
+        // Take top 5 matches and randomly select one
+        const topFallbackMatches = fallbackMatches
+          .sort((a, b) => b.score - a.score)
+          .slice(0, 5);
+        const selectedMatch = topFallbackMatches[Math.floor(Math.random() * topFallbackMatches.length)];
+        setCurrentSuggestion(selectedMatch);
         return;
       }
-      
-      console.log('Found fallback matches:', fallbackMatches.length);
-      // Take top 5 matches and randomly select one
-      const topFallbackMatches = fallbackMatches
-        .sort((a, b) => b.score - a.score)
-        .slice(0, 5);
-      const selectedMatch = topFallbackMatches[Math.floor(Math.random() * topFallbackMatches.length)];
-      setCurrentSuggestion(selectedMatch);
-      return;
-    }
 
-    // First deduplicate by title to avoid exact duplicates
-    const uniqueMatches = goodMatches.reduce((acc, match) => {
-      if (!acc.some(m => m.title === match.title)) {
-        acc.push(match);
-      }
-      return acc;
-    }, []);
-
-    // Take top matches that are sufficiently different from each other
-    const diverseMatches = uniqueMatches
-      .sort((a, b) => b.score - a.score)
-      .reduce((acc, match) => {
-        // Only add if sufficiently different from existing matches
-        const isDifferent = acc.every(existingMatch => {
-          // Calculate various similarity scores with improved weights
-          const activityOverlap = match.activity_types.filter(type => 
-            existingMatch.activity_types.includes(type)
-          ).length / Math.max(match.activity_types.length, existingMatch.activity_types.length);
-          
-          const interestOverlap = match.interests.filter(interest => 
-            existingMatch.interests.includes(interest)
-          ).length / Math.max(match.interests.length, existingMatch.interests.length);
-          
-          const sameBudget = match.cost_category === existingMatch.cost_category;
-          const sameLocation = match.location === existingMatch.location;
-          const sameAtmosphere = match.atmosphere === existingMatch.atmosphere;
-          
-          // Calculate an overall similarity score (0 to 1) with adjusted weights
-          const similarityScore = (
-            (activityOverlap * 2.5) +     // Increased weight for activity diversity
-            (interestOverlap * 2.5) +     // Increased weight for interest diversity
-            (sameBudget ? 0.8 : 0) +      // Reduced impact of same budget
-            (sameLocation ? 0.8 : 0) +    // Reduced impact of same location
-            (sameAtmosphere ? 1.4 : 0)    // Increased impact of same atmosphere
-          ) / 8; // Normalize by new total possible score (2.5+2.5+0.8+0.8+1.4 = 8)
-          
-          return similarityScore < 0.55; // Slightly reduced similarity threshold for more diversity
-        });
-
-        if (isDifferent || acc.length < 3) { // Keep allowing up to 3 diverse matches
+      // First deduplicate by title to avoid exact duplicates
+      const uniqueMatches = goodMatches.reduce((acc, match) => {
+        if (!acc.some(m => m.title === match.title)) {
           acc.push(match);
         }
         return acc;
-    }, []);
+      }, []);
 
-    // If we don't have enough diverse matches, add more from unique matches
-    while (diverseMatches.length < 3 && diverseMatches.length < uniqueMatches.length) {
-      const nextBestMatch = uniqueMatches.find(match => 
-        !diverseMatches.some(m => m.title === match.title)
-      );
-      if (nextBestMatch) {
-        diverseMatches.push(nextBestMatch);
-      } else {
-        break;
+      // Take top matches that are sufficiently different from each other
+      const diverseMatches = uniqueMatches
+        .sort((a, b) => b.score - a.score)
+        .reduce((acc, match) => {
+          // Only add if sufficiently different from existing matches
+          const isDifferent = acc.every(existingMatch => {
+            // Calculate various similarity scores with improved weights
+            const activityOverlap = match.activity_types.filter(type => 
+              existingMatch.activity_types.includes(type)
+            ).length / Math.max(match.activity_types.length, existingMatch.activity_types.length);
+            
+            const interestOverlap = match.interests.filter(interest => 
+              existingMatch.interests.includes(interest)
+            ).length / Math.max(match.interests.length, existingMatch.interests.length);
+            
+            const sameBudget = match.cost_category === existingMatch.cost_category;
+            const sameLocation = match.location === existingMatch.location;
+            const sameAtmosphere = match.atmosphere === existingMatch.atmosphere;
+            
+            // Calculate an overall similarity score (0 to 1) with adjusted weights
+            const similarityScore = (
+              (activityOverlap * 2.5) +     // Increased weight for activity diversity
+              (interestOverlap * 2.5) +     // Increased weight for interest diversity
+              (sameBudget ? 0.8 : 0) +      // Reduced impact of same budget
+              (sameLocation ? 0.8 : 0) +    // Reduced impact of same location
+              (sameAtmosphere ? 1.4 : 0)    // Increased impact of same atmosphere
+            ) / 8; // Normalize by new total possible score (2.5+2.5+0.8+0.8+1.4 = 8)
+            
+            return similarityScore < 0.55; // Slightly reduced similarity threshold for more diversity
+          });
+
+          if (isDifferent || acc.length < 3) { // Keep allowing up to 3 diverse matches
+            acc.push(match);
+          }
+          return acc;
+      }, []);
+
+      // If we don't have enough diverse matches, add more from unique matches
+      while (diverseMatches.length < 3 && diverseMatches.length < uniqueMatches.length) {
+        const nextBestMatch = uniqueMatches.find(match => 
+          !diverseMatches.some(m => m.title === match.title)
+        );
+        if (nextBestMatch) {
+          diverseMatches.push(nextBestMatch);
+        } else {
+          break;
+        }
       }
-    }
 
-    // Log detailed matching results after diversity filtering
-    console.log('\n=== MATCHING RESULTS ===');
-    const topResults = diverseMatches
-      .map(date => ({
-        title: date.title,
-        normalizedScore: date.score.toFixed(4),
-        rawScore: date.rawScore.toFixed(4),
-        totalWeight: date.totalWeight,
-        contributions: Object.entries(date.contributions).map(([key, value]) => ({
-          category: key,
-          contribution: value.toFixed(4)
-        })),
-        matchDetails: date.matchDetails
-      }));
+      // Log detailed matching results after diversity filtering
+      console.log('\n=== MATCHING RESULTS ===');
+      const topResults = diverseMatches
+        .map(date => ({
+          title: date.title,
+          normalizedScore: date.score.toFixed(4),
+          rawScore: date.rawScore.toFixed(4),
+          totalWeight: date.totalWeight,
+          contributions: Object.entries(date.contributions).map(([key, value]) => ({
+            category: key,
+            contribution: value.toFixed(4)
+          })),
+          matchDetails: date.matchDetails
+        }));
 
-    console.log('Top Diverse Matches:');
-    console.log(JSON.stringify(topResults, null, 2));
+      console.log('Top Diverse Matches:');
+      console.log(JSON.stringify(topResults, null, 2));
 
-    // Distribution Analysis
-    const scores = scoredDates.map(d => d.score);
-    const stats = {
-      min: Math.min(...scores).toFixed(4),
-      max: Math.max(...scores).toFixed(4),
-      avg: (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(4),
-      median: scores.sort((a, b) => a - b)[Math.floor(scores.length / 2)].toFixed(4)
-    };
+      // Distribution Analysis
+      const scores = scoredDates.map(d => d.score);
+      const stats = {
+        min: Math.min(...scores).toFixed(4),
+        max: Math.max(...scores).toFixed(4),
+        avg: (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(4),
+        median: scores.sort((a, b) => a - b)[Math.floor(scores.length / 2)].toFixed(4)
+      };
 
-    console.log('\n=== SCORE DISTRIBUTION ===');
-    console.log(JSON.stringify(stats, null, 2));
+      console.log('\n=== SCORE DISTRIBUTION ===');
+      console.log(JSON.stringify(stats, null, 2));
 
-    // Randomly select from the diverse matches, weighted by score
-    const totalScore = diverseMatches.reduce((sum, match) => sum + match.score, 0);
-    const randomValue = Math.random() * totalScore;
-    let currentSum = 0;
-    const selectedMatch = diverseMatches.find(match => {
-      currentSum += match.score;
-      return currentSum >= randomValue;
-    }) || diverseMatches[0];
+      // Randomly select from the diverse matches, weighted by score
+      const totalScore = diverseMatches.reduce((sum, match) => sum + match.score, 0);
+      const randomValue = Math.random() * totalScore;
+      let currentSum = 0;
+      const selectedMatch = diverseMatches.find(match => {
+        currentSum += match.score;
+        return currentSum >= randomValue;
+      }) || diverseMatches[0];
 
-    try {
-      const response = await api.get(`/dates/${selectedMatch.id}`);
-      const fetchedDateIdea = response.data;
-      
-      // Get the other matches (excluding the selected one)
-      const alternativeMatches = diverseMatches
-        .filter(match => match.id !== selectedMatch.id)
-        .slice(0, 2); // Take up to 2 alternatives
+      try {
+        const response = await api.get(`/dates/${selectedMatch.id}`);
+        const fetchedDateIdea = response.data;
         
-      console.log('Alternative matches before fetch:', alternativeMatches); // Debug log
-      
-      // Fetch full details for alternative matches
-      const alternativeFetches = await Promise.all(
-        alternativeMatches.map(match => api.get(`/dates/${match.id}`))
-      );
-      const alternativeSuggestions = alternativeFetches.map(response => response.data);
-      
-      console.log('Alternative suggestions after fetch:', alternativeSuggestions); // Debug log
+        // Get the other matches (excluding the selected one)
+        const alternativeMatches = diverseMatches
+          .filter(match => match.id !== selectedMatch.id)
+          .slice(0, 2); // Take up to 2 alternatives
+          
+        console.log('Alternative matches before fetch:', alternativeMatches); // Debug log
+        
+        // Fetch full details for alternative matches
+        const alternativeFetches = await Promise.all(
+          alternativeMatches.map(match => api.get(`/dates/${match.id}`))
+        );
+        const alternativeSuggestions = alternativeFetches.map(response => response.data);
+        
+        console.log('Alternative suggestions after fetch:', alternativeSuggestions); // Debug log
 
-      setCurrentSuggestion(fetchedDateIdea);
-      setAlternativeSuggestions(alternativeSuggestions);
+        setCurrentSuggestion(fetchedDateIdea);
+        setAlternativeSuggestions(alternativeSuggestions);
+      } catch (error) {
+        console.error("Error fetching date ideas:", error);
+        setCurrentSuggestion(selectedMatch);
+        const fallbackAlternatives = diverseMatches
+          .filter(match => match.id !== selectedMatch.id)
+          .slice(0, 2);
+        console.log('Fallback alternatives:', fallbackAlternatives); // Debug log
+        setAlternativeSuggestions(fallbackAlternatives);
+      }
+
+      setStage("suggestion");
     } catch (error) {
-      console.error("Error fetching date ideas:", error);
-      setCurrentSuggestion(selectedMatch);
-      const fallbackAlternatives = diverseMatches
-        .filter(match => match.id !== selectedMatch.id)
-        .slice(0, 2);
-      console.log('Fallback alternatives:', fallbackAlternatives); // Debug log
-      setAlternativeSuggestions(fallbackAlternatives);
+      console.error("Error processing questionnaire:", error);
+      alert("Something went wrong. Please try again.");
+    } finally {
+      setIsProcessing(false); // Stop loading regardless of outcome
     }
-
-    setStage("suggestion");
   };
 
   const handleShareToFeed = async () => {
@@ -828,7 +837,24 @@ const Home = () => {
 
         {/* Questions Stage */}
         {stage === "questions" && (
-          <QuestionPipeline onComplete={handleQuestionnaireComplete} />
+          <div style={{ position: 'relative' }}>
+            <QuestionPipeline onComplete={handleQuestionnaireComplete} />
+            {isProcessing && (
+              <div 
+                style={{
+                  maxWidth: '1200px',
+                  margin: '0 auto',
+                  padding: '1rem',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  height: '400px'
+                }}
+              >
+                <Spinner size={50} />
+              </div>
+            )}
+          </div>
         )}
 
         {/* Suggestion Stage */}
