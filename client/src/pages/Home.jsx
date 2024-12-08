@@ -746,8 +746,9 @@ const Home = () => {
               </button>
               <button
                 onClick={() => {
-                  setStage("welcome");
+                  setStage("questions");
                   setIsSaved(false);
+                  setCurrentSuggestion(null);
                 }}
                 className="secondary-button"
                 style={{

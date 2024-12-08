@@ -1,4 +1,4 @@
-import { useState, useCallback  } from "react";
+import { useState, useCallback, useEffect } from "react";
 import PropTypes from "prop-types";
 
 const questions = [
@@ -111,6 +111,12 @@ const QuestionPipeline = ({ onComplete }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState({});
   const [hasVisitedStep, setHasVisitedStep] = useState(new Set([0]));
+
+  useEffect(() => {
+    setCurrentStep(0);
+    setAnswers({});
+    setHasVisitedStep(new Set([0]));
+  }, []);
 
   const getSuggestionHint = useCallback((questionId, value) => {
     const hints = {
