@@ -180,7 +180,18 @@ const SavedDates = () => {
         <div className="saved-dates-header" style={{ marginBottom: "1rem" }}>
           <div
             className="header-with-divider"
-            style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
+            style={{ 
+              display: "flex", 
+              flexDirection: "column",
+              alignItems: "center",
+              gap: "1rem",
+              width: "100%",
+              "@media (min-width: 500px)": {
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }
+            }}
           >
             <h1
               className="saved-dates-title"
@@ -188,115 +199,114 @@ const SavedDates = () => {
                 fontSize: "2rem",
                 fontWeight: "bold",
                 color: "#000000",
+                margin: 0,
               }}
             >
               Saved Dates
             </h1>
-          </div>
-        </div>
 
-        {/* Sorting Menu (Placed Above the Divider) */}
-        <div
-          className="sort-container"
-          style={{
-            position: "relative",
-            display: "flex",
-            justifyContent: "flex-end",
-            marginBottom: "1rem",
-          }}
-          ref={dropdownRef}
-        >
-          <button
-            type="button"
-            onClick={() => setIsDropdownOpen((prev) => !prev)}
-            className="sort-toggle-button"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "0.5rem",
-              padding: "0.5rem 1rem",
-              borderRadius: "0.375rem",
-              border: "1px solid #e5e7eb",
-              backgroundColor: "#ffffff",
-              color: "#374151",
-              fontSize: "0.875rem",
-              cursor: "pointer",
-              transition: "all 0.2s ease",
-              minWidth: "150px",
-            }}
-            aria-haspopup="listbox"
-            aria-expanded={isDropdownOpen}
-          >
-            <SlidersHorizontal size={16} />
-            <span>
-              {sortOptions.find((opt) => opt.value === sortBy)?.label ||
-                "Sort By"}
-            </span>
-            {isDropdownOpen ? (
-              <ChevronUp size={16} />
-            ) : (
-              <ChevronDown size={16} />
-            )}
-          </button>
-
-          {isDropdownOpen && (
-            <ul
-              className="sort-dropdown"
+            {/* Sorting Menu */}
+            <div
+              className="sort-container"
               style={{
-                position: "absolute",
-                top: "110%",
-                right: 0,
-                width: "100%",
-                backgroundColor: "#ffffff",
-                border: "1px solid #e5e7eb",
-                borderRadius: "0.375rem",
-                boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-                zIndex: 10,
-                maxHeight: "200px",
-                overflowY: "auto",
-                marginTop: "0.5rem",
-                listStyle: "none",
-                padding: "0.5rem 0",
+                position: "relative",
+                display: "flex",
+                justifyContent: "center",
+                marginBottom: "1rem",
               }}
-              role="listbox"
+              ref={dropdownRef}
             >
-              {sortOptions.map((option) => (
-                <li
-                  key={option.value}
-                  onClick={() => {
-                    setSortBy(option.value);
-                    setIsDropdownOpen(false);
-                  }}
-                  className="sort-option"
+              <button
+                type="button"
+                onClick={() => setIsDropdownOpen((prev) => !prev)}
+                className="sort-toggle-button"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.5rem",
+                  padding: "0.5rem 1rem",
+                  borderRadius: "0.375rem",
+                  border: "1px solid #e5e7eb",
+                  backgroundColor: "#ffffff",
+                  color: "#374151",
+                  fontSize: "0.875rem",
+                  cursor: "pointer",
+                  transition: "all 0.2s ease",
+                  minWidth: "150px",
+                }}
+              >
+                <SlidersHorizontal size={16} />
+                <span>
+                  {sortOptions.find((opt) => opt.value === sortBy)?.label ||
+                    "Sort By"}
+                </span>
+                {isDropdownOpen ? (
+                  <ChevronUp size={16} />
+                ) : (
+                  <ChevronDown size={16} />
+                )}
+              </button>
+
+              {isDropdownOpen && (
+                <ul
+                  className="sort-dropdown"
                   style={{
-                    padding: "0.5rem 1rem",
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "0.5rem",
-                    transition: "background-color 0.2s ease",
-                    backgroundColor:
-                      sortBy === option.value ? "#f3f4f6" : "#ffffff",
-                    fontSize: "0.875rem",
+                    position: "absolute",
+                    top: "110%",
+                    right: 0,
+                    width: "100%",
+                    backgroundColor: "#ffffff",
+                    border: "1px solid #e5e7eb",
+                    borderRadius: "0.375rem",
+                    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+                    zIndex: 10,
+                    maxHeight: "200px",
+                    overflowY: "auto",
+                    marginTop: "0.5rem",
+                    listStyle: "none",
+                    padding: "0.5rem 0",
                   }}
-                  role="option"
-                  aria-selected={sortBy === option.value}
-                  onMouseOver={(e) =>
-                    (e.currentTarget.style.backgroundColor = "#f3f4f6")
-                  }
-                  onMouseOut={(e) =>
-                    (e.currentTarget.style.backgroundColor =
-                      sortBy === option.value ? "#f3f4f6" : "#ffffff")
-                  }
+                  role="listbox"
                 >
-                  {sortBy === option.value && (
-                    <span style={{ color: "#4f46e5" }}>&#10003;</span>
-                  )}
-                  {option.label}
-                </li>
-              ))}
-            </ul>
-          )}
+                  {sortOptions.map((option) => (
+                    <li
+                      key={option.value}
+                      onClick={() => {
+                        setSortBy(option.value);
+                        setIsDropdownOpen(false);
+                      }}
+                      className="sort-option"
+                      style={{
+                        padding: "0.5rem 1rem",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.5rem",
+                        transition: "background-color 0.2s ease",
+                        backgroundColor:
+                          sortBy === option.value ? "#f3f4f6" : "#ffffff",
+                        fontSize: "0.875rem",
+                      }}
+                      role="option"
+                      aria-selected={sortBy === option.value}
+                      onMouseOver={(e) =>
+                        (e.currentTarget.style.backgroundColor = "#f3f4f6")
+                      }
+                      onMouseOut={(e) =>
+                        (e.currentTarget.style.backgroundColor =
+                          sortBy === option.value ? "#f3f4f6" : "#ffffff")
+                      }
+                    >
+                      {sortBy === option.value && (
+                        <span style={{ color: "#4f46e5" }}>&#10003;</span>
+                      )}
+                      {option.label}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Divider */}
@@ -403,6 +413,16 @@ const SavedDates = () => {
 
           .sort-dropdown::-webkit-scrollbar-thumb:hover {
             background: #ccc;
+          }
+
+          @media (min-width: 500px) {
+            .header-with-divider {
+              flex-direction: row !important;
+              justify-content: space-between !important;
+            }
+            .sort-container {
+              margin-bottom: 0 !important;
+            }
           }
 
         `}
