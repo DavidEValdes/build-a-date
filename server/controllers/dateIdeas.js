@@ -188,7 +188,13 @@ const DateIdeasController = {
         location,
         cost_category,
         duration,
-        activity_type,
+        activity_types,
+        atmosphere,
+        time_of_day,
+        interests,
+        group_size,
+        season,
+        activity_level,
         image_url,
       } = req.body;
 
@@ -199,9 +205,15 @@ const DateIdeasController = {
                     location = COALESCE($3, location),
                     cost_category = COALESCE($4, cost_category),
                     duration = COALESCE($5, duration),
-                    activity_type = COALESCE($6, activity_type),
-                    image_url = COALESCE($7, image_url)
-                WHERE id = $8 AND creator_id = $9
+                    activity_types = COALESCE($6, activity_types),
+                    atmosphere = COALESCE($7, atmosphere),
+                    time_of_day = COALESCE($8, time_of_day),
+                    interests = COALESCE($9, interests),
+                    group_size = COALESCE($10, group_size),
+                    season = COALESCE($11, season),
+                    activity_level = COALESCE($12, activity_level),
+                    image_url = COALESCE($13, image_url)
+                WHERE id = $14 AND creator_id = $15
                 RETURNING *`,
         [
           title,
@@ -209,7 +221,13 @@ const DateIdeasController = {
           location,
           cost_category,
           duration,
-          activity_type,
+          activity_types,
+          atmosphere,
+          time_of_day,
+          interests,
+          group_size,
+          season,
+          activity_level,
           image_url,
           id,
           req.user.id,
@@ -224,6 +242,7 @@ const DateIdeasController = {
 
       res.json(results.rows[0]);
     } catch (error) {
+      console.error("Error updating date idea:", error);
       res.status(500).json({ error: error.message });
     }
   },

@@ -293,7 +293,6 @@ const DateDetail = () => {
                   { label: "Location", value: date.location },
                   { label: "Time of Day", value: date.time_of_day },
                   { label: "Activity Level", value: date.activity_level },
-                  { label: "Distance", value: date.distance },
                 ].map((item) => (
                   <div key={item.label} style={styles.detailItem}>
                     <span style={styles.detailLabel}>{item.label}</span>
@@ -571,26 +570,35 @@ const styles = {
     lineHeight: "1.5",
   },
   detailsGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))", // Adjusted minWidth for grid items
+    display: "flex",
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: "16px",
+    alignItems: "center",
+    justifyContent: "center",
+    width: "100%",
   },
   detailItem: {
-    backgroundColor: "#e2e8f0",
-    padding: "12px",
-    borderRadius: "10px",
-    boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05)",
     display: "flex",
     flexDirection: "column",
+    alignItems: "center",
+    textAlign: "center",
+    backgroundColor: "#f1f5f9",
+    padding: "16px 24px",
+    borderRadius: "8px",
+    flex: "1",
+    minWidth: "200px",
+    maxWidth: "250px",
   },
   detailLabel: {
-    fontSize: "0.8rem",
-    color: "#888888",
-    marginBottom: "3px",
+    fontSize: "0.875rem",
+    color: "#64748b",
+    marginBottom: "4px",
+    fontWeight: "500",
   },
   detailValue: {
-    fontSize: "0.95rem",
-    color: "#333333",
+    fontSize: "1rem",
+    color: "#1e293b",
     fontWeight: "600",
   },
   /* Interaction Section */
