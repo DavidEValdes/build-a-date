@@ -96,13 +96,13 @@ const fetchImageFromPexels = async (searchTerm) => {
   }
 };
 
-// Updated Weight Structure
+// Updated Weight Structure with refined weights
 const weights = {
-  atmosphere: 2,
+  atmosphere: 2.5,     // Increased weight for atmosphere
   activity_level: 2,
-  budget: 1,
+  budget: 1.5,         // Increased weight for budget
   season: 1,
-  location: 1,
+  location: 1.5,       // Increased weight for location
   time_of_day: 1,
   activityTypes: 2,
   interests: 2,
@@ -219,7 +219,8 @@ const Home = () => {
         budgetLevels[date.cost_category] - budgetLevels[answers.budget]
       );
       const budgetScore = budgetDifference === 0 ? budgetWeight : 
-                         budgetDifference === 1 ? budgetWeight * 0.5 : 0;
+                         budgetDifference === 1 ? budgetWeight * 0.6 : // Increased partial credit
+                         budgetDifference === 2 ? budgetWeight * 0.3 : 0; // Added partial credit for 2-level difference
       score += budgetScore;
       contributions.budget = budgetScore;
       matchDetails.budget = {
@@ -230,11 +231,13 @@ const Home = () => {
         score: budgetScore
       };
 
-      // Location matching - handle "both" option
+      // Location matching - improved handling for "both" option
       const locationWeight = weights.location;
       totalWeight += locationWeight;
-      const locationScore = answers.location === "both" ? locationWeight : // If user chose "both", any location is fine
-                           date.location === answers.location ? locationWeight : 0;
+      const locationScore = answers.location === "both" ? 
+        locationWeight * 0.8 : // Partial credit for "both" to avoid over-scoring
+        date.location === answers.location ? locationWeight :
+        date.location === "both" ? locationWeight * 0.6 : 0; // Partial credit for date ideas that work in both locations
       score += locationScore;
       contributions.location = locationScore;
       matchDetails.location = {
@@ -327,7 +330,7 @@ const Home = () => {
     });
 
     // Select matches with a higher minimum threshold
-    const threshold = 0.45; // Adjusted threshold since we're using max possible score
+    const threshold = 0.42; // Slightly lowered threshold for initial matches
     const goodMatches = scoredDates.filter(date => date.score >= threshold);
     
     if (goodMatches.length === 0) {
@@ -340,7 +343,7 @@ const Home = () => {
         .map(d => ({title: d.title, score: d.score}))
       );
       
-      const fallbackThreshold = 0.35; // Adjusted fallback threshold
+      const fallbackThreshold = 0.32; // Slightly lowered fallback threshold
       console.log('Trying fallback threshold:', fallbackThreshold);
       const fallbackMatches = scoredDates.filter(date => date.score >= fallbackThreshold);
       
@@ -375,7 +378,7 @@ const Home = () => {
       .reduce((acc, match) => {
         // Only add if sufficiently different from existing matches
         const isDifferent = acc.every(existingMatch => {
-          // Calculate various similarity scores
+          // Calculate various similarity scores with improved weights
           const activityOverlap = match.activity_types.filter(type => 
             existingMatch.activity_types.includes(type)
           ).length / Math.max(match.activity_types.length, existingMatch.activity_types.length);
@@ -388,19 +391,19 @@ const Home = () => {
           const sameLocation = match.location === existingMatch.location;
           const sameAtmosphere = match.atmosphere === existingMatch.atmosphere;
           
-          // Calculate an overall similarity score (0 to 1)
+          // Calculate an overall similarity score (0 to 1) with adjusted weights
           const similarityScore = (
-            (activityOverlap * 2) + // Weight activity overlap more
-            (interestOverlap * 2) + // Weight interest overlap more
-            (sameBudget ? 1 : 0) +
-            (sameLocation ? 1 : 0) +
-            (sameAtmosphere ? 1 : 0)
-          ) / 7; // Normalize by total possible score (2+2+1+1+1 = 7)
+            (activityOverlap * 2.5) +     // Increased weight for activity diversity
+            (interestOverlap * 2.5) +     // Increased weight for interest diversity
+            (sameBudget ? 0.8 : 0) +      // Reduced impact of same budget
+            (sameLocation ? 0.8 : 0) +    // Reduced impact of same location
+            (sameAtmosphere ? 1.4 : 0)    // Increased impact of same atmosphere
+          ) / 8; // Normalize by new total possible score (2.5+2.5+0.8+0.8+1.4 = 8)
           
-          return similarityScore < 0.6; // Must be less than 60% similar
+          return similarityScore < 0.55; // Slightly reduced similarity threshold for more diversity
         });
 
-        if (isDifferent || acc.length < 3) { // Allow up to 3 diverse matches
+        if (isDifferent || acc.length < 3) { // Keep allowing up to 3 diverse matches
           acc.push(match);
         }
         return acc;
