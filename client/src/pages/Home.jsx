@@ -218,7 +218,8 @@ const Home = () => {
       const budgetDifference = Math.abs(
         budgetLevels[date.cost_category] - budgetLevels[answers.budget]
       );
-      const budgetScore = Math.max(0, budgetWeight * (1 - budgetDifference / 4));
+      const budgetScore = budgetDifference === 0 ? budgetWeight : 
+                         budgetDifference === 1 ? budgetWeight * 0.5 : 0;
       score += budgetScore;
       contributions.budget = budgetScore;
       matchDetails.budget = {
@@ -229,19 +230,25 @@ const Home = () => {
         score: budgetScore
       };
 
-      // Location
+      // Location matching - handle "both" option
       const locationWeight = weights.location;
       totalWeight += locationWeight;
-      const locationScore = date.location === answers.location ? locationWeight : 0;
+      const locationScore = answers.location === "both" ? locationWeight : // If user chose "both", any location is fine
+                           date.location === answers.location ? locationWeight : 0;
       score += locationScore;
       contributions.location = locationScore;
       matchDetails.location = {
         dateValue: date.location,
         userValue: answers.location,
-        exact_match: date.location === answers.location,
+        exact_match: answers.location === "both" || date.location === answers.location,
         weight: locationWeight,
         score: locationScore
       };
+
+      // Add debug logging
+      console.log(`\n=== Processing date: ${date.title} ===`);
+      console.log('Location score:', locationScore);
+      console.log('Total score so far:', score);
 
       // Interests (Multiple Choice)
       const interestsWeight = weights.interests;
@@ -292,19 +299,22 @@ const Home = () => {
       // Season
       const seasonWeight = weights.season;
       totalWeight += seasonWeight;
-      const seasonScore = (answers.season === "noPreference" || date.season === answers.season) ? seasonWeight : 0;
+      const seasonScore = answers.season === "noPreference" ? seasonWeight * 0.5 :
+                         date.season === "noPreference" ? seasonWeight * 0.5 :
+                         date.season === answers.season ? seasonWeight : 0;
       score += seasonScore;
       contributions.season = seasonScore;
       matchDetails.season = {
         dateValue: date.season,
         userValue: answers.season,
-        exact_match: answers.season === "noPreference" || date.season === answers.season,
+        exact_match: date.season === answers.season,
         weight: seasonWeight,
         score: seasonScore
       };
 
       // Calculate normalized score (0 to 1)
-      const normalizedScore = score / totalWeight;
+      const maxPossibleScore = Object.values(weights).reduce((sum, weight) => sum + weight, 0);
+      const normalizedScore = score / maxPossibleScore;
 
       return {
         ...date,
@@ -312,15 +322,105 @@ const Home = () => {
         contributions,
         matchDetails,
         rawScore: score,
-        totalWeight
+        totalWeight: maxPossibleScore
       };
     });
 
-    // Log detailed matching results
-    console.log('\n=== MATCHING RESULTS ===');
-    const topResults = scoredDates
+    // Select matches with a higher minimum threshold
+    const threshold = 0.45; // Adjusted threshold since we're using max possible score
+    const goodMatches = scoredDates.filter(date => date.score >= threshold);
+    
+    if (goodMatches.length === 0) {
+      console.log('\n=== No matches above threshold ===');
+      console.log('Threshold:', threshold);
+      console.log('Number of scored dates:', scoredDates.length);
+      console.log('Top 3 scores:', scoredDates
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 3)
+        .map(d => ({title: d.title, score: d.score}))
+      );
+      
+      const fallbackThreshold = 0.35; // Adjusted fallback threshold
+      console.log('Trying fallback threshold:', fallbackThreshold);
+      const fallbackMatches = scoredDates.filter(date => date.score >= fallbackThreshold);
+      
+      if (fallbackMatches.length === 0) {
+        console.error("No matching date ideas found above fallback threshold.");
+        console.log('Lowest required score:', fallbackThreshold);
+        console.log('Highest available score:', Math.max(...scoredDates.map(d => d.score)));
+        return;
+      }
+      
+      console.log('Found fallback matches:', fallbackMatches.length);
+      // Take top 5 matches and randomly select one
+      const topFallbackMatches = fallbackMatches
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 5);
+      const selectedMatch = topFallbackMatches[Math.floor(Math.random() * topFallbackMatches.length)];
+      setCurrentSuggestion(selectedMatch);
+      return;
+    }
+
+    // First deduplicate by title to avoid exact duplicates
+    const uniqueMatches = goodMatches.reduce((acc, match) => {
+      if (!acc.some(m => m.title === match.title)) {
+        acc.push(match);
+      }
+      return acc;
+    }, []);
+
+    // Take top matches that are sufficiently different from each other
+    const diverseMatches = uniqueMatches
       .sort((a, b) => b.score - a.score)
-      .slice(0, 5)
+      .reduce((acc, match) => {
+        // Only add if sufficiently different from existing matches
+        const isDifferent = acc.every(existingMatch => {
+          // Calculate various similarity scores
+          const activityOverlap = match.activity_types.filter(type => 
+            existingMatch.activity_types.includes(type)
+          ).length / Math.max(match.activity_types.length, existingMatch.activity_types.length);
+          
+          const interestOverlap = match.interests.filter(interest => 
+            existingMatch.interests.includes(interest)
+          ).length / Math.max(match.interests.length, existingMatch.interests.length);
+          
+          const sameBudget = match.cost_category === existingMatch.cost_category;
+          const sameLocation = match.location === existingMatch.location;
+          const sameAtmosphere = match.atmosphere === existingMatch.atmosphere;
+          
+          // Calculate an overall similarity score (0 to 1)
+          const similarityScore = (
+            (activityOverlap * 2) + // Weight activity overlap more
+            (interestOverlap * 2) + // Weight interest overlap more
+            (sameBudget ? 1 : 0) +
+            (sameLocation ? 1 : 0) +
+            (sameAtmosphere ? 1 : 0)
+          ) / 7; // Normalize by total possible score (2+2+1+1+1 = 7)
+          
+          return similarityScore < 0.6; // Must be less than 60% similar
+        });
+
+        if (isDifferent || acc.length < 3) { // Allow up to 3 diverse matches
+          acc.push(match);
+        }
+        return acc;
+    }, []);
+
+    // If we don't have enough diverse matches, add more from unique matches
+    while (diverseMatches.length < 3 && diverseMatches.length < uniqueMatches.length) {
+      const nextBestMatch = uniqueMatches.find(match => 
+        !diverseMatches.some(m => m.title === match.title)
+      );
+      if (nextBestMatch) {
+        diverseMatches.push(nextBestMatch);
+      } else {
+        break;
+      }
+    }
+
+    // Log detailed matching results after diversity filtering
+    console.log('\n=== MATCHING RESULTS ===');
+    const topResults = diverseMatches
       .map(date => ({
         title: date.title,
         normalizedScore: date.score.toFixed(4),
@@ -333,7 +433,7 @@ const Home = () => {
         matchDetails: date.matchDetails
       }));
 
-    console.log('Top 5 Matches:');
+    console.log('Top Diverse Matches:');
     console.log(JSON.stringify(topResults, null, 2));
 
     // Distribution Analysis
@@ -348,18 +448,14 @@ const Home = () => {
     console.log('\n=== SCORE DISTRIBUTION ===');
     console.log(JSON.stringify(stats, null, 2));
 
-    // Select matches with a minimum threshold
-    const threshold = 0.3; // 30% match or better
-    const goodMatches = scoredDates.filter(date => date.score >= threshold);
-    
-    if (goodMatches.length === 0) {
-      console.error("No matching date ideas found above threshold.");
-      return;
-    }
-
-    // Randomly select from top matches
-    const topMatches = goodMatches.filter(date => date.score >= goodMatches[0].score * 0.9);
-    const selectedMatch = topMatches[Math.floor(Math.random() * topMatches.length)];
+    // Randomly select from the diverse matches, weighted by score
+    const totalScore = diverseMatches.reduce((sum, match) => sum + match.score, 0);
+    const randomValue = Math.random() * totalScore;
+    let currentSum = 0;
+    const selectedMatch = diverseMatches.find(match => {
+      currentSum += match.score;
+      return currentSum >= randomValue;
+    }) || diverseMatches[0];
 
     try {
       const response = await api.get(`/dates/${selectedMatch.id}`);
