@@ -209,32 +209,32 @@ const QuestionPipeline = ({ onComplete }) => {
         if (Array.isArray(value)) {
           if (questionId === 'interests') {
             if (value.includes('noPreference')) {
-              return <span><strong>Interests:</strong> 🎯 open to anything</span>;
+              return <span><strong>Interests:</strong> 🎯 Open to anything</span>;
             }
             const interestLabels = value.map(v => {
               switch(v) {
-                case 'art': return 'art';
-                case 'music': return 'music';
-                case 'sports': return 'sports';
-                case 'technology': return 'technology';
-                case 'food': return 'food';
-                case 'nature': return 'nature';
-                case 'history': return 'history';
+                case 'art': return 'Art';
+                case 'music': return 'Music';
+                case 'sports': return 'Sports';
+                case 'technology': return 'Technology';
+                case 'food': return 'Food';
+                case 'nature': return 'Nature';
+                case 'history': return 'History';
                 default: return v;
               }
             });
             return <span><strong>Interests:</strong> {interestLabels.join(', ')}</span>;
           } else if (questionId === 'activityTypes') {
             if (value.includes('noPreference')) {
-              return <span><strong>Activities:</strong> ✨ surprise me</span>;
+              return <span><strong>Activities:</strong> ✨ Open to anything</span>;
             }
             const activityLabels = value.map(v => {
               switch(v) {
-                case 'adventure': return 'adventure';
-                case 'relaxation': return 'relaxation';
-                case 'learning': return 'learning';
-                case 'entertainment': return 'entertainment';
-                case 'wellness': return 'wellness';
+                case 'adventure': return 'Adventure';
+                case 'relaxation': return 'Relaxation';
+                case 'learning': return 'Learning';
+                case 'entertainment': return 'Entertainment';
+                case 'wellness': return 'Wellness';
                 default: return v;
               }
             });
