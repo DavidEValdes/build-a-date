@@ -478,7 +478,7 @@ const QuestionPipeline = ({ onComplete }) => {
                   </span>
                 )}
                 {option.label}
-                {option.value === "noPreference" && !answers[currentQuestion.id]?.includes(option.value) && (
+                {option.value === "noPreference" && (
                   <span style={{
                     marginLeft: '8px',
                     fontSize: '12px',
