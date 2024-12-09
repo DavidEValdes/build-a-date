@@ -22,11 +22,11 @@ const SuggestionDisplay = ({
     // Format budget with dollar signs
     if (key === 'budget') {
       switch(value) {
-        case 'free': return 'free';
-        case 'economy': return '$ budget-friendly';
-        case 'standard': return '$$ mid-range';
-        case 'premium': return '$$$ premium';
-        case 'luxury': return '$$$$ luxury';
+        case 'free': return '🚫💰 free';
+        case 'economy': return '💰 budget-friendly';
+        case 'standard': return '💰💰 mid-range';
+        case 'premium': return '💰💰💰 premium';
+        case 'luxury': return '💰💰💰💰 luxury';
         default: return null;
       }
     }
@@ -68,6 +68,17 @@ const SuggestionDisplay = ({
         case 'afternoon': return '☀️ afternoon';
         case 'evening': return '🌆 evening';
         case 'night': return '🌙 night';
+        default: return value.toLowerCase();
+      }
+    }
+
+    // Format seasons
+    if (key === 'season') {
+      switch(value) {
+        case 'spring': return '🌸 spring';
+        case 'summer': return '☀️ summer';
+        case 'autumn': return '🍂 autumn';
+        case 'winter': return '❄️ winter';
         default: return value.toLowerCase();
       }
     }
