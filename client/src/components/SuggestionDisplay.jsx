@@ -31,6 +31,37 @@ const SuggestionDisplay = ({
     if (value === 'noPreference') return null;
     if (key === 'location' && value === 'both') return null;
     
+    // Handle arrays (for multiple choice answers)
+    if (Array.isArray(value)) {
+      if (key === 'activityTypes') {
+        return value.map(v => {
+          switch(v) {
+            case 'adventure': return '🎯 adventure';
+            case 'relaxation': return '🌿 relaxation';
+            case 'learning': return '📚 learning';
+            case 'entertainment': return '🎉 entertainment';
+            case 'wellness': return '🧘‍♀️ wellness';
+            default: return v;
+          }
+        });
+      }
+      if (key === 'interests') {
+        return value.map(v => {
+          switch(v) {
+            case 'art': return '🎨 art';
+            case 'music': return '🎵 music';
+            case 'sports': return '⚽ sports';
+            case 'technology': return '💻 technology';
+            case 'food': return '🍽️ food';
+            case 'nature': return '🌲 nature';
+            case 'history': return '📜 history';
+            default: return v;
+          }
+        });
+      }
+      return value.map(v => formatPreference(key, v));
+    }
+
     // Format budget with dollar signs
     if (key === 'budget') {
       switch(value) {
@@ -105,17 +136,6 @@ const SuggestionDisplay = ({
       }
     }
     
-    // Format arrays (for multiple choice answers)
-    if (Array.isArray(value)) {
-      if (key === 'activityTypes') {
-        return '🎯 ' + value.map(v => v.toLowerCase()).join(' • ');
-      }
-      if (key === 'interests') {
-        return '❤️ ' + value.map(v => v.toLowerCase()).join(' • ');
-      }
-      return value.map(v => v.toLowerCase()).join(' • ');
-    }
-    
     // Format single values
     return value.toLowerCase();
   };
@@ -133,7 +153,11 @@ const SuggestionDisplay = ({
     order.forEach(key => {
       const value = formatPreference(key, userPreferences[key]);
       if (value) {
-        summary.push(value);
+        if (Array.isArray(value)) {
+          summary.push(...value);
+        } else {
+          summary.push(value);
+        }
       }
     });
     
@@ -188,7 +212,7 @@ const SuggestionDisplay = ({
             </span>
           ))}
           <div className="preference-disclaimer">
-             Some matches may vary due to limited date ideas
+            ℹ️ Some matches may vary due to limited options
           </div>
         </div>
       )}
