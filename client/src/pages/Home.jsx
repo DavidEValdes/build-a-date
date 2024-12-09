@@ -392,6 +392,17 @@ const Home = () => {
       const avgScore = scores.reduce((a, b) => a + b, 0) / scores.length;
       const stdDev = Math.sqrt(scores.reduce((a, b) => a + Math.pow(b - avgScore, 2), 0) / scores.length);
       
+      // Calculate distribution stats early
+      const stats = {
+        min: Math.min(...scores).toFixed(4),
+        max: Math.max(...scores).toFixed(4),
+        avg: avgScore.toFixed(4),
+        median: scores.sort((a, b) => a - b)[Math.floor(scores.length / 2)].toFixed(4)
+      };
+
+      console.log('\n=== SCORE DISTRIBUTION ===');
+      console.log(JSON.stringify(stats, null, 2));
+      
       // Dynamic threshold based on score distribution
       const baseThreshold = answers.groupSize === 'largeGroup' ? 0.35 : 0.40;
       const threshold = Math.min(baseThreshold, avgScore + stdDev * 0.5);
@@ -503,17 +514,6 @@ const Home = () => {
 
       console.log('Top Diverse Matches:');
       console.log(JSON.stringify(topResults, null, 2));
-
-      // Distribution Analysis
-      const stats = {
-        min: Math.min(...scores).toFixed(4),
-        max: Math.max(...scores).toFixed(4),
-        avg: avgScore.toFixed(4),
-        median: scores.sort((a, b) => a - b)[Math.floor(scores.length / 2)].toFixed(4)
-      };
-
-      console.log('\n=== SCORE DISTRIBUTION ===');
-      console.log(JSON.stringify(stats, null, 2));
 
       // Randomly select from the diverse matches, weighted by score
       const totalScore = diverseMatches.reduce((sum, match) => sum + match.score, 0);
