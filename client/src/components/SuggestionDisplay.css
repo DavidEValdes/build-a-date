@@ -29,6 +29,15 @@
   white-space: nowrap;
 }
 
+.preference-disclaimer {
+  width: 100%;
+  text-align: center;
+  color: #666;
+  font-size: 12px;
+  margin-top: 8px;
+  font-style: italic;
+}
+
 .suggestion-main {
   position: relative;
   margin-bottom: 2rem;

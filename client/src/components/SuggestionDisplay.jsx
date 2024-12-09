@@ -163,6 +163,9 @@ const SuggestionDisplay = ({
               {pref}
             </span>
           ))}
+          <div className="preference-disclaimer">
+            ℹ️ Some matches may vary due to limited options
+          </div>
         </div>
       )}
 
