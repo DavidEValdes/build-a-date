@@ -105,7 +105,7 @@ export const questions = [
     question: "Who will be joining for this date?",
     type: "singleChoice",
     options: [
-      { value: "noPreference", label: "No Preference" },
+      { value: "noPreference", label: "No Preference ✨" },
       { value: "couple", label: "Just the two of us" },
       { value: "smallGroup", label: "Double date or small group (3-4 people)" },
       { value: "largeGroup", label: "Group date (5+ people)" },
@@ -201,10 +201,15 @@ const QuestionPipeline = ({ onComplete }) => {
   const getCurrentSuggestions = useCallback(() => {
     return Object.entries(submittedAnswers)
       .map(([questionId, value]) => {
+        // Don't show groupSize in the summary until completion
+        if (questionId === 'groupSize' && currentStep < questions.length) {
+          return null;
+        }
+
         if (Array.isArray(value)) {
           if (questionId === 'interests') {
             if (value.includes('noPreference')) {
-              return <span><strong>Interests:</strong> 🎯 Open to anything</span>;
+              return <span><strong>Interests:</strong> 🎯 open to anything</span>;
             }
             const interestLabels = value.map(v => {
               switch(v) {
@@ -221,7 +226,7 @@ const QuestionPipeline = ({ onComplete }) => {
             return <span><strong>Interests:</strong> {interestLabels.join(', ')}</span>;
           } else if (questionId === 'activityTypes') {
             if (value.includes('noPreference')) {
-              return <span><strong>Activities:</strong> ✨ Open to anything</span>;
+              return <span><strong>Activities:</strong> ✨ surprise me</span>;
             }
             const activityLabels = value.map(v => {
               switch(v) {
@@ -240,7 +245,7 @@ const QuestionPipeline = ({ onComplete }) => {
         return getSuggestionHint(questionId, value);
       })
       .filter(Boolean);
-  }, [submittedAnswers, getSuggestionHint]);
+  }, [submittedAnswers, currentStep, questions.length, getSuggestionHint]);
 
   const currentQuestion = questions[currentStep];
 
