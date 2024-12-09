@@ -116,10 +116,12 @@ const QuestionPipeline = ({ onComplete }) => {
   const [answers, setAnswers] = useState({});
   const [hasVisitedStep, setHasVisitedStep] = useState(new Set([0]));
   const [isFirstVisit, setIsFirstVisit] = useState(true);
+  const [submittedAnswers, setSubmittedAnswers] = useState({});
 
   useEffect(() => {
     setCurrentStep(0);
     setAnswers({});
+    setSubmittedAnswers({});
     setHasVisitedStep(new Set([0]));
     if (currentStep > 0) {
       setIsFirstVisit(false);
@@ -195,7 +197,7 @@ const QuestionPipeline = ({ onComplete }) => {
   }, []);
 
   const getCurrentSuggestions = useCallback(() => {
-    return Object.entries(answers)
+    return Object.entries(submittedAnswers)
       .map(([questionId, value]) => {
         if (Array.isArray(value)) {
           if (questionId === 'interests') {
@@ -230,7 +232,7 @@ const QuestionPipeline = ({ onComplete }) => {
         return getSuggestionHint(questionId, value);
       })
       .filter(Boolean);
-  }, [answers, getSuggestionHint]);
+  }, [submittedAnswers, getSuggestionHint]);
 
   const currentQuestion = questions[currentStep];
 
@@ -249,7 +251,6 @@ const QuestionPipeline = ({ onComplete }) => {
           [currentQuestion.id]: [...existing, value],
         };
       } else {
-        // Don't update if already at 3 selections
         return;
       }
       setAnswers(updatedAnswers);
@@ -260,6 +261,7 @@ const QuestionPipeline = ({ onComplete }) => {
       };
       setAnswers(updatedAnswers);
       if (currentStep < questions.length - 1) {
+        setSubmittedAnswers(updatedAnswers);
         setCurrentStep(currentStep + 1);
         setHasVisitedStep(prev => new Set([...prev, currentStep + 1]));
       }
@@ -267,6 +269,7 @@ const QuestionPipeline = ({ onComplete }) => {
   };
 
   const handleNext = () => {
+    setSubmittedAnswers(answers);
     setCurrentStep((prevStep) => prevStep + 1);
     setHasVisitedStep(prev => new Set([...prev, currentStep + 1]));
   };
@@ -277,6 +280,7 @@ const QuestionPipeline = ({ onComplete }) => {
   };
 
   const handleComplete = () => {
+    setSubmittedAnswers(answers);
     onComplete(answers);
   };
 
@@ -297,6 +301,7 @@ const QuestionPipeline = ({ onComplete }) => {
       }
     });
     setAnswers(randomAnswers);
+    setSubmittedAnswers(randomAnswers);
     onComplete(randomAnswers);
   };
 
@@ -343,7 +348,7 @@ const QuestionPipeline = ({ onComplete }) => {
           </p>
         </div>
 
-        {getCurrentSuggestions().length > 0 && (
+        {Object.keys(submittedAnswers).length > 0 && (
           <div style={{
             marginBottom: "24px",
             borderLeft: "2px solid #6c5ce7",
