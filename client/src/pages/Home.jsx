@@ -387,7 +387,7 @@ const Home = () => {
         };
       });
 
-      // Adjust threshold based on group size and score distribution
+      // Score distribution analysis and threshold calculation
       const scores = scoredDates.map(d => d.score);
       const avgScore = scores.reduce((a, b) => a + b, 0) / scores.length;
       const stdDev = Math.sqrt(scores.reduce((a, b) => a + Math.pow(b - avgScore, 2), 0) / scores.length);
@@ -415,7 +415,7 @@ const Home = () => {
         if (fallbackMatches.length === 0) {
           console.error("No matching date ideas found above fallback threshold.");
           console.log('Lowest required score:', fallbackThreshold);
-          console.log('Highest available score:', Math.max(...scoredDates.map(d => d.score)));
+          console.log('Highest available score:', Math.max(...scores));
           return;
         }
         
@@ -448,9 +448,9 @@ const Home = () => {
               existingMatch.activity_types.includes(type)
             ).length / Math.max(match.activity_types.length, existingMatch.activity_types.length);
             
-            const interestOverlap = match.interests.filter(interest => 
-              existingMatch.interests.includes(interest)
-            ).length / Math.max(match.interests.length, existingMatch.interests.length);
+            const interestOverlap = match.interests?.filter(interest => 
+              existingMatch.interests?.includes(interest)
+            ).length / Math.max(match.interests?.length || 0, existingMatch.interests?.length || 0);
             
             const sameBudget = match.cost_category === existingMatch.cost_category;
             const sameLocation = match.location === existingMatch.location;
@@ -459,11 +459,11 @@ const Home = () => {
             // Calculate an overall similarity score (0 to 1) with adjusted weights
             const similarityScore = (
               (activityOverlap * 2.5) +     // Increased weight for activity diversity
-              (interestOverlap * 2.5) +     // Increased weight for interest diversity
+              (interestOverlap * 2.0) +     // Slightly reduced weight for interest diversity
               (sameBudget ? 0.8 : 0) +      // Reduced impact of same budget
               (sameLocation ? 0.8 : 0) +    // Reduced impact of same location
               (sameAtmosphere ? 1.4 : 0)    // Increased impact of same atmosphere
-            ) / 8; // Normalize by new total possible score (2.5+2.5+0.8+0.8+1.4 = 8)
+            ) / 7.5; // Normalize by new total possible score (2.5+2.0+0.8+0.8+1.4 = 7.5)
             
             return similarityScore < 0.55; // Slightly reduced similarity threshold for more diversity
           });
@@ -472,7 +472,7 @@ const Home = () => {
             acc.push(match);
           }
           return acc;
-      }, []);
+        }, []);
 
       // If we don't have enough diverse matches, add more from unique matches
       while (diverseMatches.length < 3 && diverseMatches.length < uniqueMatches.length) {
@@ -505,11 +505,10 @@ const Home = () => {
       console.log(JSON.stringify(topResults, null, 2));
 
       // Distribution Analysis
-      const scores = scoredDates.map(d => d.score);
       const stats = {
         min: Math.min(...scores).toFixed(4),
         max: Math.max(...scores).toFixed(4),
-        avg: (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(4),
+        avg: avgScore.toFixed(4),
         median: scores.sort((a, b) => a - b)[Math.floor(scores.length / 2)].toFixed(4)
       };
 
