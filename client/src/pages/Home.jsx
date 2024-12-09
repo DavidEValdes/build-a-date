@@ -452,7 +452,40 @@ const Home = () => {
 
       // Take top matches that are sufficiently different from each other
       const diverseMatches = uniqueMatches
-        .sort((a, b) => b.score - a.score)
+        .sort((a, b) => {
+          // First compare by score
+          const scoreDiff = b.score - a.score;
+          if (Math.abs(scoreDiff) > 0.0001) { // Use small epsilon for floating point comparison
+            return scoreDiff;
+          }
+          
+          // If scores are equal, use secondary criteria
+          
+          // 1. Compare by number of matching activity types
+          const aActivityMatch = a.activity_types.filter(type => 
+            answers.activityTypes.includes(type)
+          ).length;
+          const bActivityMatch = b.activity_types.filter(type => 
+            answers.activityTypes.includes(type)
+          ).length;
+          if (aActivityMatch !== bActivityMatch) {
+            return bActivityMatch - aActivityMatch;
+          }
+          
+          // 2. Compare by number of matching interests
+          const aInterestMatch = (a.interests || []).filter(interest => 
+            (answers.interests || []).includes(interest)
+          ).length;
+          const bInterestMatch = (b.interests || []).filter(interest => 
+            (answers.interests || []).includes(interest)
+          ).length;
+          if (aInterestMatch !== bInterestMatch) {
+            return bInterestMatch - aInterestMatch;
+          }
+          
+          // 3. If still tied, prefer more specific matches (fewer activity types/interests)
+          return a.activity_types.length - b.activity_types.length;
+        })
         .reduce((acc, match) => {
           // Only add if sufficiently different from existing matches
           const isDifferent = acc.every(existingMatch => {
@@ -517,23 +550,33 @@ const Home = () => {
       console.log('Top Diverse Matches:');
       console.log(JSON.stringify(topResults, null, 2));
 
-      // Randomly select from the diverse matches, weighted by score
-      const totalScore = diverseMatches.reduce((sum, match) => sum + match.score, 0);
-      const randomValue = Math.random() * totalScore;
-      let currentSum = 0;
-      const selectedMatch = diverseMatches.find(match => {
-        currentSum += match.score;
-        return currentSum >= randomValue;
-      }) || diverseMatches[0];
-
       try {
+        // First, sort matches by score
+        const sortedMatches = [...diverseMatches].sort((a, b) => b.score - a.score);
+        
+        // Find the highest score and score threshold for top tier matches
+        const highestScore = sortedMatches[0].score;
+        const topTierThreshold = highestScore - 0.05; // Matches within 5% of the best score
+        
+        // Get all matches that are very close to the best match
+        const topTierMatches = sortedMatches.filter(match => match.score >= topTierThreshold);
+        
+        // Randomly select from top tier matches with weighted probability
+        const totalTopScore = topTierMatches.reduce((sum, match) => sum + match.score, 0);
+        const randomValue = Math.random() * totalTopScore;
+        let currentSum = 0;
+        const selectedMatch = topTierMatches.find(match => {
+          currentSum += match.score;
+          return currentSum >= randomValue;
+        }) || topTierMatches[0];
+
         const response = await api.get(`/dates/${selectedMatch.id}`);
         const fetchedDateIdea = response.data;
         
-        // Get the other matches (excluding the selected one)
-        const alternativeMatches = diverseMatches
+        // For alternatives, take 2 other high-scoring matches that aren't the selected one
+        const alternativeMatches = sortedMatches
           .filter(match => match.id !== selectedMatch.id)
-          .slice(0, 2); // Take up to 2 alternatives
+          .slice(0, 2);
           
         // Fetch full details for alternative matches
         const alternativeFetches = await Promise.all(
@@ -547,8 +590,22 @@ const Home = () => {
         setIsProcessing(false);
       } catch (error) {
         console.error("Error fetching date ideas:", error);
+        // Fallback to using the matches directly if API fails
+        const sortedMatches = [...diverseMatches].sort((a, b) => b.score - a.score);
+        const highestScore = sortedMatches[0].score;
+        const topTierThreshold = highestScore - 0.05;
+        const topTierMatches = sortedMatches.filter(match => match.score >= topTierThreshold);
+        
+        const totalTopScore = topTierMatches.reduce((sum, match) => sum + match.score, 0);
+        const randomValue = Math.random() * totalTopScore;
+        let currentSum = 0;
+        const selectedMatch = topTierMatches.find(match => {
+          currentSum += match.score;
+          return currentSum >= randomValue;
+        }) || topTierMatches[0];
+
         setCurrentSuggestion(selectedMatch);
-        const fallbackAlternatives = diverseMatches
+        const fallbackAlternatives = sortedMatches
           .filter(match => match.id !== selectedMatch.id)
           .slice(0, 2);
         setAlternativeSuggestions(fallbackAlternatives);
@@ -556,8 +613,13 @@ const Home = () => {
         setIsProcessing(false);
       }
     } catch (error) {
-      console.error("Error processing questionnaire:", error);
-      alert("Something went wrong. Please try again.");
+      console.error("Error fetching date ideas:", error);
+      // Fallback to using the matches directly if API fails
+      const sortedMatches = [...diverseMatches].sort((a, b) => b.score - a.score);
+      setCurrentSuggestion(sortedMatches[0]);
+      const fallbackAlternatives = sortedMatches.slice(1, 3);
+      setAlternativeSuggestions(fallbackAlternatives);
+      setStage("suggestion");
       setIsProcessing(false);
     }
   };

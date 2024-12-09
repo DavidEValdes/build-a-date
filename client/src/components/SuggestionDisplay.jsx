@@ -19,6 +19,18 @@ const SuggestionDisplay = ({
     if (value === 'noPreference') return null;
     if (key === 'location' && value === 'both') return null;
     
+    // Format budget with dollar signs
+    if (key === 'budget') {
+      switch(value) {
+        case 'free': return 'free';
+        case 'economy': return '$';
+        case 'standard': return '$$';
+        case 'premium': return '$$$';
+        case 'luxury': return '$$$$';
+        default: return null;
+      }
+    }
+    
     // Format arrays (for multiple choice answers)
     if (Array.isArray(value)) {
       return value.map(v => v.toLowerCase()).join(' • ');
