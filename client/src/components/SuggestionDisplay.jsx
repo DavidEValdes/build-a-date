@@ -17,6 +17,7 @@ const SuggestionDisplay = ({
   const formatPreference = (key, value) => {
     if (!value) return null;
     if (value === 'noPreference') return null;
+    if (key === 'location' && value === 'both') return null;
     
     // Format arrays (for multiple choice answers)
     if (Array.isArray(value)) {

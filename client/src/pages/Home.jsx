@@ -130,6 +130,7 @@ const Home = () => {
   const [savedSuggestions, setSavedSuggestions] = useState(new Set());
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [userAnswers, setUserAnswers] = useState({});
 
   const allSuggestions = currentSuggestion ? [currentSuggestion, ...alternativeSuggestions] : [];
 
@@ -155,7 +156,8 @@ const Home = () => {
   });
 
   const handleQuestionnaireComplete = async (answers) => {
-    setIsProcessing(true); // Start loading
+    setIsProcessing(true);
+    setUserAnswers(answers);
     try {
       console.log('\n=== USER PREFERENCES ===');
       console.log(JSON.stringify(answers, null, 2));
@@ -612,6 +614,7 @@ const Home = () => {
     setSharedSuggestions(new Set());
     setSavedSuggestions(new Set());
     setCurrentIndex(0);
+    setUserAnswers({});
   };
 
   // Enhanced getSortedDates Function with Proper Duration Handling
@@ -929,6 +932,7 @@ const Home = () => {
                   onDisplay={() => window.scrollTo(0, 0)} 
                   currentIndex={currentIndex}
                   setCurrentIndex={setCurrentIndex}
+                  userPreferences={userAnswers}
                 />
                 <div
                   className="suggestion-actions mt-8 flex justify-center gap-4 flex-wrap"
