@@ -463,13 +463,19 @@ const QuestionPipeline = ({ onComplete }) => {
                 Back
               </button>
             )}
-            {((!isFirstVisit || currentStep > 0) && canProceed) && (
+            {(!isFirstVisit || currentStep > 0) && (
               <button
                 className={`primary-button flex-shrink-0 w-24 ${
-                  !canProceed ? "opacity-70 cursor-not-allowed" : ""
+                  !canProceed ? "opacity-30 cursor-not-allowed" : ""
                 }`}
                 onClick={currentStep === questions.length - 1 ? handleComplete : handleNext}
                 disabled={!canProceed}
+                style={{
+                  backgroundColor: canProceed ? '#4f46e5' : '#e5e7eb',
+                  color: canProceed ? 'white' : '#9ca3af',
+                  border: canProceed ? 'none' : '1px solid #e5e7eb',
+                  transition: 'all 0.2s ease'
+                }}
               >
                 {currentStep === questions.length - 1 ? "Finish" : "Next"}
               </button>
@@ -501,7 +507,7 @@ const QuestionPipeline = ({ onComplete }) => {
                 e.currentTarget.style.backgroundColor = '#f3f4f6';
               }}
             >
-              🎲 Surprise!
+              🎲 Surprise Me!
             </button>
           </div>
         </div>
