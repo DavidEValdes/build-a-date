@@ -7,7 +7,7 @@ export const questions = [
     question: "What kind of vibe are you looking for?",
     type: "singleChoice",
     options: [
-      { value: "noPreference", label: "No Preference" },
+      { value: "noPreference", label: "No Preference ✨" },
       { value: "romantic", label: "Romantic & Intimate" },
       { value: "casual", label: "Casual & Relaxed" },
       { value: "energetic", label: "Energetic & Active" },
@@ -19,7 +19,7 @@ export const questions = [
     question: "How active would you like the date to be?",
     type: "singleChoice",
     options: [
-      { value: "noPreference", label: "No Preference" },
+      { value: "noPreference", label: "No Preference ✨" },
       { value: "low", label: "Low - Relaxed and easygoing" },
       { value: "moderate", label: "Moderate - Some light activity" },
       { value: "high", label: "High - Very active and engaging" },
@@ -30,7 +30,7 @@ export const questions = [
     question: "What's your budget range for the date?",
     type: "singleChoice",
     options: [
-      { value: "noPreference", label: "No Preference" },
+      { value: "noPreference", label: "No Preference ✨" },
       { value: "free", label: "Free activities" },
       { value: "economy", label: "Budget-friendly (under $30)" },
       { value: "standard", label: "Mid-range ($30-$75)" },
@@ -43,7 +43,7 @@ export const questions = [
     question: "Do you have a seasonal preference?",
     type: "singleChoice",
     options: [
-      { value: "noPreference", label: "No Preference" },
+      { value: "noPreference", label: "No Preference ✨" },
       { value: "spring", label: "Spring" },
       { value: "summer", label: "Summer" },
       { value: "autumn", label: "Autumn" },
@@ -65,7 +65,7 @@ export const questions = [
     question: "What time of day works best?",
     type: "singleChoice",
     options: [
-      { value: "noPreference", label: "No Preference" },
+      { value: "noPreference", label: "No Preference ✨" },
       { value: "morning", label: "Morning - Start the day together" },
       { value: "afternoon", label: "Afternoon - Perfect for day activities" },
       { value: "evening", label: "Evening - Dinner time and beyond" },
@@ -204,7 +204,7 @@ const QuestionPipeline = ({ onComplete }) => {
         if (Array.isArray(value)) {
           if (questionId === 'interests') {
             if (value.includes('noPreference')) {
-              return <span><strong>Interests:</strong> 🌈 open to anything</span>;
+              return <span><strong>Interests:</strong> 🎯 Open to anything</span>;
             }
             const interestLabels = value.map(v => {
               switch(v) {
@@ -221,7 +221,7 @@ const QuestionPipeline = ({ onComplete }) => {
             return <span><strong>Interests:</strong> {interestLabels.join(', ')}</span>;
           } else if (questionId === 'activityTypes') {
             if (value.includes('noPreference')) {
-              return <span><strong>Activities:</strong> ✨ surprise me</span>;
+              return <span><strong>Activities:</strong> ✨ Open to anything</span>;
             }
             const activityLabels = value.map(v => {
               switch(v) {
