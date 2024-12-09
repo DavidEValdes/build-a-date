@@ -212,7 +212,7 @@ const SuggestionDisplay = ({
             </span>
           ))}
           <div className="preference-disclaimer">
-            ℹ️ Some matches may vary due to limited options
+            ℹ️ Some matches may vary due to limited date ideas
           </div>
         </div>
       )}
