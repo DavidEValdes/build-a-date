@@ -7,6 +7,7 @@ const questions = [
     question: "What kind of vibe are you looking for?",
     type: "singleChoice",
     options: [
+      { value: "noPreference", label: "No Preference" },
       { value: "romantic", label: "Romantic & Intimate" },
       { value: "casual", label: "Casual & Relaxed" },
       { value: "energetic", label: "Energetic & Active" },
@@ -18,6 +19,7 @@ const questions = [
     question: "How active would you like the date to be?",
     type: "singleChoice",
     options: [
+      { value: "noPreference", label: "No Preference" },
       { value: "low", label: "Low - Relaxed and easygoing" },
       { value: "moderate", label: "Moderate - Some light activity" },
       { value: "high", label: "High - Very active and engaging" },
@@ -28,6 +30,7 @@ const questions = [
     question: "What's your budget range for the date?",
     type: "singleChoice",
     options: [
+      { value: "noPreference", label: "No Preference" },
       { value: "free", label: "Free activities" },
       { value: "economy", label: "Budget-friendly (under $30)" },
       { value: "standard", label: "Mid-range ($30-$75)" },
@@ -100,6 +103,7 @@ const questions = [
     question: "Who will be joining for this date?",
     type: "singleChoice",
     options: [
+      { value: "noPreference", label: "No Preference" },
       { value: "couple", label: "Just the two of us" },
       { value: "smallGroup", label: "Double date or small group (3-4 people)" },
       { value: "largeGroup", label: "Group date (5+ people)" },
@@ -121,17 +125,20 @@ const QuestionPipeline = ({ onComplete }) => {
   const getSuggestionHint = useCallback((questionId, value) => {
     const hints = {
       atmosphere: {
+        noPreference: "Open to any atmosphere",
         romantic: "Looking for intimate and cozy date spots",
         casual: "Keeping it laid-back and comfortable",
         energetic: "Finding active and upbeat experiences",
         fun: "Searching for playful and entertaining activities",
       },
       activity_level: {
+        noPreference: "Flexible with activity level",
         low: "Focusing on relaxed, low-key options",
         moderate: "Including some light physical activity",
         high: "Prioritizing active and engaging experiences",
       },
       budget: {
+        noPreference: "Flexible with budget",
         free: "Finding no-cost activities",
         economy: "Looking for budget-friendly options",
         standard: "Including mid-range experiences",
@@ -140,15 +147,15 @@ const QuestionPipeline = ({ onComplete }) => {
       },
       location: {
         indoor: "Focusing on indoor venues",
-        outdoor: "Exploring outdoor activities",
+        outdoor: "Exploring outdoor adventures",
         both: "Mix of indoor and outdoor experiences",
       },
       time_of_day: {
+        noPreference: "Flexible with timing",
         morning: "Planning early day activities",
         afternoon: "Looking at daytime options",
         evening: "Considering dinner and evening activities",
         night: "Exploring nighttime experiences",
-        noPreference: "Flexible with timing",
       },
       activityTypes: {
         adventure: "Including adventurous and exciting activities",
@@ -167,13 +174,14 @@ const QuestionPipeline = ({ onComplete }) => {
         history: "Including historical and cultural elements",
       },
       season: {
+        noPreference: "Available any season",
         spring: "Planning for spring weather",
         summer: "Considering summer activities",
         autumn: "Including fall-appropriate options",
         winter: "Planning for winter conditions",
-        noPreference: "",
       },
       groupSize: {
+        noPreference: "Flexible with group size",
         couple: "Planning for just the two of you",
         smallGroup: "Planning for a small group (3-4 people)",
         largeGroup: "Planning for a larger group (5+ people)",

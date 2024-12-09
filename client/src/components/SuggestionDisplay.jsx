@@ -8,9 +8,44 @@ const SuggestionDisplay = ({
   suggestion, 
   alternativeSuggestions = [], 
   currentIndex,
-  setCurrentIndex 
+  setCurrentIndex,
+  userPreferences
 }) => {
   const allSuggestions = [suggestion, ...alternativeSuggestions];
+
+  // Function to format preference value for display
+  const formatPreference = (key, value) => {
+    if (!value) return null;
+    if (value === 'noPreference') return null;
+    
+    // Format arrays (for multiple choice answers)
+    if (Array.isArray(value)) {
+      return value.map(v => v.toLowerCase()).join(' • ');
+    }
+    
+    // Format single values
+    return value.toLowerCase();
+  };
+
+  // Get simple preference summary
+  const getPreferenceSummary = () => {
+    if (!userPreferences) return [];
+    
+    const summary = [];
+    const order = [
+      'atmosphere', 'activity_level', 'budget', 'location', 
+      'time_of_day', 'season', 'groupSize', 'activityTypes', 'interests'
+    ];
+    
+    order.forEach(key => {
+      const value = formatPreference(key, userPreferences[key]);
+      if (value) {
+        summary.push(value);
+      }
+    });
+    
+    return summary;
+  };
 
   console.log('Current suggestion:', suggestion); // Debug log
   console.log('Alternative suggestions:', alternativeSuggestions); // Debug log
@@ -39,6 +74,17 @@ const SuggestionDisplay = ({
 
   return (
     <div className="suggestion-display">
+      {/* Preference Summary */}
+      {userPreferences && (
+        <div className="preference-summary">
+          {getPreferenceSummary().map((pref, index) => (
+            <span key={index} className="preference-tag">
+              {pref}
+            </span>
+          ))}
+        </div>
+      )}
+
       {/* Main Display */}
       <div className="suggestion-main">
         <div className="suggestion-card">

@@ -1,7 +1,30 @@
 .suggestion-display {
+  width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 1rem;
+  padding: 20px;
+}
+
+.preference-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 8px;
+  border-radius: 8px;
+  background-color: #f8f9fa;
+}
+
+.preference-tag {
+  display: inline-block;
+  padding: 4px 12px;
+  background-color: #6c5ce7;
+  color: white;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: capitalize;
+  white-space: nowrap;
 }
 
 .suggestion-main {
