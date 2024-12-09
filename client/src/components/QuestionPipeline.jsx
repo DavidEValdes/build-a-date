@@ -314,11 +314,6 @@ const QuestionPipeline = ({ onComplete }) => {
     }
   })();
 
-  const showNextButton = 
-    !isFirstVisit || 
-    currentStep > 0 || 
-    currentStep === questions.length - 1;
-
   const getQuestionLabel = (questionId) => {
     const question = questions.find(q => q.id === questionId);
     return question?.question || questionId;
@@ -468,7 +463,7 @@ const QuestionPipeline = ({ onComplete }) => {
                 Back
               </button>
             )}
-            {(!isFirstVisit || currentStep > 0) && (
+            {(hasVisitedStep.size > 1 || answers[currentQuestion.id]) && (
               <button
                 className={`primary-button flex-shrink-0 w-24 ${
                   !canProceed ? "opacity-30 cursor-not-allowed" : ""
