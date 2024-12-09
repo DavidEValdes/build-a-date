@@ -77,6 +77,7 @@ export const questions = [
     question: "What kind of experiences interest you? (Choose up to 3)",
     type: "multipleChoice",
     options: [
+      { value: "noPreference", label: "No Preference" },
       { value: "adventure", label: "Adventure & Excitement" },
       { value: "relaxation", label: "Relaxation & Unwinding" },
       { value: "learning", label: "Learning & Discovery" },
@@ -89,6 +90,7 @@ export const questions = [
     question: "What specific interests would you like to explore? (Choose up to 3)",
     type: "multipleChoice",
     options: [
+      { value: "noPreference", label: "No Preference" },
       { value: "art", label: "Arts & Creativity" },
       { value: "music", label: "Music & Performance" },
       { value: "sports", label: "Sports & Physical Activities" },
@@ -201,6 +203,9 @@ const QuestionPipeline = ({ onComplete }) => {
       .map(([questionId, value]) => {
         if (Array.isArray(value)) {
           if (questionId === 'interests') {
+            if (value.includes('noPreference')) {
+              return <span><strong>Interests:</strong> 🌈 open to anything</span>;
+            }
             const interestLabels = value.map(v => {
               switch(v) {
                 case 'art': return 'art';
@@ -215,6 +220,9 @@ const QuestionPipeline = ({ onComplete }) => {
             });
             return <span><strong>Interests:</strong> {interestLabels.join(', ')}</span>;
           } else if (questionId === 'activityTypes') {
+            if (value.includes('noPreference')) {
+              return <span><strong>Activities:</strong> ✨ surprise me</span>;
+            }
             const activityLabels = value.map(v => {
               switch(v) {
                 case 'adventure': return 'adventure';
@@ -240,18 +248,36 @@ const QuestionPipeline = ({ onComplete }) => {
     let updatedAnswers;
     if (currentQuestion.type === "multipleChoice") {
       const existing = answers[currentQuestion.id] || [];
-      if (existing.includes(value)) {
+      
+      // If selecting "No Preference", clear other selections
+      if (value === "noPreference") {
         updatedAnswers = {
           ...answers,
-          [currentQuestion.id]: existing.filter((v) => v !== value),
+          [currentQuestion.id]: ["noPreference"]
         };
-      } else if (existing.length < 3) {
+      }
+      // If selecting other options while "No Preference" is selected, remove "No Preference"
+      else if (existing.includes("noPreference")) {
         updatedAnswers = {
           ...answers,
-          [currentQuestion.id]: [...existing, value],
+          [currentQuestion.id]: [value]
         };
-      } else {
-        return;
+      }
+      // Normal multiple choice handling
+      else {
+        if (existing.includes(value)) {
+          updatedAnswers = {
+            ...answers,
+            [currentQuestion.id]: existing.filter((v) => v !== value),
+          };
+        } else if (existing.length < 3) {
+          updatedAnswers = {
+            ...answers,
+            [currentQuestion.id]: [...existing, value],
+          };
+        } else {
+          return;
+        }
       }
       setAnswers(updatedAnswers);
     } else {
@@ -428,9 +454,16 @@ const QuestionPipeline = ({ onComplete }) => {
                 } border ${
                   answers[currentQuestion.id]?.includes(option.value)
                     ? "border-blue-600"
+                    : option.value === "noPreference" 
+                      ? "border-purple-300"
                     : "border"
                 }`}
                 onClick={() => handleAnswer(option.value)}
+                style={{
+                  ...(option.value === "noPreference" && {
+                    marginBottom: '12px'
+                  })
+                }}
               >
                 {hasVisitedStep.has(currentStep) && (
                   <span className="mr-2">
@@ -440,6 +473,14 @@ const QuestionPipeline = ({ onComplete }) => {
                   </span>
                 )}
                 {option.label}
+                {option.value === "noPreference" && !answers[currentQuestion.id]?.includes(option.value) && (
+                  <span style={{
+                    marginLeft: '8px',
+                    fontSize: '12px',
+                  }}>
+                    ✨
+                  </span>
+                )}
               </button>
             ))}
         </div>

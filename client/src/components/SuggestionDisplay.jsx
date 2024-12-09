@@ -28,12 +28,14 @@ const SuggestionDisplay = ({
   // Function to format preference value for display
   const formatPreference = (key, value) => {
     if (!value) return null;
-    if (value === 'noPreference') return null;
     if (key === 'location' && value === 'both') return null;
     
     // Handle arrays (for multiple choice answers)
     if (Array.isArray(value)) {
       if (key === 'activityTypes') {
+        if (value.includes('noPreference')) {
+          return '✨ Flexible Activities';
+        }
         return value.map(v => {
           switch(v) {
             case 'adventure': return '🎯 adventure';
@@ -46,6 +48,9 @@ const SuggestionDisplay = ({
         });
       }
       if (key === 'interests') {
+        if (value.includes('noPreference')) {
+          return '🎯 Open to All Interests';
+        }
         return value.map(v => {
           switch(v) {
             case 'art': return '🎨 art';
@@ -60,6 +65,19 @@ const SuggestionDisplay = ({
         });
       }
       return value.map(v => formatPreference(key, v));
+    }
+
+    // Format single values
+    if (value === 'noPreference') {
+      switch(key) {
+        case 'atmosphere': return '🎭 Any Vibe';
+        case 'activity_level': return '🌟 Any Activity Level';
+        case 'budget': return '💰 Any Budget';
+        case 'season': return '🗓️ Any Season';
+        case 'time_of_day': return '⏰ Any Time';
+        case 'groupSize': return '👥 Any Group Size';
+        default: return null;
+      }
     }
 
     // Format budget with dollar signs
