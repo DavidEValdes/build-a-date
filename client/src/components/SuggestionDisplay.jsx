@@ -9,7 +9,8 @@ const SuggestionDisplay = ({
   alternativeSuggestions = [], 
   currentIndex,
   setCurrentIndex,
-  userPreferences
+  userPreferences,
+  onRandomize
 }) => {
   const allSuggestions = [suggestion, ...alternativeSuggestions];
 
@@ -164,7 +165,7 @@ const SuggestionDisplay = ({
             </span>
           ))}
           <div className="preference-disclaimer">
-            ℹ️ Some matches may vary due to limited options
+             Some matches may vary due to limited date ideas
           </div>
         </div>
       )}
@@ -248,6 +249,59 @@ const SuggestionDisplay = ({
           ))}
         </div>
       )}
+
+      <button
+        onClick={() => {
+          setStage("questions");
+          setIsSaved(false);
+          setCurrentSuggestion(null);
+        }}
+        className="secondary-button"
+        style={{
+          padding: '0.75rem 1.5rem',
+          backgroundColor: '#e5e7eb',
+          color: '#374151',
+          border: 'none',
+          borderRadius: '0.5rem',
+          fontSize: '1rem',
+          cursor: 'pointer',
+          transition: 'background-color 0.3s ease',
+          marginRight: '8px'
+        }}
+        onMouseOver={(e) =>
+          (e.currentTarget.style.backgroundColor = '#d1d5db')
+        }
+        onMouseOut={(e) =>
+          (e.currentTarget.style.backgroundColor = '#e5e7eb')
+        }
+      >
+        Try Different Preferences
+      </button>
+      <button
+        onClick={onRandomize}
+        className="secondary-button"
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '4px',
+          padding: '0.75rem 1.5rem',
+          backgroundColor: '#f3f4f6',
+          color: '#4b5563',
+          border: '1px solid #e5e7eb',
+          borderRadius: '0.5rem',
+          fontSize: '1rem',
+          cursor: 'pointer',
+          transition: 'all 0.2s ease'
+        }}
+        onMouseOver={(e) => {
+          e.currentTarget.style.backgroundColor = '#e5e7eb';
+        }}
+        onMouseOut={(e) => {
+          e.currentTarget.style.backgroundColor = '#f3f4f6';
+        }}
+      >
+        🎲 Surprise Me!
+      </button>
     </div>
   );
 };

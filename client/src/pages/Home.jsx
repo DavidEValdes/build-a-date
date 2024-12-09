@@ -849,6 +849,25 @@ const Home = () => {
     };
   }, []);
 
+  const handleRandomize = () => {
+    const randomAnswers = {};
+    questions.forEach(question => {
+      if (question.type === 'multipleChoice') {
+        // For multiple choice, randomly select 1-3 options
+        const numChoices = Math.floor(Math.random() * 3) + 1;
+        const shuffledOptions = [...question.options].sort(() => Math.random() - 0.5);
+        randomAnswers[question.id] = shuffledOptions
+          .slice(0, numChoices)
+          .map(opt => opt.value);
+      } else {
+        // For single choice, randomly select one option
+        const randomIndex = Math.floor(Math.random() * question.options.length);
+        randomAnswers[question.id] = question.options[randomIndex].value;
+      }
+    });
+    handleQuestionnaireComplete(randomAnswers);
+  };
+
   return (
     <div
       className="app-container"
@@ -987,109 +1006,14 @@ const Home = () => {
               </div>
             )}
             {!isProcessing && currentSuggestion && (
-              <>
-                <SuggestionDisplay 
-                  suggestion={currentSuggestion}
-                  alternativeSuggestions={alternativeSuggestions}
-                  onDisplay={() => window.scrollTo(0, 0)} 
-                  currentIndex={currentIndex}
-                  setCurrentIndex={setCurrentIndex}
-                  userPreferences={userAnswers}
-                />
-                <div
-                  className="suggestion-actions mt-8 flex justify-center gap-4 flex-wrap"
-                  style={{ marginTop: "2rem" }}
-                >
-                  <button
-                    className="primary-button"
-                    onClick={handleShareToFeed}
-                    disabled={createDateMutation.isLoading || 
-                      !allSuggestions.length || 
-                      sharedSuggestions.has(allSuggestions[currentIndex]?.id)}
-                    style={{
-                      padding: "0.75rem 1.5rem",
-                      backgroundColor: !allSuggestions.length || sharedSuggestions.has(allSuggestions[currentIndex]?.id) ? "#e5e7eb" : "#4f46e5",
-                      color: !allSuggestions.length || sharedSuggestions.has(allSuggestions[currentIndex]?.id) ? "#374151" : "#ffffff",
-                      border: "none",
-                      borderRadius: "0.5rem",
-                      fontSize: "1rem",
-                      cursor: !allSuggestions.length || sharedSuggestions.has(allSuggestions[currentIndex]?.id) ? "default" : "pointer",
-                      transition: "background-color 0.3s ease",
-                    }}
-                    onMouseOver={(e) => {
-                      if (!(!allSuggestions.length || sharedSuggestions.has(allSuggestions[currentIndex]?.id))) {
-                        e.currentTarget.style.backgroundColor = "#4338ca";
-                      }
-                    }}
-                    onMouseOut={(e) => {
-                      if (!(!allSuggestions.length || sharedSuggestions.has(allSuggestions[currentIndex]?.id))) {
-                        e.currentTarget.style.backgroundColor = "#4f46e5";
-                      } else {
-                        e.currentTarget.style.backgroundColor = "#e5e7eb";
-                      }
-                    }}
-                  >
-                    {!allSuggestions.length || sharedSuggestions.has(allSuggestions[currentIndex]?.id) 
-                      ? "Shared to Feed" 
-                      : "Share to Public Feed"}
-                  </button>
-                  <button
-                    className="secondary-button"
-                    onClick={handleSaveDate}
-                    disabled={!allSuggestions.length || savedSuggestions.has(allSuggestions[currentIndex]?.id)}
-                    style={{
-                      padding: "0.75rem 1.5rem",
-                      backgroundColor: !allSuggestions.length || savedSuggestions.has(allSuggestions[currentIndex]?.id) ? "#e5e7eb" : "#ffffff",
-                      color: !allSuggestions.length || savedSuggestions.has(allSuggestions[currentIndex]?.id) ? "#374151" : "#4f46e5",
-                      border: !allSuggestions.length || savedSuggestions.has(allSuggestions[currentIndex]?.id) ? "none" : "2px solid #4f46e5",
-                      borderRadius: "0.5rem",
-                      fontSize: "1rem",
-                      cursor: !allSuggestions.length || savedSuggestions.has(allSuggestions[currentIndex]?.id) ? "default" : "pointer",
-                      transition: "all 0.3s ease",
-                    }}
-                    onMouseOver={(e) => {
-                      if (!allSuggestions.length || savedSuggestions.has(allSuggestions[currentIndex]?.id)) {
-                        e.currentTarget.style.backgroundColor = "#f5f5f5";
-                      }
-                    }}
-                    onMouseOut={(e) => {
-                      if (!allSuggestions.length || savedSuggestions.has(allSuggestions[currentIndex]?.id)) {
-                        e.currentTarget.style.backgroundColor = "#ffffff";
-                      }
-                    }}
-                  >
-                    {!allSuggestions.length || savedSuggestions.has(allSuggestions[currentIndex]?.id) 
-                      ? "Already Saved" 
-                      : "Save Date"}
-                  </button>
-                  <button
-                    onClick={() => {
-                      setStage("questions");
-                      setIsSaved(false);
-                      setCurrentSuggestion(null);
-                    }}
-                    className="secondary-button"
-                    style={{
-                      padding: "0.75rem 1.5rem",
-                      backgroundColor: "#e5e7eb",
-                      color: "#374151",
-                      border: "none",
-                      borderRadius: "0.5rem",
-                      fontSize: "1rem",
-                      cursor: "pointer",
-                      transition: "background-color 0.3s ease",
-                    }}
-                    onMouseOver={(e) =>
-                      (e.currentTarget.style.backgroundColor = "#d1d5db")
-                    }
-                    onMouseOut={(e) =>
-                      (e.currentTarget.style.backgroundColor = "#e5e7eb")
-                    }
-                  >
-                    Try Different Preferences
-                  </button>
-                </div>
-              </>
+              <SuggestionDisplay
+                suggestion={currentSuggestion}
+                alternativeSuggestions={alternativeSuggestions}
+                currentIndex={currentIndex}
+                setCurrentIndex={setCurrentIndex}
+                userPreferences={userAnswers}
+                onRandomize={handleRandomize}
+              />
             )}
           </div>
         )}

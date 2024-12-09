@@ -276,6 +276,26 @@ const QuestionPipeline = ({ onComplete }) => {
     onComplete(answers);
   };
 
+  const handleRandomize = () => {
+    const randomAnswers = {};
+    questions.forEach(question => {
+      if (question.type === 'multipleChoice') {
+        // For multiple choice, randomly select 1-3 options
+        const numChoices = Math.floor(Math.random() * 3) + 1;
+        const shuffledOptions = [...question.options].sort(() => Math.random() - 0.5);
+        randomAnswers[question.id] = shuffledOptions
+          .slice(0, numChoices)
+          .map(opt => opt.value);
+      } else {
+        // For single choice, randomly select one option
+        const randomIndex = Math.floor(Math.random() * question.options.length);
+        randomAnswers[question.id] = question.options[randomIndex].value;
+      }
+    });
+    setAnswers(randomAnswers);
+    onComplete(randomAnswers);
+  };
+
   const canProceed = (() => {
     const answer = answers[currentQuestion.id];
     if (currentQuestion.type === "multipleChoice") {
@@ -303,141 +323,183 @@ const QuestionPipeline = ({ onComplete }) => {
 
   return (
     <div className="question-pipeline max-w-md mx-auto p-4 bg-white shadow-md rounded-lg">
-      <div className="progress-section mb-4">
-        <div className="progress-bar">
-          <div
-            className="progress-fill"
-            style={{
-              width: `${((currentStep + 1) / questions.length) * 100}%`,
-            }}
-          />
-        </div>
-        <p className="text-sm text-gray-600">
-          Question {currentStep + 1} of {questions.length}
-        </p>
-      </div>
-
-      {getCurrentSuggestions().length > 0 && (
-        <div style={{
-          marginBottom: "24px",
-          borderLeft: "2px solid #6c5ce7",
-          paddingLeft: "16px"
-        }}>
-          <p style={{
-            fontSize: "11px",
-            textTransform: "uppercase",
-            letterSpacing: "0.05em",
-            color: "#666",
-            marginBottom: "12px"
-          }}>
-            Based on your choices, we're:
+      <div className="relative">
+        <div className="progress-section mb-4">
+          <div className="progress-bar">
+            <div
+              className="progress-fill"
+              style={{
+                width: `${((currentStep + 1) / questions.length) * 100}%`,
+              }}
+            />
+          </div>
+          <p className="text-sm text-gray-600">
+            Question {currentStep + 1} of {questions.length}
           </p>
-          <ul style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-            gap: "8px 24px",
-            width: "100%"
-          }}>
-            {getCurrentSuggestions().map((suggestion, index) => (
-              <li 
-                key={index} 
-                style={{
-                  fontSize: "13px",
-                  color: "#333",
-                  display: "flex",
-                  alignItems: "flex-start",
-                  gap: "8px",
-                  minWidth: "240px"
-                }}
-              >
-                <span style={{
-                  width: "4px",
-                  height: "4px",
-                  backgroundColor: "#6c5ce7",
-                  borderRadius: "50%",
-                  display: "inline-block",
-                  marginTop: "8px",
-                  flexShrink: 0
-                }}></span>
-                {suggestion}
-              </li>
-            ))}
-          </ul>
         </div>
-      )}
 
-      <h3 className="text-lg font-semibold mb-4">{currentQuestion.question}</h3>
-
-      <div className="options-list">
-        {currentQuestion.type === "singleChoice" &&
-          currentQuestion.options.map((option) => (
-            <button
-              key={option.value}
-              className={`option-button ${
-                answers[currentQuestion.id] === option.value
-                  ? "bg-blue-600 text-white"
-                  : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
-              } border ${
-                answers[currentQuestion.id] === option.value
-                  ? "border-blue-600"
-                  : "border"
-              }`}
-              onClick={() => handleAnswer(option.value)}
-            >
-              {answers[currentQuestion.id] === option.value && (
-                <span className="mr-2">✅ </span>
-              )}
-              {option.label}
-            </button>
-          ))}
-
-        {currentQuestion.type === "multipleChoice" &&
-          currentQuestion.options.map((option) => (
-            <button
-              key={option.value}
-              className={`option-button ${
-                answers[currentQuestion.id]?.includes(option.value)
-                  ? "bg-blue-600 text-white"
-                  : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
-              } border ${
-                answers[currentQuestion.id]?.includes(option.value)
-                  ? "border-blue-600"
-                  : "border"
-              }`}
-              onClick={() => handleAnswer(option.value)}
-            >
-              {hasVisitedStep.has(currentStep) && (
-                <span className="mr-2">
-                  {answers[currentQuestion.id]?.includes(option.value)
-                    ? "✅ "
-                    : "⬜ "}
-                </span>
-              )}
-              {option.label}
-            </button>
-          ))}
-      </div>
-
-      <div className="flex items-center justify-center gap-4 mt-6">
-        {currentStep > 0 && (
-          <button
-            className="secondary-button flex-shrink-0 w-24"
-            onClick={handleBack}
-          >
-            Back
-          </button>
+        {getCurrentSuggestions().length > 0 && (
+          <div style={{
+            marginBottom: "24px",
+            borderLeft: "2px solid #6c5ce7",
+            paddingLeft: "16px"
+          }}>
+            <p style={{
+              fontSize: "11px",
+              textTransform: "uppercase",
+              letterSpacing: "0.05em",
+              color: "#666",
+              marginBottom: "12px"
+            }}>
+              Based on your choices, we're:
+            </p>
+            <ul style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+              gap: "8px 24px",
+              width: "100%"
+            }}>
+              {getCurrentSuggestions().map((suggestion, index) => (
+                <li 
+                  key={index} 
+                  style={{
+                    fontSize: "13px",
+                    color: "#333",
+                    display: "flex",
+                    alignItems: "flex-start",
+                    gap: "8px",
+                    minWidth: "240px"
+                  }}
+                >
+                  <span style={{
+                    width: "4px",
+                    height: "4px",
+                    backgroundColor: "#6c5ce7",
+                    borderRadius: "50%",
+                    display: "inline-block",
+                    marginTop: "8px",
+                    flexShrink: 0
+                  }}></span>
+                  {suggestion}
+                </li>
+              ))}
+            </ul>
+          </div>
         )}
-        {(showNextButton || currentStep === questions.length - 1) && (
-          <button
-            className={`primary-button flex-shrink-0 w-24 ${
-              !canProceed ? "opacity-70 cursor-not-allowed" : ""
-            }`}
-            onClick={currentStep === questions.length - 1 ? handleComplete : handleNext}
-            disabled={!canProceed}
-          >
-            {currentStep === questions.length - 1 ? "Finish" : "Next"}
-          </button>
-        )}
+
+        <h3 className="text-lg font-semibold mb-4">{currentQuestion.question}</h3>
+
+        <div className="options-list">
+          {currentQuestion.type === "singleChoice" &&
+            currentQuestion.options.map((option) => (
+              <button
+                key={option.value}
+                className={`option-button ${
+                  answers[currentQuestion.id] === option.value
+                    ? "bg-blue-600 text-white"
+                    : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
+                } border ${
+                  answers[currentQuestion.id] === option.value
+                    ? "border-blue-600"
+                    : "border"
+                }`}
+                onClick={() => handleAnswer(option.value)}
+              >
+                {answers[currentQuestion.id] === option.value && (
+                  <span className="mr-2">✅ </span>
+                )}
+                {option.label}
+              </button>
+            ))}
+
+          {currentQuestion.type === "multipleChoice" &&
+            currentQuestion.options.map((option) => (
+              <button
+                key={option.value}
+                className={`option-button ${
+                  answers[currentQuestion.id]?.includes(option.value)
+                    ? "bg-blue-600 text-white"
+                    : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
+                } border ${
+                  answers[currentQuestion.id]?.includes(option.value)
+                    ? "border-blue-600"
+                    : "border"
+                }`}
+                onClick={() => handleAnswer(option.value)}
+              >
+                {hasVisitedStep.has(currentStep) && (
+                  <span className="mr-2">
+                    {answers[currentQuestion.id]?.includes(option.value)
+                      ? "✅ "
+                      : "⬜ "}
+                  </span>
+                )}
+                {option.label}
+              </button>
+            ))}
+        </div>
+
+        <div style={{ 
+          display: 'flex', 
+          flexDirection: 'column',
+          gap: '12px',
+          marginTop: '24px'
+        }}>
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'center',
+            gap: '16px' 
+          }}>
+            {currentStep > 0 && (
+              <button
+                className="secondary-button flex-shrink-0 w-24"
+                onClick={handleBack}
+              >
+                Back
+              </button>
+            )}
+            {(showNextButton || currentStep === questions.length - 1) && (
+              <button
+                className={`primary-button flex-shrink-0 w-24 ${
+                  !canProceed ? "opacity-70 cursor-not-allowed" : ""
+                }`}
+                onClick={currentStep === questions.length - 1 ? handleComplete : handleNext}
+                disabled={!canProceed}
+              >
+                {currentStep === questions.length - 1 ? "Finish" : "Next"}
+              </button>
+            )}
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <button
+              className="secondary-button"
+              onClick={handleRandomize}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                padding: '6px 12px',
+                backgroundColor: '#f3f4f6',
+                color: '#4b5563',
+                borderRadius: '8px',
+                border: '1px solid #e5e7eb',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                fontSize: '14px',
+                whiteSpace: 'nowrap',
+                minWidth: 'auto'
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.backgroundColor = '#e5e7eb';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.backgroundColor = '#f3f4f6';
+              }}
+            >
+              🎲 Surprise!
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
