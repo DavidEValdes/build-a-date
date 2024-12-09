@@ -989,7 +989,7 @@ const Home = () => {
               className="text-2xl font-bold mb-6"
               style={{ fontSize: "2rem", color: "#000000" }}
             >
-              Your Perfect Date Match!
+              Your Perfect Date Matches!
             </h2>
             {isProcessing ? (
               <div 
