@@ -160,37 +160,111 @@ const Home = () => {
       console.log('\n=== USER PREFERENCES ===');
       console.log(JSON.stringify(answers, null, 2));
 
+      // Vector similarity functions
+      const cosineSimilarity = (vec1, vec2) => {
+        const dotProduct = vec1.reduce((sum, val, i) => sum + val * vec2[i], 0);
+        const magnitude1 = Math.sqrt(vec1.reduce((sum, val) => sum + val * val, 0));
+        const magnitude2 = Math.sqrt(vec2.reduce((sum, val) => sum + val * val, 0));
+        return dotProduct / (magnitude1 * magnitude2) || 0;
+      };
+
+      const createFeatureVector = (item) => {
+        // Activity types vector (one-hot encoding)
+        const activityTypes = ['adventure', 'relaxation', 'learning', 'entertainment', 'wellness'];
+        const activityVector = activityTypes.map(type => 
+          (Array.isArray(item.activity_types) ? item.activity_types : [])
+            .includes(type) ? 1 : 0
+        );
+
+        // Interests vector (one-hot encoding)
+        const interests = ['art', 'music', 'sports', 'technology', 'food', 'nature', 'history'];
+        const interestsVector = interests.map(interest => 
+          (Array.isArray(item.interests) ? item.interests : [])
+            .includes(interest) ? 1 : 0
+        );
+
+        // Budget level (normalized)
+        const budgetLevel = budgetLevels[item.cost_category || item.budget] / 4;
+
+        // Location encoding
+        const locationVector = [
+          item.location === 'indoor' ? 1 : 0,
+          item.location === 'outdoor' ? 1 : 0,
+          item.location === 'both' ? 0.5 : 0
+        ];
+
+        // Combine all features into one vector
+        return [
+          ...activityVector,
+          ...interestsVector,
+          budgetLevel,
+          ...locationVector
+        ];
+      };
+
       const calculateSimilarity = (arr1, arr2) => {
-        // Ensure arrays are defined and convert non-arrays to empty arrays
+        // Keep existing set-based similarity for arrays
         const array1 = Array.isArray(arr1) ? arr1 : [];
         const array2 = Array.isArray(arr2) ? arr2 : [];
         
-        // If both arrays are empty, return 1 (100% similar)
         if (array1.length === 0 && array2.length === 0) return 1;
-        
-        // If one array is empty and the other isn't, return 0 (0% similar)
         if (array1.length === 0 || array2.length === 0) return 0;
         
-        // Calculate similarity using sets
         const set1 = new Set(array1);
         const set2 = new Set(array2);
         const intersection = [...set1].filter(x => set2.has(x)).length;
         const union = new Set([...set1, ...set2]).size;
         
-        return intersection / union;
+        // Enhanced similarity calculation with partial credit
+        const overlapRatio = intersection / union;
+        const partialCredit = intersection > 0 ? 0.3 : 0; // Give some credit for any overlap
+        
+        return Math.max(overlapRatio, partialCredit);
       };
 
-      console.log('\n=== WEIGHTS USED ===');
-      console.log(JSON.stringify(weights, null, 2));
+      // Add atmosphere compatibility mapping
+      const atmosphereCompatibility = {
+        romantic: { casual: 0.3, fun: 0.2 },
+        casual: { romantic: 0.3, fun: 0.4, energetic: 0.4 },
+        energetic: { casual: 0.4, fun: 0.5 },
+        fun: { casual: 0.4, energetic: 0.5, romantic: 0.2 }
+      };
+
+      // Add time of day compatibility mapping
+      const timeCompatibility = {
+        morning: { afternoon: 0.5 },
+        afternoon: { morning: 0.5, evening: 0.5 },
+        evening: { afternoon: 0.5, night: 0.5 },
+        night: { evening: 0.5 },
+        noPreference: { morning: 0.7, afternoon: 0.7, evening: 0.7, night: 0.7 }
+      };
 
       const scoredDates = allDates.map((date) => {
+        // Create feature vectors with improved weighting
+        const dateVector = createFeatureVector(date);
+        const userVector = createFeatureVector(answers);
+        
+        // Calculate vector similarity with increased weight
+        const vectorSimilarity = cosineSimilarity(dateVector, userVector);
+        
         let score = 0;
         let totalWeight = 0;
         const contributions = {};
         const matchDetails = {};
 
-        // Activity Types (Multiple Choice)
-        const activityWeight = weights.activityTypes;
+        // Vector similarity with higher weight for better differentiation
+        const vectorWeight = 3.0;
+        score += vectorSimilarity * vectorWeight;
+        totalWeight += vectorWeight;
+        contributions.vectorSimilarity = vectorSimilarity * vectorWeight;
+        matchDetails.vectorSimilarity = {
+          similarity: vectorSimilarity,
+          weight: vectorWeight,
+          score: vectorSimilarity * vectorWeight
+        };
+
+        // Activity Types with graduated scoring
+        const activityWeight = weights.activityTypes * 1.2; // Increased weight
         totalWeight += activityWeight;
         const activitySimilarity = calculateSimilarity(
           date.activity_types,
@@ -207,29 +281,50 @@ const Home = () => {
           score: activityScore
         };
 
-        // Atmosphere
+        // Atmosphere with compatibility scoring
         const atmosphereWeight = weights.atmosphere;
         totalWeight += atmosphereWeight;
-        const atmosphereScore = date.atmosphere === answers.atmosphere ? atmosphereWeight : 0;
+        let atmosphereScore = 0;
+        if (date.atmosphere === answers.atmosphere) {
+          atmosphereScore = atmosphereWeight;
+        } else if (atmosphereCompatibility[answers.atmosphere]?.[date.atmosphere]) {
+          atmosphereScore = atmosphereWeight * atmosphereCompatibility[answers.atmosphere][date.atmosphere];
+        }
         score += atmosphereScore;
         contributions.atmosphere = atmosphereScore;
         matchDetails.atmosphere = {
           dateValue: date.atmosphere,
           userValue: answers.atmosphere,
-          exact_match: date.atmosphere === answers.atmosphere,
+          compatibility: atmosphereScore / atmosphereWeight,
           weight: atmosphereWeight,
           score: atmosphereScore
         };
 
-        // Budget
+        // Budget with refined economy matching
         const budgetWeight = weights.budget;
         totalWeight += budgetWeight;
+        const budgetLevels = {
+          free: 0,
+          economy: 1,
+          standard: 2,
+          premium: 3,
+          luxury: 4
+        };
         const budgetDifference = Math.abs(
           budgetLevels[date.cost_category] - budgetLevels[answers.budget]
         );
-        const budgetScore = budgetDifference === 0 ? budgetWeight : 
-                           budgetDifference === 1 ? budgetWeight * 0.6 : // Increased partial credit
-                           budgetDifference === 2 ? budgetWeight * 0.3 : 0; // Added partial credit for 2-level difference
+        
+        // Enhanced budget scoring for economy preference
+        let budgetScore;
+        if (answers.budget === 'economy') {
+          budgetScore = date.cost_category === 'free' ? budgetWeight * 0.9 :
+                       date.cost_category === 'economy' ? budgetWeight :
+                       date.cost_category === 'standard' ? budgetWeight * 0.4 : 0;
+        } else {
+          budgetScore = budgetDifference === 0 ? budgetWeight : 
+                       budgetDifference === 1 ? budgetWeight * 0.6 :
+                       budgetDifference === 2 ? budgetWeight * 0.3 : 0;
+        }
         score += budgetScore;
         contributions.budget = budgetScore;
         matchDetails.budget = {
@@ -240,107 +335,46 @@ const Home = () => {
           score: budgetScore
         };
 
-        // Location matching - improved handling for "both" option
+        // Location matching with refined "both" handling
         const locationWeight = weights.location;
         totalWeight += locationWeight;
         const locationScore = answers.location === "both" ? 
-          locationWeight * 0.8 : // Partial credit for "both" to avoid over-scoring
+          (date.location === "indoor" || date.location === "outdoor") ? locationWeight * 0.9 : locationWeight * 0.7 :
           date.location === answers.location ? locationWeight :
-          date.location === "both" ? locationWeight * 0.6 : 0; // Partial credit for date ideas that work in both locations
+          date.location === "both" ? locationWeight * 0.7 : 0;
         score += locationScore;
         contributions.location = locationScore;
         matchDetails.location = {
           dateValue: date.location,
           userValue: answers.location,
-          exact_match: answers.location === "both" || date.location === answers.location,
+          compatibility: locationScore / locationWeight,
           weight: locationWeight,
           score: locationScore
         };
 
-        // Add debug logging
-        console.log(`\n=== Processing date: ${date.title} ===`);
-        console.log('Location score:', locationScore);
-        console.log('Total score so far:', score);
-
-        // Interests (Multiple Choice)
-        const interestsWeight = weights.interests;
-        totalWeight += interestsWeight;
-        const interestsSimilarity = calculateSimilarity(
-          date.interests,
-          answers.interests || []
-        );
-        const interestsScore = interestsSimilarity * interestsWeight;
-        score += interestsScore;
-        contributions.interests = interestsScore;
-        matchDetails.interests = {
-          dateValue: date.interests,
-          userValue: answers.interests || [],
-          similarity: interestsSimilarity,
-          weight: interestsWeight,
-          score: interestsScore
-        };
-
-        // Group Size
-        const groupSizeWeight = weights.groupSize;
-        totalWeight += groupSizeWeight;
-        let groupSizeScore = 0;
-        
-        // Define group size compatibility
-        const groupSizeCompatibility = {
-          individual: ["individual", "couple"],
-          couple: ["couple", "smallGroup"],
-          smallGroup: ["couple", "smallGroup", "largeGroup"],
-          largeGroup: ["smallGroup", "largeGroup"]
-        };
-
-        if (date.group_size === answers.groupSize) {
-          groupSizeScore = groupSizeWeight; // Perfect match
-        } else if (groupSizeCompatibility[answers.groupSize]?.includes(date.group_size)) {
-          groupSizeScore = groupSizeWeight * 0.7; // Compatible match
-        }
-
-        score += groupSizeScore;
-        contributions.groupSize = groupSizeScore;
-        matchDetails.groupSize = {
-          dateValue: date.group_size,
-          userValue: answers.groupSize,
-          compatibility: groupSizeScore / groupSizeWeight,
-          weight: groupSizeWeight,
-          score: groupSizeScore
-        };
-
-        // Time of Day
+        // Time of Day with compatibility scoring
         const timeWeight = weights.time_of_day;
         totalWeight += timeWeight;
-        const timeScore = date.time_of_day === answers.time_of_day ? timeWeight : 0;
+        let timeScore = 0;
+        if (date.time_of_day === answers.time_of_day) {
+          timeScore = timeWeight;
+        } else if (timeCompatibility[answers.time_of_day]?.[date.time_of_day]) {
+          timeScore = timeWeight * timeCompatibility[answers.time_of_day][date.time_of_day];
+        } else if (answers.time_of_day === 'noPreference') {
+          timeScore = timeWeight * 0.7;
+        }
         score += timeScore;
         contributions.timeOfDay = timeScore;
         matchDetails.timeOfDay = {
           dateValue: date.time_of_day,
           userValue: answers.time_of_day,
-          exact_match: date.time_of_day === answers.time_of_day,
+          compatibility: timeScore / timeWeight,
           weight: timeWeight,
           score: timeScore
         };
 
-        // Season
-        const seasonWeight = weights.season;
-        totalWeight += seasonWeight;
-        const seasonScore = answers.season === "noPreference" ? seasonWeight * 0.5 :
-                           date.season === "noPreference" ? seasonWeight * 0.5 :
-                           date.season === answers.season ? seasonWeight : 0;
-        score += seasonScore;
-        contributions.season = seasonScore;
-        matchDetails.season = {
-          dateValue: date.season,
-          userValue: answers.season,
-          exact_match: date.season === answers.season,
-          weight: seasonWeight,
-          score: seasonScore
-        };
-
         // Calculate normalized score (0 to 1)
-        const maxPossibleScore = Object.values(weights).reduce((sum, weight) => sum + weight, 0);
+        const maxPossibleScore = totalWeight;
         const normalizedScore = score / maxPossibleScore;
 
         return {
@@ -353,8 +387,15 @@ const Home = () => {
         };
       });
 
-      // Select matches with a higher minimum threshold
-      const threshold = answers.groupSize === 'largeGroup' ? 0.38 : 0.42;
+      // Adjust threshold based on group size and score distribution
+      const scores = scoredDates.map(d => d.score);
+      const avgScore = scores.reduce((a, b) => a + b, 0) / scores.length;
+      const stdDev = Math.sqrt(scores.reduce((a, b) => a + Math.pow(b - avgScore, 2), 0) / scores.length);
+      
+      // Dynamic threshold based on score distribution
+      const baseThreshold = answers.groupSize === 'largeGroup' ? 0.35 : 0.40;
+      const threshold = Math.min(baseThreshold, avgScore + stdDev * 0.5);
+      
       const goodMatches = scoredDates.filter(date => date.score >= threshold);
       
       if (goodMatches.length === 0) {
