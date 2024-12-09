@@ -1019,6 +1019,8 @@ const Home = () => {
                 onSave={handleSaveDate}
                 onShare={handleShareToFeed}
                 isSaved={isSaved}
+                savedSuggestions={savedSuggestions}
+                sharedSuggestions={sharedSuggestions}
               />
             )}
           </div>

@@ -16,9 +16,14 @@ const SuggestionDisplay = ({
   setCurrentSuggestion,
   onSave,
   onShare,
-  isSaved
+  isSaved,
+  savedSuggestions,
+  sharedSuggestions
 }) => {
   const allSuggestions = [suggestion, ...alternativeSuggestions];
+  const currentSuggestion = allSuggestions[currentIndex];
+  const isCurrentSaved = savedSuggestions?.has(currentSuggestion?.id);
+  const isCurrentShared = sharedSuggestions?.has(currentSuggestion?.id);
 
   // Function to format preference value for display
   const formatPreference = (key, value) => {
@@ -267,7 +272,7 @@ const SuggestionDisplay = ({
               style={{
                 flex: 1,
                 padding: '12px 24px',
-                backgroundColor: isSaved ? '#4CAF50' : '#6c5ce7',
+                backgroundColor: isCurrentSaved ? '#4CAF50' : '#6c5ce7',
                 color: 'white',
                 border: 'none',
                 borderRadius: '8px',
@@ -280,7 +285,7 @@ const SuggestionDisplay = ({
                 gap: '8px'
               }}
             >
-              {isSaved ? '✓ Saved' : 'Save Date'}
+              {isCurrentSaved ? '✓ Saved' : 'Save Date'}
             </button>
             <button
               onClick={handleShare}
@@ -288,9 +293,9 @@ const SuggestionDisplay = ({
               style={{
                 flex: 1,
                 padding: '12px 24px',
-                backgroundColor: '#f3f4f6',
-                color: '#4b5563',
-                border: '1px solid #e5e7eb',
+                backgroundColor: isCurrentShared ? '#4CAF50' : '#f3f4f6',
+                color: isCurrentShared ? 'white' : '#4b5563',
+                border: isCurrentShared ? 'none' : '1px solid #e5e7eb',
                 borderRadius: '8px',
                 fontSize: '14px',
                 cursor: 'pointer',
@@ -301,7 +306,7 @@ const SuggestionDisplay = ({
                 gap: '8px'
               }}
             >
-              Share to Feed
+              {isCurrentShared ? '✓ Shared' : 'Share to Feed'}
             </button>
           </div>
           <button
