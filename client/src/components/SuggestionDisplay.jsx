@@ -23,16 +23,73 @@ const SuggestionDisplay = ({
     if (key === 'budget') {
       switch(value) {
         case 'free': return 'free';
-        case 'economy': return '$';
-        case 'standard': return '$$';
-        case 'premium': return '$$$';
-        case 'luxury': return '$$$$';
+        case 'economy': return '$ budget-friendly';
+        case 'standard': return '$$ mid-range';
+        case 'premium': return '$$$ premium';
+        case 'luxury': return '$$$$ luxury';
         default: return null;
+      }
+    }
+
+    // Format atmosphere
+    if (key === 'atmosphere') {
+      switch(value) {
+        case 'romantic': return '💑 romantic';
+        case 'casual': return '😊 casual';
+        case 'energetic': return '⚡ energetic';
+        case 'fun': return '🎉 fun';
+        default: return value.toLowerCase();
+      }
+    }
+
+    // Format activity level
+    if (key === 'activity_level') {
+      switch(value) {
+        case 'low': return '🌟 relaxed';
+        case 'moderate': return '🌟🌟 moderate activity';
+        case 'high': return '🌟🌟🌟 very active';
+        default: return value.toLowerCase();
+      }
+    }
+
+    // Format location
+    if (key === 'location') {
+      switch(value) {
+        case 'indoor': return '🏠 indoor';
+        case 'outdoor': return '🌳 outdoor';
+        default: return value.toLowerCase();
+      }
+    }
+
+    // Format time of day
+    if (key === 'time_of_day') {
+      switch(value) {
+        case 'morning': return '🌅 morning';
+        case 'afternoon': return '☀️ afternoon';
+        case 'evening': return '🌆 evening';
+        case 'night': return '🌙 night';
+        default: return value.toLowerCase();
+      }
+    }
+
+    // Format group size
+    if (key === 'groupSize') {
+      switch(value) {
+        case 'couple': return '👥 couple';
+        case 'smallGroup': return '👥👥 small group';
+        case 'largeGroup': return '👥👥👥 large group';
+        default: return value.toLowerCase();
       }
     }
     
     // Format arrays (for multiple choice answers)
     if (Array.isArray(value)) {
+      if (key === 'activityTypes') {
+        return '🎯 ' + value.map(v => v.toLowerCase()).join(' • ');
+      }
+      if (key === 'interests') {
+        return '❤️ ' + value.map(v => v.toLowerCase()).join(' • ');
+      }
       return value.map(v => v.toLowerCase()).join(' • ');
     }
     

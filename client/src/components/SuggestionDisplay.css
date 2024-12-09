@@ -13,6 +13,8 @@
   padding: 8px;
   border-radius: 8px;
   background-color: #f8f9fa;
+  justify-content: center;
+  align-items: center;
 }
 
 .preference-tag {
