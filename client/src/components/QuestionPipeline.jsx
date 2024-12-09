@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import PropTypes from "prop-types";
 
-const questions = [
+export const questions = [
   {
     id: "atmosphere",
     question: "What kind of vibe are you looking for?",
@@ -115,11 +115,15 @@ const QuestionPipeline = ({ onComplete }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState({});
   const [hasVisitedStep, setHasVisitedStep] = useState(new Set([0]));
+  const [isFirstVisit, setIsFirstVisit] = useState(true);
 
   useEffect(() => {
     setCurrentStep(0);
     setAnswers({});
     setHasVisitedStep(new Set([0]));
+    if (currentStep > 0) {
+      setIsFirstVisit(false);
+    }
   }, []);
 
   const getSuggestionHint = useCallback((questionId, value) => {
@@ -306,8 +310,9 @@ const QuestionPipeline = ({ onComplete }) => {
   })();
 
   const showNextButton = 
-    currentQuestion.type === "singleChoice" || 
-    hasVisitedStep.has(currentStep);
+    !isFirstVisit || 
+    currentStep > 0 || 
+    currentStep === questions.length - 1;
 
   const getQuestionLabel = (questionId) => {
     const question = questions.find(q => q.id === questionId);
@@ -458,7 +463,7 @@ const QuestionPipeline = ({ onComplete }) => {
                 Back
               </button>
             )}
-            {(showNextButton || currentStep === questions.length - 1) && (
+            {((!isFirstVisit || currentStep > 0) && canProceed) && (
               <button
                 className={`primary-button flex-shrink-0 w-24 ${
                   !canProceed ? "opacity-70 cursor-not-allowed" : ""

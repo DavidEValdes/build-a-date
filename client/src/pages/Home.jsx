@@ -7,6 +7,7 @@ import SuggestionDisplay from "../components/SuggestionDisplay";
 import Spinner from "../components/Spinner";
 import api, { getDateIdeas, getAllDateIdeas, createDateIdea, fetchImageForDate, saveDateIdea } from "../api";
 import { useAuth } from "../context/AuthContext";
+import { questions } from "../components/QuestionPipeline";
 import {
   ArrowRight,
   SlidersHorizontal,
@@ -990,7 +991,7 @@ const Home = () => {
             >
               Your Perfect Date Match!
             </h2>
-            {isProcessing && (
+            {isProcessing ? (
               <div 
                 style={{
                   maxWidth: '1200px',
@@ -1004,8 +1005,7 @@ const Home = () => {
               >
                 <Spinner size={50} />
               </div>
-            )}
-            {!isProcessing && currentSuggestion && (
+            ) : (
               <SuggestionDisplay
                 suggestion={currentSuggestion}
                 alternativeSuggestions={alternativeSuggestions}
@@ -1013,6 +1013,12 @@ const Home = () => {
                 setCurrentIndex={setCurrentIndex}
                 userPreferences={userAnswers}
                 onRandomize={handleRandomize}
+                setStage={setStage}
+                setIsSaved={setIsSaved}
+                setCurrentSuggestion={setCurrentSuggestion}
+                onSave={handleSaveDate}
+                onShare={handleShareToFeed}
+                isSaved={isSaved}
               />
             )}
           </div>

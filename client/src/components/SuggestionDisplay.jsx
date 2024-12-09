@@ -10,7 +10,13 @@ const SuggestionDisplay = ({
   currentIndex,
   setCurrentIndex,
   userPreferences,
-  onRandomize
+  onRandomize,
+  setStage,
+  setIsSaved,
+  setCurrentSuggestion,
+  onSave,
+  onShare,
+  isSaved
 }) => {
   const allSuggestions = [suggestion, ...alternativeSuggestions];
 
@@ -154,6 +160,18 @@ const SuggestionDisplay = ({
     });
   };
 
+  const handleSave = () => {
+    if (onSave && allSuggestions[currentIndex]) {
+      onSave(allSuggestions[currentIndex]);
+    }
+  };
+
+  const handleShare = () => {
+    if (onShare && allSuggestions[currentIndex]) {
+      onShare(allSuggestions[currentIndex]);
+    }
+  };
+
   return (
     <div className="suggestion-display">
       {/* Preference Summary */}
@@ -228,6 +246,122 @@ const SuggestionDisplay = ({
             </div>
           </>
         )}
+
+        <div style={{ 
+          display: 'flex', 
+          flexDirection: 'column',
+          gap: '12px',
+          marginTop: '24px',
+          alignItems: 'center'
+        }}>
+          <div style={{
+            display: 'flex',
+            gap: '12px',
+            width: '100%',
+            maxWidth: '300px',
+            marginBottom: '12px'
+          }}>
+            <button
+              onClick={handleSave}
+              className="primary-button"
+              style={{
+                flex: 1,
+                padding: '12px 24px',
+                backgroundColor: isSaved ? '#4CAF50' : '#6c5ce7',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                fontSize: '14px',
+                cursor: 'pointer',
+                transition: 'background-color 0.3s ease',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px'
+              }}
+            >
+              {isSaved ? '✓ Saved' : 'Save Date'}
+            </button>
+            <button
+              onClick={handleShare}
+              className="secondary-button"
+              style={{
+                flex: 1,
+                padding: '12px 24px',
+                backgroundColor: '#f3f4f6',
+                color: '#4b5563',
+                border: '1px solid #e5e7eb',
+                borderRadius: '8px',
+                fontSize: '14px',
+                cursor: 'pointer',
+                transition: 'background-color 0.3s ease',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px'
+              }}
+            >
+              Share to Feed
+            </button>
+          </div>
+          <button
+            onClick={() => {
+              setStage("questions");
+              setIsSaved(false);
+              setCurrentSuggestion(null);
+            }}
+            className="secondary-button"
+            style={{
+              padding: '12px 24px',
+              backgroundColor: '#f3f4f6',
+              color: '#374151',
+              border: '1px solid #e5e7eb',
+              borderRadius: '8px',
+              fontSize: '14px',
+              cursor: 'pointer',
+              transition: 'background-color 0.3s ease',
+              width: '100%',
+              maxWidth: '300px',
+              textAlign: 'center'
+            }}
+            onMouseOver={(e) =>
+              (e.currentTarget.style.backgroundColor = '#e5e7eb')
+            }
+            onMouseOut={(e) =>
+              (e.currentTarget.style.backgroundColor = '#f3f4f6')
+            }
+          >
+            Try Different Preferences
+          </button>
+          <button
+            className="secondary-button"
+            onClick={onRandomize}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '4px',
+              padding: '12px 24px',
+              backgroundColor: '#f3f4f6',
+              color: '#4b5563',
+              borderRadius: '8px',
+              border: '1px solid #e5e7eb',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              fontSize: '14px',
+              width: '100%',
+              maxWidth: '300px'
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.backgroundColor = '#e5e7eb';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.backgroundColor = '#f3f4f6';
+            }}
+          >
+            🎲 Surprise Me!
+          </button>
+        </div>
       </div>
 
       {/* Only show preview when there are multiple suggestions */}
@@ -249,59 +383,6 @@ const SuggestionDisplay = ({
           ))}
         </div>
       )}
-
-      <button
-        onClick={() => {
-          setStage("questions");
-          setIsSaved(false);
-          setCurrentSuggestion(null);
-        }}
-        className="secondary-button"
-        style={{
-          padding: '0.75rem 1.5rem',
-          backgroundColor: '#e5e7eb',
-          color: '#374151',
-          border: 'none',
-          borderRadius: '0.5rem',
-          fontSize: '1rem',
-          cursor: 'pointer',
-          transition: 'background-color 0.3s ease',
-          marginRight: '8px'
-        }}
-        onMouseOver={(e) =>
-          (e.currentTarget.style.backgroundColor = '#d1d5db')
-        }
-        onMouseOut={(e) =>
-          (e.currentTarget.style.backgroundColor = '#e5e7eb')
-        }
-      >
-        Try Different Preferences
-      </button>
-      <button
-        onClick={onRandomize}
-        className="secondary-button"
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '4px',
-          padding: '0.75rem 1.5rem',
-          backgroundColor: '#f3f4f6',
-          color: '#4b5563',
-          border: '1px solid #e5e7eb',
-          borderRadius: '0.5rem',
-          fontSize: '1rem',
-          cursor: 'pointer',
-          transition: 'all 0.2s ease'
-        }}
-        onMouseOver={(e) => {
-          e.currentTarget.style.backgroundColor = '#e5e7eb';
-        }}
-        onMouseOut={(e) => {
-          e.currentTarget.style.backgroundColor = '#f3f4f6';
-        }}
-      >
-        🎲 Surprise Me!
-      </button>
     </div>
   );
 };
