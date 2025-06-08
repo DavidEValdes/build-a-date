@@ -4,7 +4,6 @@ CodePath WEB103 Final Project
 
 Designed and developed by: David Valdes
 
-🔗 Link to deployed app:https://buildadate.app
 
 ## About
 
